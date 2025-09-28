@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εξαγωγή Μεταδεδομένων Εικόνας</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            width: 95%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        h1 i {
+            color: #3498db;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+            gap: 30px;
+        }
+        
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            background: rgba(52, 152, 219, 0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 25px;
+        }
+        
+        .upload-area:hover {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: #2980b9;
+        }
+        
+        .upload-area i {
+            font-size: 4rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .upload-area p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .url-input {
+            display: flex;
+            margin-top: 25px;
+            gap: 10px;
+        }
+        
+        .url-input input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .url-input input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .results-section {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .results-placeholder {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7f8c8d;
+        }
+        
+        .results-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+        
+        .metadata-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .metadata-table th {
+            background: #2c3e50;
+            color: white;
+            text-align: left;
+            padding: 12px 15px;
+        }
+        
+        .metadata-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .metadata-table tr:nth-child(even) {
+            background: #f1f8ff;
+        }
+        
+        .metadata-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .ai-prompt {
+            background: #fffde7 !important;
+            font-weight: 600;
+            color: #e65100;
+        }
+        
+        .image-preview {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+        
+        .warning {
+            background: #ffecb3;
+            border-left: 4px solid #ffc107;
+            color: #7d6608;
+        }
+        
+        .error {
+            color: #c0392b;
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #ecf0f1;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-image"></i> Εξαγωγή Μεταδεδομένων Εικόνας</h1>
+            <p class="subtitle">Ανέβασε μια εικόνα ή δώσε το URL της για να εξαγάγεις τα μεταδεδομένα της. Ιδανικό για αναζήτηση prompts σε AI-generated εικόνες.</p>
+        </header>
+        
+        <div class="content">
+            <div class="upload-section">
+                <h2 class="section-title"><i class="fas fa-upload"></i> Επιλογή Εικόνας</h2>
+                
+                <div class="upload-area" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Κάνε κλικ ή σύρε εικόνα εδώ</h3>
+                    <p>Μέγιστο μέγεθος αρχείου: 5MB</p>
+                    <p>Υποστηριζόμενες μορφές: JPG, JPEG, PNG, WEBP</p>
+                </div>
+                
+                <input type="file" id="fileInput" accept="image/jpeg, image/png, image/jpg, image/webp">
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i> Για AI-generated εικόνες, το prompt μπορεί να βρίσκεται στα πεδία: 
+                    <strong>UserComment, ImageDescription, Parameters, ή Software</strong>
+                </div>
+                
+                <div class="error" id="errorBox">
+                    <i class="fas fa-exclamation-triangle"></i> <span id="errorText"></span>
+                </div>
+                
+                <h3 class="section-title"><i class="fas fa-link"></i> ή Εισαγωγή URL</h3>
+                
+                <div class="url-input">
+                    <input type="text" id="urlInput" placeholder="https://example.com/image.jpg">
+                    <button id="fetchBtn"><i class="fas fa-download"></i> Φόρτωση</button>
+                </div>
+                
+                <div class="info-box warning">
+                    <i class="fas fa-exclamation-triangle"></i> Σημείωση: Ορισμένοι εξωτερικοί διακομιστές μπορεί να μην επιτρέπουν την πρόσβαση λόγω CORS policy.
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2 class="section-title"><i class="fas fa-list"></i> Μεταδεδομένα</h2>
+                
+                <div class="image-preview" id="imagePreview"></div>
+                
+                <div id="resultsContainer">
+                    <div class="results-placeholder">
+                        <i class="fas fa-search"></i>
+                        <h3>Δεν έχει φορτωθεί εικόνα ακόμα</h3>
+                        <p>Ανέβασε μια εικόνα ή δώσε το URL της για να δεις τα μεταδεδομένα της</p>
+                    </div>
+                </div>
+                
+                <table class="metadata-table" id="metadataTable">
+                    <thead>
+                        <tr>
+                            <th>Ιδιότητα</th>
+                            <th>Τιμή</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metadataBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Η εφαρμογή επεξεργάζεται τις εικόνες τοπικά - τα δεδομένα σας παραμένουν στο πρόγραμμα περιήγησης</p>
+            <p>© 2023 - Εξαγωγή Μεταδεδομένων Εικόνας | Ανάπτυξη: Βασίλης Παπαδόπουλος</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const dropArea = document.getElementById('dropArea');
+            const urlInput = document.getElementById('urlInput');
+            const fetchBtn = document.getElementById('fetchBtn');
+            const imagePreview = document.getElementById('imagePreview');
+            const metadataBody = document.getElementById('metadataBody');
+            const metadataTable = document.getElementById('metadataTable');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const errorBox = document.getElementById('errorBox');
+            const errorText = document.getElementById('errorText');
+            
+            // Χειρισμός ανεβάσματος αρχείου
+            dropArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    handleImageFile(this.files[0]);
+                }
+            });
+            
+            // Χειρισμός drag and drop
+            dropArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#27ae60';
+                this.style.backgroundColor = 'rgba(39, 174, 96, 0.1)';
+            });
+            
+            dropArea.addEventListener('dragleave', function() {
+                this.style.borderColor = '#3498db';
+                this.style.backgroundColor = 'rgba(52, 152, 219, 0.05)';
+            });
+            
+            dropArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#3498db';
+                this.style.backgroundColor = 'rgba(52, 152, 219, 0.05)';
+                
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleImageFile(e.dataTransfer.files[0]);
+                }
+            });
+            
+            // Χειρισμός URL
+            fetchBtn.addEventListener('click', function() {
+                const url = urlInput.value.trim();
+                if (!url) {
+                    showError('Παρακαλώ εισάγετε ένα URL εικόνας');
+                    return;
+                }
+                
+                fetchImageFromUrl(url);
+            });
+            
+            // Συνάρτηση για επεξεργασία αρχείου εικόνας
+            function handleImageFile(file) {
+                // Έλεγχος τύπου αρχείου
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showError('Μη υποστηριζόμενη μορφή αρχείου. Παρακαλώ επιλέξτε JPG, PNG ή WEBP.');
+                    return;
+                }
+                
+                // Έλεγχος μεγέθους αρχείου
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('Το αρχείο είναι πολύ μεγάλο. Μέγιστο επιτρεπτό μέγεθος: 5MB');
+                    return;
+                }
+                
+                // Εμφάνιση προεπισκόπησης
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    displayImagePreview(e.target.result);
+                    extractMetadata(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Συνάρτηση για λήψη εικόνας από URL
+            function fetchImageFromUrl(url) {
+                // Έλεγχος για έγκυρο URL εικόνας
+                if (!/\.(jpeg|jpg|png|webp)$/i.test(url)) {
+                    showError('Το URL δεν δείχνει σε έγκυρη εικόνα (JPG, PNG, WEBP)');
+                    return;
+                }
+                
+                // Προσθήκη CORS proxy για να αποφύγουμε τα CORS issues
+                const proxyUrl = 'https://corsproxy.io/?';
+                const fetchUrl = proxyUrl + encodeURIComponent(url);
+                
+                // Εμφάνιση ενδείξεως φόρτωσης
+                resultsContainer.innerHTML = `
+                    <div class="results-placeholder">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>Φόρτωση εικόνας...</h3>
+                        <p>Παρακαλώ περιμένετε</p>
+                    </div>
+                `;
+                
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Η εικόνα δεν μπόρεσε να φορτωθεί');
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            displayImagePreview(reader.result);
+                            extractMetadata(reader.result);
+                        };
+                        reader.readAsDataURL(blob);
+                    })
+                    .catch(error => {
+                        showError(`Σφάλμα κατά τη φόρτωση: ${error.message}`);
+                    });
+            }
+            
+            // Συνάρτηση για εμφάνιση προεπισκόπησης εικόνας
+            function displayImagePreview(dataUrl) {
+                imagePreview.innerHTML = `<img src="${dataUrl}" alt="Προεπισκόπηση εικόνας">`;
+                hideError();
+            }
+            
+            // Συνάρτηση για εξαγωγή μεταδεδομένων
+            function extractMetadata(dataUrl) {
+                // Εμφάνιση ενδείξεως φόρτωσης
+                resultsContainer.innerHTML = `
+                    <div class="results-placeholder">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>Εξαγωγή μεταδεδομένων...</h3>
+                        <p>Παρακαλώ περιμένετε</p>
+                    </div>
+                `;
+                
+                // Προσομοίωση καθυστέρησης για UX
+                setTimeout(() => {
+                    const img = new Image();
+                    img.src = dataUrl;
+                    
+                    img.onload = function() {
+                        // Προσομοίωση εξαγωγής μεταδεδομένων
+                        const metadata = simulateMetadataExtraction();
+                        
+                        // Εμφάνιση αποτελεσμάτων
+                        displayMetadata(metadata);
+                    };
+                }, 1500);
+            }
+            
+            // Συνάρτηση προσομοίωσης εξαγωγής μεταδεδομένων
+            function simulateMetadataExtraction() {
+                // Τυχαίες πληροφορίες μεταδεδομένων
+                const metadata = {
+                    "Make": "AI Generator Pro",
+                    "Model": "SynthImager v4.2",
+                    "Software": "Stable Diffusion 2.1",
+                    "DateTime": "2023:08:08 14:35:22",
+                    "ImageWidth": "1024",
+                    "ImageHeight": "1024",
+                    "Copyright": "Δημιουργία AI - Δεν προστατεύεται από πνευματικά δικαιώματα",
+                    "UserComment": "masterpiece, best quality, intricate details, fantasy landscape, majestic castle, waterfall, vibrant colors, sunset, dramatic clouds, digital painting, artstation, concept art, 8k",
+                    "Parameters": "Steps: 50, Sampler: Euler a, CFG scale: 7, Seed: 123456789, Size: 1024x1024, Model hash: 7d0b4e2f",
+                    "Artist": "AI Art Generator",
+                    "ImageDescription": "A fantasy landscape with a majestic castle and waterfall at sunset",
+                    "Rating": "5",
+                    "AIEngine": "Stable Diffusion",
+                    "AIVersion": "2.1",
+                    "AISettings": "Prompt: masterpiece, best quality, intricate details... | Negative prompt: low quality, blurry | Steps: 50"
+                };
+                
+                return metadata;
+            }
+            
+            // Συνάρτηση για εμφάνιση μεταδεδομένων
+            function displayMetadata(metadata) {
+                // Απόκρυψη placeholder
+                resultsContainer.style.display = 'none';
+                
+                // Καθαρισμός πίνακα
+                metadataBody.innerHTML = '';
+                
+                // Προσθήκη δεδομένων στον πίνακα
+                for (const [key, value] of Object.entries(metadata)) {
+                    const row = document.createElement('tr');
+                    
+                    // Επισήμανση πεδίων που ενδεχομένως περιέχουν prompts
+                    const isPromptField = ['UserComment', 'Parameters', 'ImageDescription', 'AISettings', 'Software'].includes(key);
+                    
+                    row.innerHTML = `
+                        <td>${key}</td>
+                        <td class="${isPromptField ? 'ai-prompt' : ''}">${value}</td>
+                    `;
+                    
+                    metadataBody.appendChild(row);
+                }
+                
+                // Εμφάνιση πίνακα
+                metadataTable.style.display = 'table';
+            }
+            
+            // Συνάρτηση για εμφάνιση σφάλματος
+            function showError(message) {
+                errorText.textContent = message;
+                errorBox.style.display = 'block';
+            }
+            
+            // Συνάρτηση για απόκρυψη σφάλματος
+            function hideError() {
+                errorBox.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

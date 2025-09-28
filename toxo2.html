@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογισμός Τόξου</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for a technical/workshop feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Equivalent to Tailwind's bg-gray-900 */
+            color: #e2e8f0; /* Equivalent to Tailwind's text-gray-200 */
+        }
+        .form-input {
+            background-color: #2d3748; /* bg-gray-800 */
+            border-color: #4a5568; /* border-gray-600 */
+            color: #e2e8f0;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #4299e1; /* border-blue-400 */
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+        }
+        .svg-container {
+            border: 1px solid #4a5568; /* border-gray-600 */
+            background-color: #2d3748; /* bg-gray-800 */
+            background-image:
+                linear-gradient(rgba(74, 85, 104, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 85, 104, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Back Button -->
+    <a href="index.html" class="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 z-10">
+        &larr; Επιστροφή
+    </a>
+
+    <!-- Main Container -->
+    <main class="flex-grow container mx-auto p-4 md:p-8 flex flex-col lg:flex-row items-center justify-center gap-8">
+
+        <!-- Controls and Info Panel -->
+        <div class="w-full lg:w-1/3 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+            <h1 class="text-2xl font-bold text-center text-blue-300 mb-6">Υπολογιστής Τόξου</h1>
+            
+            <!-- Input for 'a' -->
+            <div class="mb-4">
+                <label for="a_val" class="block text-gray-400 text-sm font-bold mb-2">Βάση τόξου (a):</label>
+                <input type="number" id="a_val" value="10" class="form-input w-full p-3 rounded-lg text-lg appearance-none">
+            </div>
+
+            <!-- Input for 'h' -->
+            <div class="mb-6">
+                <label for="h_val" class="block text-gray-400 text-sm font-bold mb-2">Ύψος τόξου (h):</label>
+                <input type="number" id="h_val" value="4" class="form-input w-full p-3 rounded-lg text-lg appearance-none">
+            </div>
+
+            <!-- Result Display -->
+            <div class="bg-gray-900 p-4 rounded-lg text-center">
+                <p class="text-gray-400 text-sm">Υπολογιζόμενο Μήκος Τόξου:</p>
+                <p id="l_result" class="text-2xl font-bold text-green-400 tracking-wider">0.00</p>
+            </div>
+        </div>
+
+        <!-- SVG Drawing Panel -->
+        <div class="w-full lg:w-2/3 h-96 lg:h-auto lg:aspect-video p-4 rounded-xl shadow-2xl svg-container">
+            <svg id="drawing" width="100%" height="100%" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+    </main>
+
+    <!-- Signature -->
+    <footer class="text-right p-4">
+        <p class="text-xs text-gray-600">Κώστας Κούδας</p>
+    </footer>
+
+    <script>
+        // --- DOM Element References ---
+        const inputA = document.getElementById('a_val');
+        const inputH = document.getElementById('h_val');
+        const resultL = document.getElementById('l_result');
+        const svgContainer = document.getElementById('drawing');
+
+        /**
+         * Main function to calculate values and redraw the SVG.
+         * This function is triggered on input change.
+         */
+        function calculateAndDraw() {
+            // --- 1. Get Input Values ---
+            // Parse inputs as floating-point numbers. Use defaults if parsing fails.
+            let a = parseFloat(inputA.value) || 10;
+            let h = parseFloat(inputH.value) || 4;
+            
+            // Prevent division by zero or nonsensical values
+            if (a <= 0 || h <= 0) {
+                resultL.textContent = "Μη έγκυρες τιμές";
+                svgContainer.innerHTML = `<text x="50%" y="50%" fill="#f87171" text-anchor="middle" font-size="20">Οι τιμές 'a' και 'h' πρέπει να είναι θετικές.</text>`;
+                return;
+            }
+
+            // --- 2. Perform Calculation (from Mathematica formula) ---
+            // l = 2a * ArcTan[2h/a] / Sin[2*ArcTan[2h/a]]
+            const angleTerm = 2 * Math.atan(2 * h / a);
+            // Handle the case where the angle is a multiple of PI, which makes sin(angle) zero
+            if (Math.abs(Math.sin(angleTerm)) < 1e-9) {
+                 resultL.textContent = "Σφάλμα: Διαίρεση με το μηδέν.";
+                 svgContainer.innerHTML = `<text x="50%" y="50%" fill="#f87171" text-anchor="middle">Ο συνδυασμός a, h οδηγεί σε μηδενικό παρανομαστή.</text>`;
+                 return;
+            }
+            const l = (2 * a * Math.atan(2 * h / a)) / Math.sin(angleTerm);
+            
+            // Update the result display, formatted to 2 decimal places.
+            resultL.textContent = l.toFixed(2);
+
+            // --- 3. Draw SVG ---
+            drawSVG(a, h);
+        }
+
+        /**
+         * Renders the SVG graphic based on 'a' and 'h'.
+         * @param {number} a - The length of the chord.
+         * @param {number} h - The sagitta (height) of the arc.
+         */
+        function drawSVG(a, h) {
+            // --- SVG Geometry Calculation ---
+            const svgWidth = 500;
+            const svgHeight = 400;
+            const padding = 50;
+
+            // Scale the drawing to fit the SVG viewport
+            const scale = (svgWidth - 2 * padding) / a;
+            const h_scaled = h * scale;
+
+            // Define coordinates for the drawing elements
+            const y_base = svgHeight / 2 + 50; // Center the drawing vertically a bit more
+            const x_start = padding;
+            const x_end = svgWidth - padding;
+            const x_mid = svgWidth / 2;
+
+            // Calculate the radius of the circle that the arc belongs to.
+            // Formula: r = (h^2 + (a/2)^2) / (2h)
+            const r = (Math.pow(h, 2) + Math.pow(a / 2, 2)) / (2 * h);
+            const r_scaled = r * scale;
+
+            // Determine the 'large-arc-flag' for the SVG path.
+            // If the arc's height is more than its radius, it's the larger part of the circle.
+            const largeArcFlag = (h > r) ? 1 : 0;
+            
+            // --- Generate SVG Markup ---
+            const svgContent = `
+                <!-- Guideline for h (height) -->
+                <line x1="${x_mid}" y1="${y_base}" x2="${x_mid}" y2="${y_base - h_scaled}" stroke="#4a5568" stroke-width="1" stroke-dasharray="4"/>
+
+                <!-- Line segment 'a' (chord) -->
+                <line x1="${x_start}" y1="${y_base}" x2="${x_end}" y2="${y_base}" stroke="#63b3ed" stroke-width="3" />
+                <text x="${x_mid}" y="${y_base + 20}" fill="#90cdf4" text-anchor="middle">a = ${a}</text>
+
+                <!-- Line segment 'h' (height) -->
+                <line x1="${x_mid}" y1="${y_base}" x2="${x_mid}" y2="${y_base - h_scaled}" stroke="#f6ad55" stroke-width="2" />
+                <text x="${x_mid + 10}" y="${y_base - h_scaled / 2}" fill="#fbd38d">h = ${h}</text>
+
+                <!-- The calculated Arc (drawn on top) -->
+                <path d="M ${x_start} ${y_base} A ${r_scaled} ${r_scaled} 0 ${largeArcFlag} 1 ${x_end} ${y_base}"
+                      fill="none" stroke="#68d391" stroke-width="4" />
+                
+                <!-- Arc endpoints markers -->
+                <circle cx="${x_start}" cy="${y_base}" r="4" fill="#63b3ed"/>
+                <circle cx="${x_end}" cy="${y_base}" r="4" fill="#63b3ed"/>
+                <circle cx="${x_mid}" cy="${y_base - h_scaled}" r="4" fill="#f6ad55"/>
+            `;
+            
+            // Set the generated content into the SVG container
+            svgContainer.innerHTML = svgContent;
+        }
+
+        // --- Event Listeners ---
+        // Add listeners to both inputs to trigger the calculation and drawing on any change.
+        inputA.addEventListener('input', calculateAndDraw);
+        inputH.addEventListener('input', calculateAndDraw);
+
+        // --- Initial Call ---
+        // Run the function once on page load to show the initial state with default values.
+        window.onload = calculateAndDraw;
+    </script>
+
+</body>
+</html>

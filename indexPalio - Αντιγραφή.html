@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Επιψαύσεις</title>
+  <link rel="icon" href="myIcon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+        margin: 0;
+        background: #1a0a0a url('https://www.transparenttextures.com/patterns/old-wall.png');
+        overflow-x: hidden;
+        min-height: 100vh;
+        font-family: 'Cardo', serif;
+        color: #e8d8b0;
+    }
+
+    /* Styling για τον τίτλο */
+    .title-container {
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+
+    .title-container h1 {
+        font-family: 'Cinzel Decorative', serif;
+        font-size: 2.8em;
+        color: #d4af37;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        margin: 0;
+        padding: 0;
+        letter-spacing: 2px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .title-container h1::before,
+    .title-container h1::after {
+        content: "❖";
+        color: #d4af37;
+        margin: 0 15px;
+        font-size: 0.8em;
+    }
+
+    .container {
+        position: relative;
+        width: 100%;
+        height: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+    }
+
+    .central-circle {
+        width: 120px;
+        height: 120px;
+        background: rgba(26, 10, 10, 0.8);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        box-shadow: 
+            0 0 15px rgba(212, 175, 55, 0.5),
+            inset 0 0 10px rgba(212, 175, 55, 0.3);
+        position: relative;
+        z-index: 2;
+        border: 2px solid #d4af37;
+        transition: transform 0.3s ease;
+        text-align: center;
+        overflow: hidden;
+        color: inherit;
+    }
+
+    .central-circle.can-reset {
+        cursor: pointer;
+    }
+
+    #central-svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        z-index: 1;
+    }
+
+    #main-label-text {
+        position: relative;
+        z-index: 2;
+        padding: 5px;
+        box-sizing: border-box;
+        max-width: 100%;
+        word-break: break-word;
+        color: #d4af37;
+        font-family: 'Cinzel Decorative', serif;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        display: none;
+        /* Added for centering the new SVG */
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .donut-chart-container {
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+    }
+
+    .donut-chart {
+        width: 100%;
+        height: 100%;
+    }
+
+    .donut-arc:focus,
+    .dropdown button:focus,
+    .book-list a:focus {
+        outline: none;
+    }
+
+    .donut-arc {
+        stroke: #d4af37;
+        stroke-width: 2;
+        cursor: pointer;
+        transition: fill 0.3s ease, opacity 0.3s ease, stroke 0.3s ease;
+        opacity: 1;
+    }
+
+    .donut-arc:hover {
+        stroke: #f1e5ac;
+        stroke-width: 3;
+    }
+
+    .donut-arc.selected {
+        stroke: #f1e5ac;
+        stroke-width: 3;
+    }
+
+    /* This class is now unused as we use SVGs, but kept for reference */
+    .donut-label {
+        font-family: 'Cinzel Decorative', serif;
+        font-size: 16px;
+        font-weight: bold;
+        fill: #e8d8b0;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        pointer-events: none;
+        user-select: none;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    .dropdowns-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        position: relative;
+        width: 100%;
+        padding-bottom: 30px;
+        min-height: 150px;
+        opacity: 0; /* Start hidden */
+        transform: translateY(20px);
+    }
+
+    .dropdown-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+    }
+
+    .dropdown {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .dropdown button {
+        background: rgba(26, 10, 10, 0.8);
+        border: none;
+        padding: 12px;
+        border-radius: 5px;
+        width: 180px;
+        box-shadow: 
+            0 0 10px rgba(212, 175, 55, 0.3),
+            inset 2px 2px 5px rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        font-weight: bold;
+        border: 1px solid #d4af37;
+        transition: all 0.3s ease;
+        color: #e8d8b0;
+        font-family: 'Cardo', serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dropdown button:hover {
+        background: rgba(42, 20, 20, 0.9);
+        box-shadow: 
+            0 0 15px rgba(212, 175, 55, 0.5),
+            inset 2px 2px 5px rgba(255, 255, 255, 0.2);
+        border-color: #f1e5ac;
+    }
+
+    .dropdown button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .dropdown button:hover::before {
+        left: 100%;
+    }
+
+    /* --- CSS ΓΙΑ ΤΑ POPUPS (Βυζαντινό στυλ) --- */
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 85%;
+        max-width: 650px;
+        max-height: 85vh;
+        background: rgba(26, 10, 10, 0.95);
+        border: 2px solid #d4af37;
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        border-radius: 5px;
+        overflow-y: auto;
+        z-index: 1000;
+        padding: 20px 30px;
+        color: #e8d8b0;
+        font-family: 'Cardo', serif;
+        box-sizing: border-box;
+    }
+
+    .popup::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://www.transparenttextures.com/patterns/parchment.png');
+        opacity: 0.1;
+        pointer-events: none;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #d4af37;
+        font-size: 1.8em;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 5px;
+        transition: color 0.3s ease, transform 0.3s ease;
+        z-index: 1001;
+        font-family: Arial, sans-serif;
+    }
+
+    .close-btn:hover {
+        color: #f1e5ac;
+        transform: scale(1.1);
+    }
+
+    /* --- Στυλ για το Info Popup --- */
+    #info-popup .popup-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        float: right;
+        margin: 0 0 15px 15px;
+        border-radius: 5px;
+        border: 2px solid #d4af37;
+    }
+
+    #info-popup p {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        text-align: justify;
+        text-indent: 2em;
+    }
+
+    #info-popup p:first-of-type {
+        clear: none;
+        text-indent: 0;
+    }
+
+    #info-popup p:first-of-type::first-letter {
+        font-family: 'Cinzel Decorative', serif;
+        font-size: 2em;
+        color: #d4af37;
+        float: left;
+        margin-right: 5px;
+        line-height: 0.8;
+    }
+
+    #info-popup a {
+        color: #d4af37;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+        transition: color 0.3s ease;
+    }
+
+    #info-popup a:hover {
+        color: #f1e5ac;
+        border-bottom-color: #f1e5ac;
+    }
+
+    /* --- ΚΑΝΟΝΕΣ CSS ΓΙΑ ΤΗ ΛΙΣΤΑ LINKS (Βυζαντινό στυλ) --- */
+    .book-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+
+    .book-list li {
+        margin: 25px 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .book-list a {
+        position: relative;
+        display: block;
+        width: 80%;
+        max-width: 300px;
+        padding: 15px;
+        background: rgba(42, 20, 20, 0.8);
+        color: #e8d8b0;
+        text-align: center;
+        text-decoration: none;
+        font-size: 1.1em;
+        font-family: 'Cardo', serif;
+        border: 1px solid #d4af37;
+        transition: all 0.3s ease;
+        box-shadow: 
+            0 0 10px rgba(212, 175, 55, 0.2),
+            inset 0 0 5px rgba(212, 175, 55, 0.1);
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .book-list a::before {
+        content: "◈";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(212, 175, 55, 0.5);
+        font-size: 0.8em;
+    }
+
+    .book-list a::after {
+        content: "◈";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(212, 175, 55, 0.5);
+        font-size: 0.8em;
+    }
+
+    .book-list a:hover {
+        background: rgba(212, 175, 55, 0.2);
+        color: #f1e5ac;
+        border-color: #f1e5ac;
+        box-shadow: 
+            0 0 15px rgba(212, 175, 55, 0.4),
+            inset 0 0 10px rgba(212, 175, 55, 0.2);
+        transform: translateY(-3px);
+    }
+
+    /* Μήνυμα όταν δεν υπάρχουν σύνδεσμοι */
+    .book-list .no-links-message {
+        color: #a08b6b;
+        font-size: 1em;
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+    }
+
+    /* Διακοσμητικά στοιχεία */
+    .corner-decoration {
+        position: fixed;
+        width: 100px;
+        height: 100px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23d4af37" d="M100,0 L100,20 C70,20 70,40 50,40 C30,40 30,20 0,20 L0,0 Z"/></svg>');
+        background-repeat: no-repeat;
+        opacity: 0.3;
+        z-index: -1;
+    }
+
+    .corner-decoration.top-left {
+        top: 0;
+        left: 0;
+        transform: rotate(0deg);
+    }
+
+    .corner-decoration.top-right {
+        top: 0;
+        right: 0;
+        transform: rotate(90deg);
+    }
+
+    .corner-decoration.bottom-left {
+        bottom: 0;
+        left: 0;
+        transform: rotate(270deg);
+    }
+
+    .corner-decoration.bottom-right {
+        bottom: 0;
+        right: 0;
+        transform: rotate(180deg);
+    }
+
+    /* Ornament divider */
+    .ornament-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+        color: #d4af37;
+    }
+
+    .ornament-divider::before,
+    .ornament-divider::after {
+        content: "◇◆◇";
+        margin: 0 15px;
+        letter-spacing: 2px;
+        font-size: 0.8em;
+    }
+
+    .ornament-divider span {
+        font-family: 'Cinzel Decorative', serif;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Διακοσμητικά στοιχεία στις γωνίες -->
+  <div class="corner-decoration top-left"></div>
+  <div class="corner-decoration top-right"></div>
+  <div class="corner-decoration bottom-left"></div>
+  <div class="corner-decoration bottom-right"></div>
+
+  <div class="title-container">
+    <h1>ἐπιψαύσεις</h1>
+  </div>
+
+  <div class="ornament-divider">
+      <span>ΨΗΛΑΦΙΖΟΝΤΑΣ ΤΗ ΜΟΡΦΗ, ΤΗ ΔΟΜΗ ΚΑΙ ΤΗ ΛΕΙΤΟΥΡΓΕΙΑ ΤΟΥ ΚΟΣΜΟΥ</span>
+  </div>
+
+  <div class="container">
+    <div class="central-circle" id="main-label">
+        <!-- Το προεπιλεγμένο SVG παραμένει εδώ -->
+        <svg id="central-svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+            <g transform="translate(137.5625, -77.73435)">
+                <path d="M116.5781 365.4844 Q103.5 378.7031 90.9062 384.0469 Q78.3281 389.3906 60.75 389.3906 Q35.4375 389.3906 21.8594 376.875 Q8.2969 364.3594 8.2969 344.9531 Q8.2969 320.625 33.1875 308.6719 Q12.375 297.1406 12.375 276.4688 Q12.375 258.0469 25.7969 245.6719 Q39.2344 233.2969 61.875 233.2969 Q91.6875 233.2969 111.2344 253.4062 L93.0938 268.0312 Q76.6406 255.0938 60.75 255.0938 Q50.3438 255.0938 43.7344 261.2812 Q37.125 267.4688 37.125 275.9062 Q37.125 283.2188 42.8125 289.2656 Q48.5156 295.3125 54.9844 296.9375 Q61.4531 298.5469 77.2031 298.5469 L77.2031 319.3594 Q50.625 319.3594 42.75 327.1719 Q34.875 334.9688 34.875 344.6719 Q34.875 354.0938 42.6094 361.2031 Q50.3438 368.2969 61.3125 368.2969 Q82.9688 368.2969 98.4375 349.875 L116.5781 365.4844 ZM52.4531 212.7656 Q64.2656 203.7656 64.2656 194.625 Q64.2656 191.6719 58.0781 188.5781 Q48.9375 184.0781 48.9375 177.6094 Q48.9375 173.1094 52.3125 169.5938 Q55.6875 166.0781 61.0312 166.0781 Q67.9219 166.0781 73.2656 172.0625 Q78.6094 178.0312 78.6094 186.0469 Q78.6094 205.5938 58.5 219.0938 L52.4531 212.7656 Z" 
+                    fill="#702963" stroke="#ffbf00" stroke-width="3" stroke-linecap="square" stroke-miterlimit="10" stroke-linejoin="miter"/>
+            </g>
+        </svg>
+        <!-- Αυτό το span θα φιλοξενεί το SVG του επιλεγμένου αντικειμένου -->
+        <span id="main-label-text"></span>
+    </div>
+
+    <div class="donut-chart-container">
+        <svg class="donut-chart" viewBox="0 0 340 340" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <div class="dropdowns-container" id="dropdowns-container">
+    <div class="dropdowns" id="dropdowns"></div>
+  </div>
+
+  <div class="popup" id="info-popup">
+      <button class="close-btn" onclick="closePopup('info-popup')">✖</button>
+      <p>Τα μαθηματικά παρέχουν ισχυρά εργαλεία για τη μελέτη του φυσικού και κοινωνικού μας περιβάλλοντος. 
+        Στην παρούσα σελίδα θα προσπαθήσουμε να τα αξιοποιήσουμε με αυτόν ακριβώς τον τρόπο, δηλαδή για να ψηλαφίσουμε τη δομή και τον τρόπο λειτουργείας του κόσμου που μας περιβάλλει.
+         Του φυσικού και του κοινωνικού κόσμου που μας περιβάλλει.</p>
+        <p> Δυστυχώς, κάποιες φορές αυτά τα εργαλεία  μπορεί   να είναι απρόσιτα στους μη μυημένους ή έστω αρκετά κουραστικά σε βαθμό που ο αναγνώστης να αναλώνεται στην «πάλη» με αυτά κι όχι σε αυτό που περιγράφουν.
+        Σε μια προσπάθεια να εξομαλύνουμε τη διαδικασία και να κάνουμε πιο φιλικούς στον αναγνώστη τους καρπούς των μαθηματικών, προσπαθήσαμε (όπου γίνεται) 
+        να αυτοματοποιήσουμε τη μαθηματική διαδικασία ή έστω να την παρακάμψουμε.</p>
+        
+       <p> Αυτοματοποιημένους υπολογισμούς ο αναγνώστης μπορεί να βρει στην καρτέλα «Πρακρικά». 
+         Εκεί δεν θα χρειαστούν καθόλου μαθηματικά, παρά μόνο ο αναγνώστης να έχει στο κεφάλι του το πρόβλημα που θέλει να λύσει.
+         Φυσικά, παρέχοντας στο λογισμικό τις κατάλληλες πληροφορίες-μετρήσεις.</p>
+         
+         <p> Όσον αφορά τη μερική παράκαμψη των μαθηματικών, εκεί χρησιμοποιήσαμε τη γλώσσα Wolfram. Η γλώσσα Wolfram είναι κάτι σαν ένα μαγικό ραβδί των μαθηματικών. Πράγματα που κανονικά μπορεί να απαιτούσαν δυσθεώρητο κόπο και χρόνο,
+           μπορούν χάρις σε αυτήν να λυθούν με λίγες γραμμές κώδικα. Δεν έχεις παρά να φανταστείς ένα πρόβλημα κι αυτή στο λύνει. Συνεπώς 
+           βασιζόμενοι πάνω της μπορούμε να αφιερώνουμε τη σκέψη μας στη μοντελοποίηση των φαινομένων, χωρίς να αποτελεί ανασταλτικό παράγοντα η 
+           περιπλοκότητά τους. Ακόμα όμως και σε ζητήματα που χρειάζονται κάποιες μαθηματικές κινήσεις από μέρους μας (όπως λ.χ. η επίλυση μιας 
+           περίπλοκης Μ.Δ.Ε.), ακόμα και τότε μάς προσφέρει τη δυνατότητα να ασχοληθούμε με το «ζουμί» της μεθοδολογίας κι όχι με το «σκάψιμο» πράξεων.</p>
+     
+     <p>Όσον αφορά τον γράφοντα, να πω πως ονομάζομαι Κώστας Κούδας και εργάζομαι ως μαθηματικός 
+           στη μέση εκπαίδευση στην Κέρκυρα. <img src="info_image.jpg" class="popup-image" alt="Info Image" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1a0a0a/d4af37?text=K.K.'"> 
+           Προσπαθώ να κρατήσω μια επαφή με όλες τις επιστήμες και
+           ειδικότερα με τα μαθηματικά, τα οποία και σπούδασα. Άλλες σελίδες που διαχειρίζομαι είναι:
+           <li><a href="https://arkoudakafe.pages.dev/">Αρκούδα καφέ</a>, μια σελίδα με εκπαιδευτικό υλικό,</li>
+           <li><a href="https://kkoudas01.github.io/r4social/index.html">Στοχαστικά Μαθηματικά χωρίς… μαθηματικά για κοινωνικούς επιστήμονες με τη συνδρομή της R</a>, μια σελίδα εκμάθυνσης της γλώσσας R εξειδικευμένης στις ανάγκες των κοινωνικών επιστημόνων, καθώς και κάποιες κοινωνικές μελέτες με τη χρήση της.</li>
+           <li><a href="https://www.youtube.com/@kostaskoudas4193">Η σελίδα μου στο YouTube</a>, περιέχει εκπαιδευτικό υλικό σε μορφή βίντεο.</li>
+            </p>
+     
+
+     <p>Υ.Γ.:Ένα βασικό μειονέκτημα της εν λόγω γλώσσας είναι ότι την πληρώνεις. Και, για τα δεδομένα ενός μέσου Έλληνα, την πληρώνεις καλά. Συνεπώς εδώ 
+           θα βασιστούμε σε μία από τις δωρεάν της εκδόσεις. Εν προκειμένω θα χρησιμοποιήσουμε το <a href="https://wljs.io/">WLJS Notebook</a>, 
+           το οποίο χρησιμοποιεί την Wolfram Engine για να παράγει μια ελαφρώς περιορισμένη έκδοση του Wolfram Mathematica. Σε πολλά σημεία υστερεί του
+           Wolfram Mathematica, αλλά η συνεργατική διάθεση των δημιουργών του  WLJS Notebook σε τυχούσες απορίες στο 
+           <a href="https://github.com/JerryI/wolfram-js-frontend/issues">github</a> τα ελαττώνει στο ελάχιστο. Όπως θα διαπιστώσει ο αναγνώστης, 
+           δεν υπήρξε ουσιαστικό πρόβλημα σε κανένα από τα ζητήματα που καταπιαστήκαμε. Ό,τι θα καταφέρναμε με το Wolfram Mathematica, καταφέρνουμε και
+            με το WLJS Notebook.</p>
+  </div>
+
+  <div class="popup" id="links-popup">
+      <button class="close-btn" onclick="closePopup('links-popup')">✖</button>
+      <ul class="book-list" id="links-list-container">
+      </ul>
+  </div>
+
+  <script>
+    // --- Data Objects ---
+    const subjectsData = {
+        'Αμπελοφιλοσοφία': { 
+            topics: ['Κοινωνικές επιστήμες','Μαθηματικά', 'Φυσική'], 
+            color: 'rgba(212, 175, 55, 0.2)', 
+            hoverColor: 'rgba(212, 175, 55, 0.3)', 
+            selectedColor: 'rgba(212, 175, 55, 0.4)', 
+            startAngle: 120, 
+            endAngle: 240,
+            svgContent: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 298.935 298.935"><g><path fill="#e8d8b0" d="m149.468,77.394c-44.435,0-73.694,25.159-80.457,80.457-4.127,33.746-15.998,88.94-20.955,111.298-1.243,5.607 1.945,11.256 7.394,13.073l48.379,16.136c3.303,1.102 6.93,0.608 9.819-1.336 2.889-1.944 4.711-5.119 4.934-8.594l4.251-66.347c0.293-4.568-2.218-8.856-6.345-10.837l-31.892-15.306c-4.189-2.01-5.955-7.035-3.944-11.224l7.592-15.82c0.965-2.012 2.69-3.557 4.795-4.297 2.105-0.74 4.418-0.613 6.429,0.353l32.174,15.442c3.892,1.868 6.367,5.802 6.367,10.119v41.797c0,0.839 0.262,1.658 0.75,2.341l7.43,10.401c0.756,1.059 1.977,1.687 3.278,1.687 1.301,0 2.521-0.628 3.278-1.687l7.43-10.401c0.488-0.683 0.75-1.502 0.75-2.341v-41.798c0-4.317 2.476-8.251 6.368-10.119l32.174-15.442c2.011-0.965 4.324-1.092 6.429-0.353 2.105,0.74 3.83,2.285 4.795,4.297l7.593,15.82c2.01,4.189 0.244,9.214-3.944,11.224l-31.892,15.306c-4.127,1.981-6.637,6.269-6.345,10.837l4.251,66.347c0.223,3.475 2.045,6.649 4.934,8.594 2.888,1.944 6.516,2.438 9.819,1.336l48.379-16.136c5.459-1.821 8.639-7.455 7.394-13.073-4.956-22.359-16.828-77.552-20.955-111.298-6.763-55.297-36.022-80.456-80.457-80.456z"/><path fill="#e8d8b0" d="m259.957,43.655c-38.229-35.915-89.823-49.669-138.289-41.264-0.95,0.165-1.624,1.012-1.567,1.975l.875,14.836c0.01,0.168-0.107,0.318-0.273,0.348-0.166,0.031-0.328-0.067-0.379-0.228l-4.511-14.337c-0.277-0.881-1.151-1.432-2.066-1.305-5.355,0.742-8.924,1.306-14.283,3.693-0.785,0.35-1.235,1.186-1.097,2.034l4.069,24.987c0.066,0.404-0.132,0.805-0.493,0.998-0.361,0.193-0.804,0.136-1.104-0.143l-20.075-18.659c-0.573-0.533-1.416-0.658-2.119-0.315-14.207,6.92-27.602,16.047-39.666,27.38-0.976,0.917-1.54,2.19-1.562,3.53-0.021,1.34 0.501,2.63 1.449,3.578l34.041,34.041c1.87,1.87 4.881,1.935 6.834,0.152 39.382-35.976 100.072-35.976 139.454,0 1.955,1.786 4.962,1.721 6.834-0.152l34.041-34.041c0.947-0.947 1.468-2.239 1.447-3.578-0.021-1.34-0.584-2.613-1.56-3.53z"/></g></svg>`
+        },
+        'Πρακτικά': { 
+            topics: ['Γεωμετρία', 'Στοχαστικά μαθηματικά', 'Θεωρία Αριθμών', 'Βιολογία'], 
+            color: 'rgba(212, 175, 55, 0.2)', 
+            hoverColor: 'rgba(212, 175, 55, 0.3)', 
+            selectedColor: 'rgba(212, 175, 55, 0.4)', 
+            startAngle: 0, 
+            endAngle: 120,
+            svgContent: `<svg fill="#e8d8b0" width="800px" height="800px" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M3.135 6.89c.933-.725 1.707-.225 2.74.971.116.135.272-.023.361-.1.088-.078 1.451-1.305 1.518-1.361.066-.059.146-.169.041-.292a36.238 36.238 0 0 1-.743-.951c-1.808-2.365 4.946-3.969 3.909-3.994-.528-.014-2.646-.039-2.963-.004-1.283.135-2.894 1.334-3.705 1.893-1.061.726-1.457 1.152-1.522 1.211-.3.262-.048.867-.592 1.344-.575.503-.934.122-1.267.414-.165.146-.627.492-.759.607-.133.117-.157.314-.021.471 0 0 1.264 1.396 1.37 1.52.105.122.391.228.567.071.177-.156.632-.553.708-.623.078-.066-.05-.861.358-1.177zm5.708.517c-.12-.139-.269-.143-.397-.029L7.012 8.63a.289.289 0 0 0-.027.4l8.294 9.439c.194.223.53.246.751.053l.97-.813a.54.54 0 0 0 .052-.758L8.843 7.407zM19.902 3.39c-.074-.494-.33-.391-.463-.182-.133.211-.721 1.102-.963 1.506-.24.4-.832 1.191-1.934.41-1.148-.811-.749-1.377-.549-1.758.201-.383.818-1.457.907-1.59.089-.135-.015-.527-.371-.363-.357.164-2.523 1.025-2.823 2.26-.307 1.256.257 2.379-.85 3.494l-1.343 1.4 1.349 1.566 1.654-1.57c.394-.396 1.236-.781 1.998-.607 1.633.369 2.524-.244 3.061-1.258.482-.906.402-2.814.327-3.308zM2.739 17.053a.538.538 0 0 0 0 .758l.951.93c.208.209.538.121.746-.088l4.907-4.824-1.503-1.714-5.101 4.938z"/></svg>`
+        },
+        'Πληροφορίες': { 
+            topics: [], 
+            color: 'rgba(212, 175, 55, 0.2)', 
+            hoverColor: 'rgba(212, 175, 55, 0.3)', 
+            selectedColor: 'rgba(212, 175, 55, 0.4)', 
+            startAngle: 240, 
+            endAngle: 360,
+            svgContent: `<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="24" height="24" fill="none"/>
+<path d="M12 6.90909C10.8999 5.50893 9.20406 4.10877 5.00119 4.00602C4.72513 3.99928 4.5 4.22351 4.5 4.49965C4.5 6.54813 4.5 14.3034 4.5 16.597C4.5 16.8731 4.72515 17.09 5.00114 17.099C9.20405 17.2364 10.8999 19.0998 12 20.5M12 6.90909C13.1001 5.50893 14.7959 4.10877 18.9988 4.00602C19.2749 3.99928 19.5 4.21847 19.5 4.49461C19.5 6.78447 19.5 14.3064 19.5 16.5963C19.5 16.8724 19.2749 17.09 18.9989 17.099C14.796 17.2364 13.1001 19.0998 12 20.5M12 6.90909L12 20.5" stroke="#e8d8b0" stroke-linejoin="round"/>
+<path d="M19.2353 6H21.5C21.7761 6 22 6.22386 22 6.5V19.539C22 19.9436 21.5233 20.2124 21.1535 20.0481C20.3584 19.6948 19.0315 19.2632 17.2941 19.2632C14.3529 19.2632 12 21 12 21C12 21 9.64706 19.2632 6.70588 19.2632C4.96845 19.2632 3.64156 19.6948 2.84647 20.0481C2.47668 20.2124 2 19.9436 2 19.539V6.5C2 6.22386 2.22386 6 2.5 6H4.76471" stroke="#e8d8b0" stroke-linejoin="round"/>
+</svg>`
+        }
+    };
+
+    const links = {        
+        'Κοινωνικές επιστήμες': [ 
+            { text: 'Εξέλιξη πολιτικών σχηματισμών', url: 'aristeradaxia(wljs).html' }, 
+            { text: 'Black-Scoles', url: 'BlackScoles.html' }, 
+            { text: 'Κούρσα εξοπλισμών', url: 'exoplismoi(wljs).html' },
+            { text: 'Τα Ασαφή Σύνολα ξεκαθαρίζουν τις ασαφείς έννοιες!', url: 'fuzzySocSci.html' },
+            { text: 'Εξέλιξη κατανομής πολιτικού φάσματος', url: 'politicsDist(wljs).html' },
+            { text: 'Εξέλιξη πολιτικού σχηματισμού', url: 'PosoiParamenoyn(wljs).html' },
+            { text: 'Ταξική Συνείδηση', url: 'aristeradaxia.html' }
+        ],
+        'Γεωμετρία': [ 
+            { text: 'Στοιχεία τριγώνου', url: 'stoixeiaTrigonoy.html' }, 
+            { text: 'Στοιχεία κύκλου', url: 'stoixeiaKykloy.html' } , 
+            { text: 'Υπολογιστής Γωνιακών Σκαλοπατιών', url: 'stairs.html' } , 
+            { text: 'Υπολογισμός μήκους τόξου', url: 'toxo.html' } , 
+            { text: 'Υπολογιστής Σπειροειδούς Σκάλας', url: 'spiralStairs.html' } 
+        ],
+        'Στοχαστικά μαθηματικά': [ 
+            { text: 'Βασική στιατιστική ανάλυση', url: 'continVar.html' } ,
+            { text: 'Χρόνος αναμονής σε ουρά', url: 'anamoni.html' } 
+        ],
+        'Θεωρία Αριθμών': [ 
+            { text: 'Αναδιάταξη σελίδων για εκτύπωση στο μισό μέγεθος', url: 'ektyposi.html' }
+        ],
+        'Βιολογία': [ 
+            { text: 'Συγκαλλιέργειες', url: 'sygkalliergeies.html' }
+        ],
+        'Μαθηματικά': [ 
+            { text: 'Αντίστροφο προβλήματος Frobenius-Perron', url: 'FrobeniusPerron(wljs).html' },  
+            { text: 'Σφαίρες Dandelin', url: '#' } 
+        ],
+        'Φυσική': [ 
+            { text: 'Εξίσωση θερμότητας', url: '#' }, 
+            { text: 'Ανάλυση σήματος', url: '#' }, 
+            { text: 'Αξιωματική θεμελίωση έργου και κινητικής ενέργειας', url: 'energeia.html' } 
+        ]
+    };
+
+    // --- DOM Elements ---
+    const centralCircle = document.getElementById('main-label');
+    const centralSvg = document.getElementById('central-svg');
+    const centralLabelText = document.getElementById('main-label-text');
+    const dropdownsContainer = document.getElementById('dropdowns-container');
+    const dropdownsDiv = document.getElementById('dropdowns');
+    const svgContainer = document.querySelector('.donut-chart');
+    const infoPopup = document.getElementById('info-popup');
+    const linksPopup = document.getElementById('links-popup');
+    const linksListContainer = document.getElementById('links-list-container');
+
+    // --- SVG Donut Chart Settings ---
+    const cx = 170;
+    const cy = 170;
+    const outerRadius = 160;
+    const innerRadius = 60;
+    const labelRadius = (outerRadius + innerRadius) / 2;
+
+    let currentlySelectedArc = null;
+
+    // --- Helper Functions ---
+    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+        return {    
+            x: centerX + (radius * Math.cos(angleInRadians)),    
+            y: centerY + (radius * Math.sin(angleInRadians))    
+        };
+    }
+
+    function describeDonutSegment(x, y, outerR, innerR, startAngle, endAngle) {
+        const startOuter = polarToCartesian(x, y, outerR, endAngle);
+        const endOuter = polarToCartesian(x, y, outerR, startAngle);
+        const startInner = polarToCartesian(x, y, innerR, endAngle);
+        const endInner = polarToCartesian(x, y, innerR, startAngle);
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+        
+        if (endAngle - startAngle >= 359.99) {    
+            endAngle = startAngle + 359.99;    
+            const adjustedStartOuter = polarToCartesian(x, y, outerR, endAngle);    
+            const d = [
+                "M", adjustedStartOuter.x, adjustedStartOuter.y,    
+                "A", outerR, outerR, 0, largeArcFlag, 0, endOuter.x, endOuter.y,    
+                "L", endInner.x, endInner.y,    
+                "A", innerR, innerR, 0, largeArcFlag, 1, startInner.x, startInner.y,    
+                "Z"
+            ].join(" ");    
+            return d;    
+        }    
+        
+        const d = [
+            "M", startOuter.x, startOuter.y,    
+            "A", outerR, outerR, 0, largeArcFlag, 0, endOuter.x, endOuter.y,    
+            "L", endInner.x, endInner.y,    
+            "A", innerR, innerR, 0, largeArcFlag, 1, startInner.x, startInner.y,    
+            "Z"
+        ].join(" ");    
+        return d;
+    }
+
+    // --- Function to Create the Donut Chart ---
+    function createDonutChart() {
+        svgContainer.innerHTML = ''; // Clear previous chart elements
+        
+        Object.keys(subjectsData).forEach(subject => {
+            const data = subjectsData[subject];
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", describeDonutSegment(cx, cy, outerRadius, innerRadius, data.startAngle, data.endAngle));
+            path.setAttribute("fill", data.color);
+            path.setAttribute("class", "donut-arc");
+            path.dataset.subject = subject;
+            
+            const midAngle = data.startAngle + (data.endAngle - data.startAngle) / 2;
+            const labelPos = polarToCartesian(cx, cy, labelRadius, midAngle);
+            
+            // --- NEW: Use foreignObject to embed SVG icons instead of text ---
+            const iconSize = 45; // The size of the container for the icon
+            const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+            foreignObject.setAttribute('x', labelPos.x - iconSize / 2);
+            foreignObject.setAttribute('y', labelPos.y - iconSize / 2);
+            foreignObject.setAttribute('width', iconSize);
+            foreignObject.setAttribute('height', iconSize);
+            foreignObject.style.pointerEvents = 'none'; // Make it non-interactive
+            
+            // The container div is necessary for innerHTML to work reliably
+            const div = document.createElement('div');
+            div.innerHTML = data.svgContent;
+            const svgIcon = div.firstChild;
+            svgIcon.style.width = '100%';
+            svgIcon.style.height = '100%';
+
+            foreignObject.appendChild(svgIcon);
+            // --- END NEW ---
+
+            path.addEventListener('mouseenter', () => {    
+                if (path !== currentlySelectedArc) {    
+                    path.style.fill = data.hoverColor;    
+                }    
+            });
+            
+            path.addEventListener('mouseleave', () => {    
+                if (path !== currentlySelectedArc) {    
+                    path.style.fill = data.color;    
+                } else {    
+                    path.style.fill = data.selectedColor;    
+                }    
+            });
+            
+            path.addEventListener('click', handleArcClick);
+            
+            svgContainer.appendChild(path);
+            svgContainer.appendChild(foreignObject); // Add the icon
+        });
+    }
+
+    // --- Popup and UI Functions ---
+    function closePopup(id) {
+        const popup = document.getElementById(id);
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    }
+
+    function showLinksPopup(topic) {
+        if (!linksPopup || !linksListContainer) {
+            console.error("Links popup or container not found!");
+            return;
+        }
+
+        linksListContainer.innerHTML = '';
+
+        if (links[topic] && links[topic].length > 0) {
+            links[topic].forEach(link => {
+                const listItem = document.createElement('li');
+                const anchor = document.createElement('a');
+                anchor.href = link.url || '#';
+                anchor.textContent = link.text;
+
+                if (link.url && !link.url.startsWith('#')) {
+                    anchor.target = "_blank";
+                    anchor.rel = "noopener noreferrer";
+                }
+
+                if (anchor.getAttribute('href') === '#') {
+                    anchor.addEventListener('click', (e) => e.preventDefault());
+                }
+
+                listItem.appendChild(anchor);
+                linksListContainer.appendChild(listItem);
+            });
+        } else {
+            const noLinksMsg = document.createElement('li');
+            noLinksMsg.textContent = "Δεν υπάρχουν διαθέσιμοι σύνδεσμοι για αυτή την ενότητα.";
+            noLinksMsg.className = 'no-links-message';
+            linksListContainer.appendChild(noLinksMsg);
+        }
+
+        linksPopup.style.display = 'block';
+    }
+
+    function createDropdowns(subject) {
+        dropdownsDiv.innerHTML = '';
+        const dropdownContent = document.createElement('div');
+        dropdownContent.className = 'dropdown';
+
+        const topics = subjectsData[subject].topics;
+        topics.forEach(topic => {
+            const button = document.createElement('button');
+            button.textContent = topic;
+            button.onclick = () => showLinksPopup(topic);
+            dropdownContent.appendChild(button);
+        });
+        dropdownsDiv.appendChild(dropdownContent);
+    }
+
+    function updateCentralCircle(subject) {
+        const data = subjectsData[subject];
+
+        // Hide the default content
+        centralSvg.style.display = 'none';
+
+        // Prepare and show the subject's SVG content
+        centralLabelText.innerHTML = data.svgContent;
+        const newSvgElement = centralLabelText.querySelector('svg');
+        if (newSvgElement) {
+            newSvgElement.style.width = '80%';
+            newSvgElement.style.height = '80%';
+            // Override colors for the central display to make it stand out
+            newSvgElement.querySelectorAll('[fill]').forEach(el => el.setAttribute('fill', '#d4af37'));
+            newSvgElement.querySelectorAll('[stroke]').forEach(el => el.setAttribute('stroke', '#d4af37'));
+        }
+        centralLabelText.style.display = 'flex';
+
+        centralCircle.classList.add('can-reset');
+    }
+
+    function resetToDefaultState() {
+        if (currentlySelectedArc) {
+            const oldSubject = currentlySelectedArc.dataset.subject;
+            currentlySelectedArc.style.fill = subjectsData[oldSubject].color;
+            currentlySelectedArc.classList.remove('selected');
+            currentlySelectedArc = null;
+        }
+        
+        // Hide the subject content
+        centralLabelText.style.display = 'none';
+        centralLabelText.innerHTML = '';
+
+        // Show the default content
+        centralSvg.style.display = 'block';
+
+        centralCircle.classList.remove('can-reset');
+
+        // Hide dropdowns with animation
+        dropdownsContainer.style.opacity = 0;
+        dropdownsContainer.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            if (!currentlySelectedArc) { // Check again in case of rapid clicks
+                dropdownsDiv.innerHTML = '';
+            }
+        }, 300); // Match transition duration
+    }
+
+    // --- Main Event Handlers ---
+    function handleArcClick(event) {
+        const path = event.currentTarget;
+        const subject = path.dataset.subject;
+        const data = subjectsData[subject];
+
+        // The 'Πληροφορίες' case opens a popup directly without selection
+        if (subject === 'Πληροφορίες') {
+            infoPopup.style.display = 'block';
+            resetToDefaultState(); // Reset selection if any
+            return;
+        }
+
+        // Handle selection logic
+        if (currentlySelectedArc === path) {
+            // Deselect if clicking the same arc again
+            resetToDefaultState();
+        } else {
+            // Deselect previous arc if one was selected
+            if (currentlySelectedArc) {
+                const oldSubject = currentlySelectedArc.dataset.subject;
+                currentlySelectedArc.style.fill = subjectsData[oldSubject].color;
+                currentlySelectedArc.classList.remove('selected');
+            }
+
+            // Select new arc
+            currentlySelectedArc = path;
+            path.style.fill = data.selectedColor;
+            path.classList.add('selected');
+
+            // Update UI
+            updateCentralCircle(subject);
+            createDropdowns(subject);
+            dropdownsContainer.style.opacity = 1;
+            dropdownsContainer.style.transform = 'translateY(0)';
+        }
+    }
+
+    // Add event listener for the central circle to act as a reset button
+    centralCircle.addEventListener('click', () => {
+        if (centralCircle.classList.contains('can-reset')) {
+            resetToDefaultState();
+        }
+    });
+
+    // --- Initial Call ---
+    document.addEventListener('DOMContentLoaded', createDonutChart);
+
+  </script>
+</body>
+</html>

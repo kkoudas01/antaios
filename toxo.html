@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογισμός Τόξου</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for a technical/workshop feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* bg-gray-900 */
+            color: #e2e8f0; /* text-gray-200 */
+        }
+        .form-input {
+            background-color: #2d3748; /* bg-gray-800 */
+            border-color: #4a5568; /* border-gray-600 */
+            color: #e2e8f0;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #4299e1; /* border-blue-400 */
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+        }
+        .svg-container {
+            border: 1px solid #4a5568; /* border-gray-600 */
+            background-color: #2d3748; /* bg-gray-800 */
+            background-image:
+                linear-gradient(rgba(74, 85, 104, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 85, 104, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom-width: 2px;
+            border-color: transparent;
+        }
+        .tab-button.active {
+            border-color: #63b3ed; /* border-blue-400 */
+            color: #63b3ed;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Back Button -->
+    <a href="index.html" class="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 z-10">
+        &larr; Επιστροφή
+    </a>
+
+    <!-- Main Container -->
+    <div class="flex-grow container mx-auto p-4 md:p-8 flex flex-col items-center justify-center gap-8">
+        <div class="w-full max-w-7xl flex flex-col lg:flex-row items-start justify-center gap-8">
+            <!-- Controls and Info Panel -->
+            <div class="w-full lg:w-1/3 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h1 class="text-2xl font-bold text-center text-blue-300 mb-6">Υπολογιστής Τόξου</h1>
+                
+                <div class="mb-4">
+                    <label for="a_val" class="block text-gray-400 text-sm font-bold mb-2">Βάση τόξου (a):</label>
+                    <input type="number" id="a_val" value="10" step="any" class="form-input w-full p-3 rounded-lg text-lg appearance-none">
+                </div>
+
+                <div class="mb-6">
+                    <label for="h_val" class="block text-gray-400 text-sm font-bold mb-2">Ύψος τόξου (h):</label>
+                    <input type="number" id="h_val" value="4" step="any" class="form-input w-full p-3 rounded-lg text-lg appearance-none">
+                </div>
+
+                <div class="bg-gray-900 p-4 rounded-lg text-center">
+                    <p class="text-gray-400 text-sm">Υπολογιζόμενο Μήκος Τόξου:</p>
+                    <p id="l_result" class="text-2xl font-bold text-green-400 tracking-wider">0.000</p>
+                </div>
+            </div>
+
+            <!-- SVG Drawing Panel -->
+            <div class="w-full lg:w-2/3 h-96 lg:h-auto lg:aspect-[4/3] p-4 rounded-xl shadow-2xl svg-container">
+                <svg id="drawing" width="100%" height="100%" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="w-full max-w-7xl mt-4 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+            <!-- Tab Headers -->
+            <div class="flex border-b border-gray-700">
+                <button id="tab-btn-1" class="tab-button active text-lg font-semibold p-4" onclick="switchTab('tab1')">Μεμονωμένο ύψος</button>
+                <button id="tab-btn-2" class="tab-button text-lg font-semibold p-4" onclick="switchTab('tab2')">Διαμέριση</button>
+            </div>
+            
+            <!-- Tab 1 Content: Single Height -->
+            <div id="tab1" class="tab-content active flex-col md:flex-row items-start gap-8 p-6">
+                <div class="w-full md:w-1/3">
+                    <h3 class="text-xl text-blue-300 mb-4">Υπολογισμός Ύψους (y)</h3>
+                    <div class="mb-4">
+                        <label for="x_val" class="block text-gray-400 text-sm font-bold mb-2">Απόσταση 'x' από δεξιά άκρη:</label>
+                        <input type="number" id="x_val" value="2" step="any" class="form-input w-full p-3 rounded-lg text-lg">
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm">Υπολογιζόμενο Ύψος 'y':</p>
+                        <p id="y_result" class="text-2xl font-bold text-yellow-400 tracking-wider">0.000</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3 h-64 md:h-auto md:aspect-[4/3] p-2 rounded-lg svg-container">
+                     <svg id="drawing_tab1" width="100%" height="100%" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+            </div>
+
+            <!-- Tab 2 Content: Partition -->
+            <div id="tab2" class="tab-content flex-col md:flex-row items-start gap-8 p-6">
+                <div class="w-full md:w-1/3">
+                    <h3 class="text-xl text-blue-300 mb-4">Διαμέριση Τόξου</h3>
+                    <div class="mb-4">
+                        <label for="n_val" class="block text-gray-400 text-sm font-bold mb-2">Πλήθος κατακόρυφων τμημάτων:</label>
+                        <input type="number" id="n_val" value="5" min="1" step="1" class="form-input w-full p-3 rounded-lg text-lg">
+                    </div>
+                    <div class="h-64 overflow-y-auto bg-gray-900 rounded-lg">
+                        <table class="w-full text-left">
+                            <thead class="sticky top-0 bg-gray-700">
+                                <tr>
+                                    <th class="p-2">A/A</th>
+                                    <th class="p-2">x</th>
+                                    <th class="p-2">y</th>
+                                </tr>
+                            </thead>
+                            <tbody id="heights_table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3 h-64 md:h-auto md:aspect-[4/3] p-2 rounded-lg svg-container">
+                     <svg id="drawing_tab2" width="100%" height="100%" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Signature -->
+    <footer class="text-right p-4 mt-auto">
+        <p class="text-xs text-gray-600">Κώστας Κούδας</p>
+    </footer>
+
+    <script>
+        // --- DOM Element References ---
+        const elements = {
+            a: document.getElementById('a_val'),
+            h: document.getElementById('h_val'),
+            l_result: document.getElementById('l_result'),
+            svg: document.getElementById('drawing'),
+            x: document.getElementById('x_val'),
+            y_result: document.getElementById('y_result'),
+            svg_tab1: document.getElementById('drawing_tab1'),
+            n: document.getElementById('n_val'),
+            heights_table: document.getElementById('heights_table'),
+            svg_tab2: document.getElementById('drawing_tab2'),
+        };
+
+        let activeTab = 'tab1';
+
+        /**
+         * Switches the active tab and recalculates its content.
+         * @param {string} tabId - The ID of the tab to switch to.
+         */
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.getElementById(`tab-btn-${tabId.slice(-1)}`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Trigger a full recalculation to update the new active tab
+            calculateAndDraw();
+        }
+
+        /**
+         * Main function to calculate all values and redraw SVGs.
+         * This function is the single source of truth and triggers all updates.
+         */
+        function calculateAndDraw() {
+            let a = parseFloat(elements.a.value) || 0;
+            let h = parseFloat(elements.h.value) || 0;
+            
+            if (a <= 0 || h <= 0) {
+                elements.l_result.textContent = "Μη έγκυρες τιμές";
+                elements.svg.innerHTML = `<text x="50%" y="50%" fill="#f87171" text-anchor="middle" font-size="20">Οι τιμές 'a' και 'h' πρέπει να είναι θετικές.</text>`;
+                // Clear tab content on error
+                elements.y_result.textContent = "---";
+                elements.svg_tab1.innerHTML = "";
+                elements.heights_table.innerHTML = "";
+                elements.svg_tab2.innerHTML = "";
+                return;
+            }
+
+            const angleTerm = 2 * Math.atan(2 * h / a);
+            if (Math.abs(Math.sin(angleTerm)) < 1e-9) {
+                elements.l_result.textContent = "Σφάλμα";
+                elements.svg.innerHTML = `<text x="50%" y="50%" fill="#f87171" text-anchor="middle">Διαίρεση με το μηδέν.</text>`;
+                return;
+            }
+            
+            // Correct calculations based on Mathematica formulas
+            const l = (2 * a * Math.atan(2 * h / a)) / Math.sin(2 * Math.atan(2 * h / a));
+            const r = a / (2 * Math.sin(2 * Math.atan(2 * h / a)));
+            
+            elements.l_result.textContent = l.toFixed(3);
+
+            // Draw the main SVG
+            drawSVG(elements.svg, a, h, { showH: true });
+            
+            // Update the content of the currently active tab using correct values
+            if (activeTab === 'tab1') {
+                calculateForTab1(a, h, r);
+            } else {
+                calculateForTab2(a, h, r);
+            }
+        }
+        
+        /**
+         * Calculates and draws content for the "Single Height" tab.
+         */
+        function calculateForTab1(a, h, r) {
+            const x = parseFloat(elements.x.value) || 0;
+            const distFromCenter = a / 2 - x;
+            const termInsideSqrt = r**2 - distFromCenter**2;
+            
+            let y = 0;
+            if (termInsideSqrt >= 0) {
+                y = h - r + Math.sqrt(termInsideSqrt);
+            }
+            
+            elements.y_result.textContent = y.toFixed(3);
+            drawSVG(elements.svg_tab1, a, h, { showH: false, markerX: x, markerY: y });
+        }
+        
+        /**
+         * Calculates and draws content for the "Partition" tab.
+         */
+        function calculateForTab2(a, h, r) {
+            const n = parseInt(elements.n.value) || 1;
+            if (n < 1) return; // Prevent invalid calculations
+            const d = a / (n + 1);
+            let heights = [];
+            let tableContent = '';
+
+            for (let j = 1; j <= n; j++) {
+                const x_j = j * d; // Distance from left edge
+                const distFromCenter = x_j - a / 2;
+                const termInsideSqrt = r**2 - distFromCenter**2;
+                let y_j = 0;
+                if(termInsideSqrt >= 0){
+                    y_j = h - r + Math.sqrt(termInsideSqrt);
+                }
+                heights.push({ x: x_j, y: y_j });
+                tableContent += `
+                    <tr class="border-t border-gray-700">
+                        <td class="p-2">${j}</td>
+                        <td class="p-2">${x_j.toFixed(3)}</td>
+                        <td class="p-2">${y_j.toFixed(3)}</td>
+                    </tr>`;
+            }
+            elements.heights_table.innerHTML = tableContent;
+            drawSVG(elements.svg_tab2, a, h, { showH: false, partitionLines: heights });
+        }
+
+
+        /**
+         * Generic SVG rendering function.
+         */
+        function drawSVG(svgEl, a, h, options = {}) {
+            const { showH = false, markerX = null, markerY = null, partitionLines = [] } = options;
+
+            const svgWidth = 500;
+            const svgHeight = 400;
+            const padding = 50;
+            const scale = (svgWidth - 2 * padding) / a;
+            const h_scaled = h * scale;
+
+            const y_base = svgHeight / 2 + 80;
+            const x_start = padding;
+            const x_end = svgWidth - padding;
+            const x_mid = svgWidth / 2;
+
+            const r_geom = (h**2 + (a/2)**2) / (2 * h);
+            const r_scaled = r_geom * scale;
+            const largeArcFlag = (h > r_geom) ? 1 : 0;
+            
+            let svgContent = `
+                <defs>
+                    <marker id="arrowhead-purple" viewBox="0 0 10 10" refX="5" refY="5"
+                        markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a78bfa"></path>
+                    </marker>
+                </defs>
+                <!-- Base Arc -->
+                <path d="M ${x_start} ${y_base} A ${r_scaled} ${r_scaled} 0 ${largeArcFlag} 1 ${x_end} ${y_base}"
+                      fill="none" stroke="#68d391" stroke-width="4" />
+                <!-- Base Chord 'a' -->
+                <line x1="${x_start}" y1="${y_base}" x2="${x_end}" y2="${y_base}" stroke="#63b3ed" stroke-width="3" />
+                <text x="${x_mid}" y="${y_base + 20}" fill="#90cdf4" text-anchor="middle">a = ${a}</text>
+            `;
+
+            if (showH) {
+                svgContent += `
+                    <line x1="${x_mid}" y1="${y_base}" x2="${x_mid}" y2="${y_base - h_scaled}" stroke-dasharray="4" stroke="#f6ad55" stroke-width="2" />
+                    <text x="${x_mid + 10}" y="${y_base - h_scaled / 2}" fill="#fbd38d">h = ${h.toFixed(2)}</text>
+                    <circle cx="${x_mid}" cy="${y_base - h_scaled}" r="4" fill="#f6ad55"/>`;
+            }
+            
+            if (markerX !== null && markerY !== null) {
+                const markerX_scaled = x_end - (markerX * scale);
+
+                if (markerY > 0) {
+                    const markerY_scaled = markerY * scale;
+                    svgContent += `
+                        <line x1="${markerX_scaled}" y1="${y_base}" x2="${markerX_scaled}" y2="${y_base - markerY_scaled}" stroke="#ef4444" stroke-width="2.5" />
+                        <circle cx="${markerX_scaled}" cy="${y_base - markerY_scaled}" r="4" fill="#ef4444"/>
+                        <text x="${markerX_scaled + 5}" y="${y_base - markerY_scaled - 5}" fill="#f87171">y=${markerY.toFixed(2)}</text>`;
+                }
+
+                // Draw purple 'x' arrow
+                const y_arrow = y_base + 35;
+                const x_arrow_start = markerX_scaled;
+                const x_arrow_end = x_end;
+
+                svgContent += `
+                    <line x1="${x_arrow_start}" y1="${y_arrow}" x2="${x_arrow_end}" y2="${y_arrow}"
+                          stroke="#a78bfa" stroke-width="2"
+                          marker-start="url(#arrowhead-purple)" marker-end="url(#arrowhead-purple)" />
+                    <text x="${(x_arrow_start + x_arrow_end) / 2}" y="${y_arrow + 15}"
+                          fill="#c4b5fd" text-anchor="middle">x = ${markerX}</text>
+                `;
+            }
+
+            if (partitionLines.length > 0) {
+                partitionLines.forEach(line => {
+                    if (line.y <= 0) return;
+                    const lineX_scaled = x_start + (line.x * scale);
+                    const lineY_scaled = line.y * scale;
+                    svgContent += `<line x1="${lineX_scaled}" y1="${y_base}" x2="${lineX_scaled}" y2="${y_base - lineY_scaled}" stroke="#a78bfa" stroke-width="2" />`;
+                });
+            }
+
+            svgEl.innerHTML = svgContent;
+        }
+
+        // --- Event Listeners (FIXED) ---
+        // Any change triggers the main calculation function, ensuring data consistency.
+        elements.a.addEventListener('input', calculateAndDraw);
+        elements.h.addEventListener('input', calculateAndDraw);
+        elements.x.addEventListener('input', calculateAndDraw);
+        elements.n.addEventListener('input', calculateAndDraw);
+
+        // --- Initial Call ---
+        window.onload = () => {
+             // Set default tab as active visually
+            document.getElementById('tab-btn-1').classList.add('active');
+            document.getElementById('tab1').classList.add('active');
+            calculateAndDraw();
+        };
+
+    </script>
+</body>
+</html>

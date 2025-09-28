@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print "Hello World"</title>
+    <!-- External library for PDF manipulation -->
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <style>
+        /* --- General Styling & Dark Theme --- */
+        :root {
+            --bg-color: #1a1a1a;
+            --primary-text-color: #f0f0f0;
+            --secondary-text-color: #a0a0a0;
+            --surface-color: #2a2a2a;
+            --border-color: #444;
+            --accent-color: #0d6efd;
+            --accent-hover-color: #0b5ed7;
+            --success-color: #198754;
+            --error-color: #dc3545;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* --- Main Container --- */
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-text-color);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        /* --- Main Introductory Paragraph --- */
+        .main-intro {
+            text-align: center;
+            color: var(--secondary-text-color);
+            margin: -0.5rem auto 2rem;
+            max-width: 90%;
+            line-height: 1.6;
+        }
+
+        /* --- Tab Navigation --- */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        .tab-link {
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--secondary-text-color);
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .tab-link:hover {
+            color: var(--primary-text-color);
+        }
+        .tab-link.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Common Elements --- */
+        .intro {
+            color: var(--secondary-text-color);
+            line-height: 1.6;
+            text-align: justify;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 1rem;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+        }
+        input[type="number"], input[type="file"] {
+            flex-grow: 1;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: var(--bg-color);
+            color: var(--primary-text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #333;
+            color: var(--primary-text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background-color: var(--accent-hover-color);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-family: "Courier New", Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--primary-text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        /* --- PDF Processor Specifics --- */
+        #pdf-status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+        #pdf-status.success {
+            background-color: var(--success-color);
+            color: white;
+            display: block;
+        }
+        #pdf-status.error {
+            background-color: var(--error-color);
+            color: white;
+            display: block;
+        }
+        #pdf-status.processing {
+            background-color: #4a4a4a;
+            color: var(--primary-text-color);
+            display: block;
+        }
+        
+        /* --- Corner Elements --- */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 0.5rem 1rem;
+            background-color: var(--surface-color);
+            color: var(--primary-text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background-color: #3c3c3c;
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Back Button to index.html -->
+    <a href="index.html" class="back-button">&larr; Επιστροφή</a>
+
+    <div class="container">
+        <h1>Αναδιάταξη σελίδων</h1>
+        
+        <p class="main-intro">
+            Έχεις ένα έγγραφο και τσιγκουνεύεσαι να εκτυπώσεις όλες αυτές τις σελίδες; Θα ήθελες να εκτυπώσεις δύο σελίδες σε κάθε φύλλο, μετά να κόψεις στη μέση το πακέτο εκτύπωσης, να βάλεις τον ένα μισο-πάκο κάτω από τον άλλο και να έχεις το αρχείο σου εκτυπωμένο στο μισό μέγεθος πιο όμορφα;
+        </p>
+        
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'generator')">Γεννήτρια Αριθμών</button>
+            <button class="tab-link" onclick="openTab(event, 'pdf-processor')">Επεξεργαστής PDF</button>
+        </div>
+
+        <!-- Tab 1: Number Sequence Generator -->
+        <div id="generator" class="tab-content active">
+            <p class="intro">
+                Βάλε τον αριθμό των σελίδων του εγγράφου που θες να εκτυπώσεις. Θα σου εμφανιστεί η σειρά που πρέπει αυτές να καταχωρηθούν στον εκτυπωτή, ώστε να γίνει αυτό που περιγράφουμε παραπάνω.
+
+            </p>
+            <div class="form-group">
+                <label for="page-count">Δώσε συνολικό αριθμό σελίδων:</label>
+                <div class="input-wrapper">
+                    <input type="number" id="page-count" placeholder="π.χ. 16" min="1">
+                    <button id="calculate-btn">Υπολογισμός</button>
+                </div>
+            </div>
+            <label for="output">Ακολουθία σελίδων (έτοιμη για αντιγραφή):</label>
+            <textarea id="output" readonly placeholder="Τα αποτελέσματα θα εμφανιστούν εδώ..."></textarea>
+        </div>
+
+        <!-- Tab 2: PDF Processor -->
+        <div id="pdf-processor" class="tab-content">
+            <p class="intro">
+                Ανεβάστε ένα αρχείο PDF. Το πρόγραμμα της σελίδας θα το επεξεργαστεί αναδιατάσσοντας τις σελίδες, ώστε να το έχεις έτοιμο για εκτύπωση  σύμφωνα τον τρόπο που περιγράφουμε παραπάνω.
+            </p>
+             <div class="form-group">
+                <label for="pdf-upload">Επιλέξτε αρχείο PDF:</label>
+                <input type="file" id="pdf-upload" accept=".pdf">
+            </div>
+            <button id="process-pdf-btn">Επεξεργασία & Λήψη</button>
+            <div id="pdf-status"></div>
+        </div>
+
+    </div>
+
+    <!-- Signature -->
+    <div class="signature">
+        Created by Gemini
+    </div>
+
+    <script>
+        // Make PDF-LIB available
+        const { PDFDocument } = PDFLib;
+
+        // --- Tab Navigation Logic ---
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        // Set default active tab on load
+        document.querySelector('.tab-link.active').click();
+
+
+        // --- Core Imposition Algorithm ---
+        /**
+         * Generates the page sequence based on the specified imposition algorithm.
+         * @param {number} n - The total number of pages.
+         * @param {string} format - 'string' or 'array'.
+         * @returns {string|number[]|null} - The sequence or null for invalid input.
+         */
+        function generateSequence(n, format = 'string') {
+            if (isNaN(n) || n <= 0 || !Number.isInteger(n)) {
+                return null;
+            }
+
+            const result = [];
+            const m = Math.floor(n / 2);
+            let k = 0;
+
+            while (result.length < n) {
+                const p1 = 2 * k + 1;
+                const p4 = 2 * k + 2;
+                const p2 = m + 2 * k + 1;
+                const p3 = m + 2 * k + 2;
+                
+                let pagesAddedInThisLoop = 0;
+
+                if (p1 <= m && result.length < n) { result.push(p1); pagesAddedInThisLoop++; }
+                if (p2 <= n && result.length < n) { result.push(p2); pagesAddedInThisLoop++; }
+                if (p3 <= n && result.length < n) { result.push(p3); pagesAddedInThisLoop++; }
+                if (p4 <= m && result.length < n) { result.push(p4); pagesAddedInThisLoop++; }
+
+                if (pagesAddedInThisLoop === 0) break;
+                k++;
+            }
+
+            return format === 'array' ? result : result.join(', ');
+        }
+
+
+        // --- Tab 1: Number Generator Logic ---
+        const pageCountInput = document.getElementById('page-count');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const outputTextarea = document.getElementById('output');
+
+        function handleCalculation() {
+            const n = parseInt(pageCountInput.value, 10);
+            const sequence = generateSequence(n, 'string');
+            outputTextarea.value = sequence !== null ? sequence : "Σφάλμα: Δώστε έγκυρο θετικό ακέραιο αριθμό.";
+        }
+
+        calculateBtn.addEventListener('click', handleCalculation);
+        pageCountInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); handleCalculation(); }
+        });
+
+
+        // --- Tab 2: PDF Processor Logic ---
+        const pdfUploadInput = document.getElementById('pdf-upload');
+        const processPdfBtn = document.getElementById('process-pdf-btn');
+        const pdfStatus = document.getElementById('pdf-status');
+
+        async function handlePdfProcessing() {
+            const file = pdfUploadInput.files[0];
+            if (!file) {
+                updateStatus('Παρακαλώ επιλέξτε ένα αρχείο PDF.', 'error');
+                return;
+            }
+
+            processPdfBtn.disabled = true;
+            updateStatus('Επεξεργασία σε εξέλιξη, παρακαλώ περιμένετε...', 'processing');
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfDoc = await PDFDocument.load(arrayBuffer);
+                const n = pdfDoc.getPageCount();
+
+                const newSequence = generateSequence(n, 'array');
+                if (newSequence === null) {
+                    throw new Error('Δεν ήταν δυνατή η δημιουργία ακολουθίας.');
+                }
+                
+                // pdf-lib uses 0-based indices
+                const pageIndices = newSequence.map(p => p - 1);
+
+                const newPdfDoc = await PDFDocument.create();
+                const copiedPages = await newPdfDoc.copyPages(pdfDoc, pageIndices);
+                copiedPages.forEach(page => newPdfDoc.addPage(page));
+
+                const pdfBytes = await newPdfDoc.save();
+
+                // Trigger download
+                download(pdfBytes, `reordered_${file.name}`, 'application/pdf');
+                
+                updateStatus(`Επιτυχής αναδιάταξη! Το αρχείο ${n} σελίδων είναι έτοιμο για λήψη.`, 'success');
+
+            } catch (err) {
+                console.error(err);
+                updateStatus(`Προέκυψε σφάλμα: ${err.message}`, 'error');
+            } finally {
+                processPdfBtn.disabled = false;
+            }
+        }
+        
+        function updateStatus(message, type) {
+            pdfStatus.textContent = message;
+            pdfStatus.className = type; // 'success', 'error', 'processing'
+        }
+
+        function download(bytes, name, mimeType) {
+            const blob = new Blob([bytes], { type: mimeType });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        processPdfBtn.addEventListener('click', handlePdfProcessing);
+
+    </script>
+
+</body>
+</html>

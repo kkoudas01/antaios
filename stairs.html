@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Γωνιακών Σκαλοπατιών</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the page */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+        .form-input {
+            background-color: #374151; /* bg-gray-700 */
+            border-color: #4b5563; /* bg-gray-600 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6; /* border-blue-500 */
+            box-shadow: 0 0 0 2px #1e40af; /* ring-blue-500 */
+        }
+        .result-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border: 1px solid #4b5563; /* border-gray-600 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .table-header {
+            background-color: #374151; /* bg-gray-700 */
+        }
+        /* Ensure table cells have appropriate padding and borders */
+        table, th, td {
+            border-collapse: collapse; /* Ensure borders are collapsed */
+        }
+        th, td {
+            padding: 0.75rem; /* Add consistent padding */
+            border: 1px solid #4b5563; /* Use the same border color as custom styles */
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- Header with Back Button -->
+        <header class="relative mb-8">
+            <a href="index.html" class="absolute top-0 left-0 flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Επιστροφή
+            </a>
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-white">Υπολογιστής Γωνιακών Σκαλοπατιών</h1>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+
+            <!-- Left Column: Explanation and Image -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-400">Επεξήγηση</h2>
+                <p class="text-gray-300 leading-relaxed">
+                     Η εικόνα αναπαριστά τη στροφή μιας σκάλας, όπως αυτή φαίνεται από το ταβάνι. Το ζητούμενο είναι να υπολογιστούν τα μήκη σ και x. Ενδεικτικά έχουν απεικονιστεί 8 σκαλοπάτια, αλλά ο χρήστης μπορεί να αλλάξει τον αριθμό τους, αν το επιθυμεί.
+                </p>
+
+                <p class="text-gray-300 leading-relaxed">
+                    ⚠️ΠΡΟΣΟΧΗ⚠️ Οι τιμές που εξάγονται αφορούν μήκη πάνω σε ένα νοητό οριζόντιο επίπεδο. Δεν αφορούν τις αποστάσεις ανάμεσα από σκαλί σε σκαλί. Οι θέσεις που θα τοποθετηθούν τα σκαλιά (άρα και οι αποστάσεις ανάμεσα από σκαλί σε σκαλί) προκύπτουν από τις κατακόρυφους στα σημεία που προσδιορίζει ο παρών υπολογιστής.
+                </p>
+                <div class="mt-6">
+                    <img src="stairsDiagram.png" 
+                         alt="Επεξηγηματικό σχήμα για τις διαστάσεις a και b" 
+                         class="w-full h-auto rounded-lg border-2 border-gray-600"
+                         onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/a0aec0?text=Σφάλμα+φόρτωσης+εικόνας';">
+                </div>
+            </div>
+
+            <!-- Right Column: Calculator Inputs and Results -->
+            <div id="calculator" class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-2xl font-semibold mb-6 text-blue-400">Παράμετροι Υπολογισμού</h2>
+                
+                <!-- Input Form -->
+                <div class="space-y-6">
+                    <div>
+                        <label for="a" class="block text-sm font-medium text-gray-300 mb-1">Απόσταση από το σημείο που αρχίζουν να στρίβουν τα σκαλοπάτια, μέχρι τη γωνία του τοίχου (α)</label>
+                        <input type="number" id="a" value="86.69" step="0.01" class="w-full form-input rounded-md p-2">
+                    </div>
+                    <div>
+                        <label for="b" class="block text-sm font-medium text-gray-300 mb-1">Πλάτος σκαλοπατιών (β)</label>
+                        <input type="number" id="b" value="77.14" step="0.01" class="w-full form-input rounded-md p-2">
+                    </div>
+                    <div>
+                        <label for="n" class="block text-sm font-medium text-gray-300 mb-1">Αριθμός σκαλοπατιών στη στροφή</label>
+                        <input type="number" id="n" value="8" step="1" class="w-full form-input rounded-md p-2">
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="mt-8 pt-6 border-t border-gray-700">
+                    <h3 class="text-xl font-semibold text-blue-400">📐 Αποτελέσματα</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="result-box">
+                            <p class="text-sm text-gray-400">Γωνία σκαλοπατιών (κόκκινη πάνω αριστερά)</p>
+                            <p id="angleU-output" class="text-2xl font-bold text-red-400">-</p>
+                        </div>
+                        <div class="result-box">
+                            <p class="text-sm text-gray-400">Γωνία τοίχου (πορτοκαλί κάτω δεξιά)</p>
+                            <p id="angleD-output" class="text-2xl font-bold text-orange-400">-</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h4 class="text-lg font-semibold text-gray-300">📏 Μήκη σχετικά με τα σκαλιά</h4>
+                        <div id="table-container" class="mt-2 overflow-x-auto">
+                            <!-- Table will be generated here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer with Signature -->
+        <footer class="mt-12 text-right">
+            <p class="text-sm text-gray-500">Κώστας Κούδας</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM element references
+        const inputA = document.getElementById('a');
+        const inputB = document.getElementById('b');
+        const inputN = document.getElementById('n');
+        const outputAngleU = document.getElementById('angleU-output');
+        const outputAngleD = document.getElementById('angleD-output');
+        const tableContainer = document.getElementById('table-container');
+
+        /**
+         * Converts degrees to radians.
+         * @param {number} degrees The angle in degrees.
+         * @returns {number} The angle in radians.
+         */
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        /**
+         * Converts radians to degrees.
+         * @param {number} radians The angle in radians.
+         * @returns {number} The angle in degrees.
+         */
+        function radiansToDegrees(radians) {
+            return radians * (180 / Math.PI);
+        }
+
+        /**
+         * Main calculation function.
+         * Reads inputs, performs calculations, and updates the UI.
+         */
+        function calculateAndDisplay() {
+            // Get values from inputs and convert them to numbers
+            const a = parseFloat(inputA.value);
+            const b = parseFloat(inputB.value);
+            const n = parseInt(inputN.value, 10);
+
+            // Validate inputs
+            if (isNaN(a) || isNaN(b) || isNaN(n) || b <= 0 || n <= 0) {
+                outputAngleU.textContent = '-';
+                outputAngleD.textContent = '-';
+                tableContainer.innerHTML = '<p class="text-red-400">Παρακαλώ εισάγετε έγκυρες, θετικές τιμές.</p>';
+                return;
+            }
+
+            // --- Calculations based on Mathematica script ---
+
+            // Calculate angleU in degrees (2 * ArcTan[a/b])
+            const angleU = radiansToDegrees(2 * Math.atan(a / b));
+
+            // Calculate angleD
+            const angleD = 180 - angleU;
+
+            // Calculate the angle per step
+            const angle = angleU / n;
+            
+            // Calculate number of steps for the table
+            const n0 = Math.floor(n / 2);
+
+            // Generate the lengths and widths for the table, similar to Mathematica's 'lengths'
+            const measurements = [];
+            for (let j = 1; j <= n0; j++) {
+                const mikos = b * Math.tan(degreesToRadians(j * angle));
+                const platos = b / Math.cos(degreesToRadians(j * angle)); // New calculation for 'Platos'
+                measurements.push({ id: j, mikos: mikos, platos: platos }); // Store both values
+            }
+
+            // --- Update UI ---
+
+            // Display calculated angles, rounded to 2 decimal places
+            outputAngleU.textContent = `${angleU.toFixed(2)}°`;
+            outputAngleD.textContent = `${angleD.toFixed(2)}°`;
+
+            // Generate and display the results table
+            let tableHTML = `
+                <table class="w-full text-left border-collapse rounded-lg overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="p-4 border table-header rounded-tl-lg">A/A Σκαλιού</th>
+                            <th class="p-4 border table-header">Μήκος όπου θα στεραιωθούν τα σκαλοπάτια (x)</th>
+                            <th class="p-4 border table-header rounded-tr-lg">Πλάτος σκαλιού (σ)</th> <!-- New header for Platos -->
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            if (measurements.length === 0) {
+                tableHTML += `<tr><td colspan="3" class="p-4 border text-center">Δεν υπάρχουν δεδομένα για τον πίνακα.</td></tr>`; // Updated colspan
+            } else {
+                measurements.forEach(item => {
+                    tableHTML += `
+                        <tr class="bg-gray-800 hover:bg-gray-700">
+                            <td class="p-4 border">${item.id}</td>
+                            <td class="p-4 border font-mono">${item.mikos.toFixed(3)}</td>
+                            <td class="p-4 border font-mono">${item.platos.toFixed(3)}</td> <!-- Display Platos -->
+                        </tr>
+                    `;
+                });
+            }
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            tableContainer.innerHTML = tableHTML;
+        }
+
+        // --- Event Listeners ---
+
+        // Add event listeners to all inputs to trigger calculation on change
+        inputA.addEventListener('input', calculateAndDisplay);
+        inputB.addEventListener('input', calculateAndDisplay);
+        inputN.addEventListener('input', calculateAndDisplay);
+
+        // Perform initial calculation on page load
+        window.addEventListener('load', calculateAndDisplay);
+    </script>
+
+</body>
+</html>

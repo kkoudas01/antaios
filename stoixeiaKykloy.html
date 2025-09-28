@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Στοιχεία Κύκλου</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: #444;
+            background-image: linear-gradient(to bottom right, #555, #333);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: rgba(51, 51, 51, 0.8);
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-family: 'Stencil Std', 'Impact', 'Arial Black', sans-serif;
+            color: #f0ad4e;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #f0ad4e;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-family: 'Arial Black', sans-serif;
+        }
+
+        .back-button:hover {
+            color: #fff;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background-color: rgba(75, 75, 75, 0.85);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 900px;
+        }
+
+        .image-container {
+            flex: 1;
+            min-width: 250px; /* Adjusted min-width for better layout */
+            max-width: 300px; /* Added max-width for larger screens */
+            position: relative;
+            display: flex; /* Center SVG */
+            justify-content: center; /* Center SVG */
+            align-items: center; /* Center SVG */
+        }
+
+        #circleDiagram {
+            width: 100%;
+            max-width: 250px; /* Max width for the SVG itself */
+            height: auto;
+            border-radius: 5px;
+        }
+
+        #circleDiagram circle {
+            fill: none;
+            stroke: #f0ad4e;
+            stroke-width: 2;
+        }
+
+        #circleDiagram line {
+            stroke: #f0ad4e;
+        }
+
+        #circleDiagram text {
+            fill: #f0ad4e;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .input-fields {
+            flex: 1.5;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group label {
+            flex-basis: 120px;
+            font-weight: bold;
+            color: #ddd;
+        }
+
+        .input-group input[type="number"],
+        .input-group select {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #666;
+            border-radius: 4px;
+            background-color: #555;
+            color: #fff;
+            font-family: 'Consolas', 'Monaco', monospace;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .input-group input[type="number"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #f0ad4e;
+            box-shadow: 0 0 5px rgba(240, 173, 78, 0.5);
+        }
+
+        #clearButton {
+            padding: 10px 15px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Stencil Std', 'Impact', sans-serif;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        #clearButton:hover {
+            background-color: #c9302c;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background-color: rgba(34, 34, 34, 0.9);
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .signature {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-group label {
+                flex-basis: auto;
+                margin-bottom: 5px;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+            .back-button {
+                font-size: 1em;
+                left: 10px;
+            }
+            .image-container { /* Ensure SVG container behaves well on mobile */
+                min-width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-button">⬅ Αρχική</a>
+        <h1>Στοιχεία Κύκλου</h1>
+    </header>
+    <main>
+        <div class="calculator-container">
+            <div class="image-container">
+                <svg id="circleDiagram" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="80" stroke="#f0ad4e" stroke-width="2" fill="none" />
+                    
+                    <line id="radiusLine" x1="100" y1="100" x2="139.625" y2="31.357" stroke="#f0ad4e" stroke-width="1.5" stroke-dasharray="5,5" />
+                    
+                    <line id="diameterLine" x1="20.5" y1="100" x2="179.5" y2="100" stroke="#f0ad4e" stroke-width="1" />
+                    
+                    <text x="110" y="45" id="radiusValueText" text-anchor="middle" transform="rotate(-60 129.7 48.5)"></text>
+                    <text x="100" y="118" id="diameterValueText" text-anchor="middle"></text>
+                    <text x="100" y="15" id="circumferenceText" text-anchor="middle"></text>
+                    <text x="100" y="140" id="areaText" text-anchor="middle" font-size="10"></text>
+                </svg>
+            </div>
+            <div class="input-fields">
+                <div class="input-group">
+                    <label for="radius">Ακτίνα (r):</label>
+                    <input type="number" id="radius" step="any">
+                    <select id="radiusUnit">
+                        <option value="mm">mm</option>
+                        <option value="cm">cm</option>
+                        <option value="dm">dm</option>
+                        <option value="m" selected>m</option>
+                        <option value="km">km</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="diameter">Διάμετρος (d):</label>
+                    <input type="number" id="diameter" step="any">
+                    <select id="diameterUnit">
+                        <option value="mm">mm</option>
+                        <option value="cm">cm</option>
+                        <option value="dm">dm</option>
+                        <option value="m" selected>m</option>
+                        <option value="km">km</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="circumference">Μήκος Κύκλου (C):</label>
+                    <input type="number" id="circumference" step="any">
+                    <select id="circumferenceUnit">
+                        <option value="mm">mm</option>
+                        <option value="cm">cm</option>
+                        <option value="dm">dm</option>
+                        <option value="m" selected>m</option>
+                        <option value="km">km</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="area">Εμβαδόν (A):</label>
+                    <input type="number" id="area" step="any">
+                    <select id="areaUnit">
+                        <option value="mm2">mm²</option>
+                        <option value="cm2">cm²</option>
+                        <option value="dm2">dm²</option>
+                        <option value="m2" selected>m²</option>
+                        <option value="km2">km²</option>
+                    </select>
+                </div>
+                <button id="clearButton">Καθαρισμός</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p class="signature">Κατασκευάστηκε από Επώνυμη Εταιρεία</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const radiusInput = document.getElementById('radius');
+            const diameterInput = document.getElementById('diameter');
+            const circumferenceInput = document.getElementById('circumference');
+            const areaInput = document.getElementById('area');
+
+            const radiusUnit = document.getElementById('radiusUnit');
+            const diameterUnit = document.getElementById('diameterUnit');
+            const circumferenceUnit = document.getElementById('circumferenceUnit');
+            const areaUnit = document.getElementById('areaUnit');
+
+            const clearButton = document.getElementById('clearButton');
+
+            const radiusValueText = document.getElementById('radiusValueText');
+            const diameterValueText = document.getElementById('diameterValueText');
+            const circumferenceText = document.getElementById('circumferenceText');
+            const areaText = document.getElementById('areaText');
+
+            const PI = Math.PI;
+
+            const lengthUnits = {
+                'mm': 0.001, 'cm': 0.01, 'dm': 0.1, 'm': 1, 'km': 1000
+            };
+            const areaUnits = {
+                'mm2': 0.000001, 'cm2': 0.0001, 'dm2': 0.01, 'm2': 1, 'km2': 1000000
+            };
+
+            function getValueInMeters(value, unit) {
+                return value * lengthUnits[unit];
+            }
+            function getValueInSquareMeters(value, unit) {
+                return value * areaUnits[unit];
+            }
+            function convertFromMeters(valueInMeters, targetUnit) {
+                return valueInMeters / lengthUnits[targetUnit];
+            }
+            function convertFromSquareMeters(valueInSquareMeters, targetUnit) {
+                return valueInSquareMeters / areaUnits[targetUnit];
+            }
+
+            function updateCalculations(sourceField) {
+                let r_m = 0;
+
+                if (sourceField === 'radius' && radiusInput.value) {
+                    r_m = getValueInMeters(parseFloat(radiusInput.value), radiusUnit.value);
+                } else if (sourceField === 'diameter' && diameterInput.value) {
+                    const d_m = getValueInMeters(parseFloat(diameterInput.value), diameterUnit.value);
+                    r_m = d_m / 2;
+                } else if (sourceField === 'circumference' && circumferenceInput.value) {
+                    const c_m = getValueInMeters(parseFloat(circumferenceInput.value), circumferenceUnit.value);
+                    r_m = c_m / (2 * PI);
+                } else if (sourceField === 'area' && areaInput.value) {
+                    const a_m2 = getValueInSquareMeters(parseFloat(areaInput.value), areaUnit.value);
+                    r_m = Math.sqrt(a_m2 / PI);
+                } else {
+                    clearInputs(false); 
+                    updateCircleDiagramText(); 
+                    return;
+                }
+
+                if (isNaN(r_m) || r_m <= 0) {
+                    if (sourceField) { 
+                        const fieldsToClear = ['radius', 'diameter', 'circumference', 'area'].filter(f => f !== sourceField);
+                        fieldsToClear.forEach(f => {
+                            document.getElementById(f).value = '';
+                        });
+                    } else { 
+                         clearAllInputValues();
+                    }
+                    updateCircleDiagramText(); 
+                    return;
+                }
+
+                const d_m = 2 * r_m;
+                const c_m = 2 * PI * r_m;
+                const a_m2 = PI * r_m * r_m;
+
+                if (sourceField !== 'radius') {
+                    radiusInput.value = parseFloat(convertFromMeters(r_m, radiusUnit.value).toFixed(3));
+                }
+                if (sourceField !== 'diameter') {
+                    diameterInput.value = parseFloat(convertFromMeters(d_m, diameterUnit.value).toFixed(3));
+                }
+                if (sourceField !== 'circumference') {
+                    circumferenceInput.value = parseFloat(convertFromMeters(c_m, circumferenceUnit.value).toFixed(3));
+                }
+                if (sourceField !== 'area') {
+                    areaInput.value = parseFloat(convertFromSquareMeters(a_m2, areaUnit.value).toFixed(5));
+                }
+                updateCircleDiagramText(r_m, d_m, c_m, a_m2);
+            }
+            
+            function clearAllInputValues() {
+                radiusInput.value = '';
+                diameterInput.value = '';
+                circumferenceInput.value = '';
+                areaInput.value = '';
+            }
+
+            function updateCircleDiagramText(r, d, c, a) {
+                if (r > 0 && !isNaN(r)) { 
+                    radiusValueText.textContent = `r = ${convertFromMeters(r, radiusUnit.value).toFixed(2)} ${radiusUnit.value}`;
+                    diameterValueText.textContent = `d = ${convertFromMeters(d, diameterUnit.value).toFixed(2)} ${diameterUnit.value}`;
+                    circumferenceText.textContent = `C = ${convertFromMeters(c, circumferenceUnit.value).toFixed(2)} ${circumferenceUnit.value}`;
+                    areaText.textContent = `A = ${convertFromSquareMeters(a, areaUnit.value).toFixed(2)} ${areaUnit.value}²`;
+                } else {
+                    radiusValueText.textContent = 'r = ?';
+                    diameterValueText.textContent = 'd = ?';
+                    circumferenceText.textContent = 'C = ?';
+                    areaText.textContent = 'A = ?';
+                }
+            }
+
+            function clearInputs(triggeredByUser = true) {
+                clearAllInputValues();
+                if (triggeredByUser) {
+                     updateCalculations(); 
+                } else {
+                    updateCircleDiagramText(); 
+                }
+            }
+
+            radiusInput.addEventListener('input', () => updateCalculations('radius'));
+            diameterInput.addEventListener('input', () => updateCalculations('diameter'));
+            circumferenceInput.addEventListener('input', () => updateCalculations('circumference'));
+            areaInput.addEventListener('input', () => updateCalculations('area'));
+
+            radiusUnit.addEventListener('change', () => updateCalculations('radius'));
+            diameterUnit.addEventListener('change', () => updateCalculations('diameter'));
+            circumferenceUnit.addEventListener('change', () => updateCalculations('circumference'));
+            areaUnit.addEventListener('change', () => updateCalculations('area'));
+
+            clearButton.addEventListener('click', () => clearInputs(true));
+
+            updateCircleDiagramText(); 
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εφαρμογή Shiny</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS for dark theme and layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Full viewport height */
+        }
+
+        .header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2d3748; /* Slightly lighter dark for header */
+            border-bottom: 1px solid #4a5568;
+            border-radius: 0.5rem; /* Rounded corners for header */
+            margin: 0.5rem;
+        }
+
+        .back-button {
+            background-color: #4299e1; /* Blue button */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #3182ce; /* Darker blue on hover */
+        }
+
+        .content-area {
+            flex-grow: 1; /* Allows content to take available space */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+        }
+
+        .shiny-iframe {
+            width: 100%;
+            height: calc(100vh - 120px); /* Adjust height based on header/footer */
+            border: none;
+            border-radius: 0.5rem; /* Rounded corners for iframe */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .footer {
+            padding: 0.75rem 1.5rem;
+            text-align: right;
+            font-size: 0.875rem; /* Small font size */
+            color: #a0aec0; /* Lighter grey for signature */
+            background-color: #2d3748; /* Slightly lighter dark for footer */
+            border-top: 1px solid #4a5568;
+            border-radius: 0.5rem; /* Rounded corners for footer */
+            margin: 0.5rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .shiny-iframe {
+                height: calc(100vh - 100px); /* Adjust for smaller screens */
+            }
+            .header, .footer {
+                margin: 0.25rem;
+            }
+            .back-button {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with back button -->
+    <header class="header">
+        <a href="index.html" class="back-button">Επιστροφή στην Αρχική</a>
+        <div></div> <!-- Placeholder for right alignment, if needed -->
+    </header>
+
+    <!-- Main content area for the Shiny app -->
+    <main class="content-area">
+        <iframe
+            src="https://0197c05e-0af0-ec9c-bf39-c8c40d0e91f8.share.connect.posit.cloud/"
+            class="shiny-iframe"
+            title="Εφαρμογή R Shiny"
+            allowfullscreen
+        ></iframe>
+    </main>
+
+    <!-- Footer with signature -->
+    <footer class="footer">
+        <p>Κώστας Κούδας</p>
+    </footer>
+
+    <script>
+        // No specific JavaScript needed for this layout, but included for completeness.
+        // You can add JS here if you need dynamic behavior later.
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Θερμικής Διαστολής</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- Γενικά Στυλ Σελίδας --- */
+        body {
+            font-family: "Inter", "Helvetica Neue", "Helvetica", sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+            overflow-x: hidden;
+            display: grid; /* Απαιτείται για τη σωστή στοίχιση του LengthSlider */
+            place-items: center;
+        }
+
+        /* --- Στυλ για το ThermalSlider --- */
+        :root {
+            --c1: #00adff; --c2: #39d469; --c3: #ffeb00; --c4: #ff8100; --c5: #b50f0f;
+        }
+        .thermostat-container { height: 24vmin; width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1vmin; position: relative; place-items: center; }
+        .liquid { position: absolute; inset: 0; border-radius: 10vmin; overflow: hidden; isolation: isolate; }
+        .liquid .bg { position: absolute; inset: 0; }
+        .liquid .bg:before, .liquid .bg:after { content: ""; position: absolute; inset: 0; --gp: calc(100% - var(--progress)); background: linear-gradient(to bottom, var(--c5) calc(5% - var(--gp)), var(--c4) calc(25% - var(--gp)), var(--c3) calc(50% - var(--gp)), var(--c2) calc(75% - var(--gp)), var(--c1) calc(100% - var(--gp))); transform: translateY(calc(100% - var(--progress))); animation: wave 1s linear infinite; transition: transform 0.2s linear; filter: saturate(0.65); }
+        .liquid .bg:after { transform: scaleX(-1) translateY(calc(100% - var(--progress))); opacity: 0; --o: 0.6; animation-delay: 0.55s; }
+        @keyframes wave { from { opacity: var(--o, 1); clip-path: polygon(100% 100%, 0% 100%, 0% 27.83%, 7.14% 28.61%, 14.29% 28.98%, 21.43% 28.9%, 28.57% 28.4%, 35.71% 27.49%, 42.86% 26.22%, 50% 24.65%, 57.14% 22.86%, 64.29% 20.95%, 71.43% 19%, 78.57% 17.12%, 85.71% 15.4%, 92.86% 13.92%, 100% 12.77%); } 25% { clip-path: polygon(100% 100%, 0% 100%, 0% 17.77%, 7.14% 16.02%, 14.29% 14%, 21.43% 11.82%, 28.57% 9.58%, 35.71% 7.4%, 42.86% 5.38%, 50% 3.63%, 57.14% 2.23%, 64.29% 1.26%, 71.43% 0.76%, 78.57% 0.76%, 85.71% 1.26%, 92.86% 2.23%, 100% 3.63%); } 50% { clip-path: polygon(100% 100%, 0% 100%, 0% 2.21%, 7.14% 1.34%, 14.29% 0.93%, 21.43% 1.01%, 28.57% 1.58%, 35.71% 2.6%, 42.86% 4.03%, 50% 5.8%, 57.14% 7.81%, 64.29% 9.97%, 71.43% 12.16%, 78.57% 14.28%, 85.71% 16.22%, 92.86% 17.88%, 100% 19.19%); } to { opacity: var(--o, 1); clip-path: polygon(100% 100%, 0% 100%, 0% 31.33%, 7.14% 32.11%, 14.29% 32.48%, 21.43% 32.4%, 28.57% 31.9%, 35.71% 30.99%, 42.86% 29.72%, 50% 28.15%, 57.14% 26.36%, 64.29% 24.45%, 71.43% 22.5%, 78.57% 20.62%, 85.71% 18.9%, 92.86% 17.42%, 100% 16.27%); } }
+        .glass { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.1); border-radius: 10vmin; }
+        .glass-container { height: 24vmin; width: 6vmin; border-radius: 10vmin; position: relative; border: 0.1vmin solid hsla(0, 0, 100%, 0.2); box-shadow: -1px 0.1vmin 0 1px hsla(0, 0, 100%, 0.5), 1px 0.1vmin 0 1px hsla(0, 0, 100%, 0.2); }
+        .glass-container:before { border-radius: 10vmin; content: ""; position: absolute; --size: 2vmin; inset: calc(var(--size) * -1); border-left: var(--size) solid hsla(0, 0, 100%, 0.5); border-right: var(--size) solid hsla(0, 0, 50%, 0.2); filter: blur(0.5vmin); }
+        .glass-reflection { pointer-events: none; mix-blend-mode: overlay; position: absolute; border-radius: 10vmin; overflow: hidden; inset: 0; }
+        .glass-reflection:before { content: ""; position: absolute; inset: 0; background: linear-gradient(to right, hsla(0, 0, 100%, 0.5), hsla(0, 0, 100%, 0.5)) no-repeat, linear-gradient(to right, hsla(0, 0, 100%, 0.5), hsla(0, 0, 100%, 0.1)) no-repeat; background-size: 0.5vmin 19vmin, 1.8vmin 21vmin; background-position: 1vmin 3vmin, 3vmin 2vmin; filter: blur(0.4vmin); }
+        .glass-reflection:after { content: ""; position: absolute; inset: 0; background: radial-gradient(4vmin 14vmin at 1vmin 20%, hsla(0, 0, 100%, 0.3) 10%, transparent 50%, transparent), radial-gradient(2vmin 2vmin at 2vmin 5%, hsla(0, 0, 100%, 0.9), transparent, transparent), radial-gradient(7vmin 7vmin at 2vmin 5%, hsla(0, 0, 100%, 0.9), transparent, transparent); }
+        .thermal-number { font-size: 7vmin; font-weight: bold; color: #e8eaec; position: relative; text-shadow: -0.5vmin -0.5vmin 1vmin hsla(0, 0, 100%, 0.4), 0.5vmin 0.5vmin 0.8vmin hsla(0, 0, 0, 0.2); font-variant-numeric: tabular-nums; }
+        .thermal-number:after { content: "°C"; position: absolute; font-size: 0.5em; top: 0.5em; }
+        .thermal-slider-control { place-self: center; --gp: calc(100% - var(--progress)); --pos: 0px; background: linear-gradient(to bottom, #333 var(--gp), white var(--gp)); box-shadow: -0.1vmin 0 0 0.1vmin hsla(0, 0, 0, 0.08); width: 0.1vmin; border-radius: 1vmin; height: 20vmin; position: relative; cursor: pointer; }
+        .thermal-slider-control:before { content: ""; position: absolute; inset: -1vmin -2vmin; }
+        .thermal-slider-control:after { content: ""; position: absolute; top: 0; left: 50%; width: 3vmin; height: 3vmin; background: radial-gradient(30% 30% at 50% 50%, white, transparent), radial-gradient(70% 70% at 50% 50%, #f6f0f0, #bfc1cd), white; border-radius: 50%; transform: translate(-50%, var(--pos, 0)); border-left: 0.1vmin solid white; box-shadow: -0.5vmin -0.5vmin 1vmin hsla(0, 0, 100%, 0.8), 0.5vmin 0.5vmin 1vmin hsla(0, 0, 10%, 0.2); transition: transform 0.2s linear; }
+        .device { background: #2c3e50; width: 25svmin; aspect-ratio: 3/5.5; border-radius: 4vmin; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.5vmin; --progress: 50%; transform: scale(1.2); box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23); }
+
+        /* --- Πλήρη Στυλ για το LengthSlider --- */
+        .length-slider-wrap, .length-slider-wrap datalist, .length-slider-wrap output { display: grid; }
+        .length-slider-wrap {
+            --u: 1rem; --b: #1f1f1f; --c1: #daff47; --c2: #f43e75; --g: calc(1.25 * var(--u));
+            --ruler-m: 6; --thumb-d: calc(var(--ruler-m) * var(--u)); --thumb-r: calc(0.5 * var(--thumb-d));
+            --thumb-f: .42; --thumb-p: calc(0.625 * var(--u)); --input-t: calc(1.25 * var(--u));
+            --input-r: calc(0.5 * var(--input-t)); --input-d: calc(var(--input-r) - var(--thumb-r));
+            --track-t: calc(0.1875 * var(--u)); --track-x: calc(var(--g) + var(--input-r));
+            --track-i: calc(var(--thumb-r) + var(--g)); --track-o: calc(var(--track-i) + var(--track-t));
+            --track-r: calc(var(--track-o) + var(--thumb-r)); --track-h: calc(2 * var(--track-i) + var(--track-t));
+            --track-a: 43.3deg; --track-y: calc(var(--track-h) * 0.685); --track-s: calc(var(--track-i) * 0.685);
+            --track-d: calc(var(--track-y) - var(--track-s));
+            --rng: calc(var(--max) - var(--min)); --prg: calc((var(--val) - var(--min)) / var(--rng));
+            --prc: calc(var(--prg) * 100%); --pos: calc(var(--val) * var(--u));
+            grid-gap: var(--g);
+            grid-template-columns: max-content var(--track-t) var(--input-t) max-content;
+            place-self: center;
+            color: var(--c2);
+            font: 1em trebuchet ms, ubuntu, verdana, arial, sans-serif;
+            transition: .35s;
+        }
+        @supports (color: color-mix(in lch, red 1%, tan)) {
+            .length-slider-wrap { color: color-mix(in lch, var(--c2) var(--prc), var(--c1)); }
+        }
+        .length-slider-wrap:not(:focus-within):not(:hover) { filter: sepia(1); }
+        .length-slider-wrap::before, .length-slider-wrap::after {
+            --pos-x: calc(100% + var(--track-x)); --pos-y: calc(var(--pos) + var(--track-r));
+            grid-area: 1/ 1/ span 1/ span 2; place-self: center end; z-index: 1;
+            width: calc(var(--track-r) - var(--input-r) - var(--g)); height: calc(100% + 2 * var(--track-r));
+            transform: scaley(-1); pointer-events: none; content: '';
+        }
+        .length-slider-wrap::before {
+            --sl: transparent calc(100% + -0.5px), red calc(100% + 0.5px);
+            background: radial-gradient(circle var(--track-r) at var(--pos-x) var(--pos-y), currentcolor calc(var(--track-i) - var(--track-t)), transparent);
+            mask: radial-gradient(circle var(--track-i) at var(--pos-x) var(--pos-y), var(--sl)) subtract, radial-gradient(circle var(--track-o) at 0 0, var(--sl)) 100% calc(var(--pos-y) + -1 * var(--track-y)) / var(--track-o) var(--track-s) no-repeat add, radial-gradient(circle var(--track-o) at 0 100%, var(--sl)) 100% calc(var(--pos-y) + var(--track-d)) / var(--track-o) var(--track-s) no-repeat;
+        }
+        .length-slider-wrap::after {
+            --sl: transparent calc(var(--track-i) + -0.5px), red calc(var(--track-i) + 0.5px) calc(100% + -0.5px), transparent calc(100% + 0.5px);
+            background: linear-gradient(currentcolor calc(var(--pos-y) + var(--thumb-d)), transparent calc(var(--pos-y) + 2 * var(--thumb-d))) #666;
+            mask: linear-gradient(red calc(var(--pos-y) + -1 * var(--track-y) + 0.5px), transparent 0 calc(var(--pos-y) + var(--track-y) + -0.5px), red 0) 100% / var(--track-t) 100%, radial-gradient(circle var(--track-o) at var(--pos-x), var(--sl)) 100% calc(var(--pos-y) + -1 * var(--track-d) + -0.5px) / 100% calc(2 * var(--track-d) + 1px), radial-gradient(circle var(--track-o) at 0 0, var(--sl)) 100% calc(var(--pos-y) + -1 * var(--track-y)) / var(--track-o) var(--track-s), radial-gradient(circle var(--track-o) at 0 100%, var(--sl)) 100% calc(var(--pos-y) + var(--track-d)) / var(--track-o) var(--track-s);
+            mask-repeat: no-repeat;
+        }
+        input[type='range'].length-slider {
+            -webkit-appearance: none; appearance: none;
+            --sel: 0; place-self: center;
+            width: calc(var(--max) * var(--u) + var(--thumb-d)); height: var(--input-t);
+            transform: rotate(-90deg); background: transparent; font: inherit; cursor: pointer;
+        }
+        input[type='range'].length-slider:focus { outline: none; }
+        input[type='range'].length-slider:hover, input[type='range'].length-slider:focus { --sel: 1; }
+        input[type='range'].length-slider::-webkit-slider-runnable-track, input[type='range'].length-slider::-moz-range-track { height: 100%; }
+        input[type='range'].length-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            margin-top: var(--input-d);
+        }
+        input[type='range'].length-slider::-webkit-slider-thumb, input[type='range'].length-slider::-moz-range-thumb {
+            --shl: 0 0 0 calc((1 - .375*var(--sel))*1rem) hsla(0, 0%, 19%, var(--sel));
+            box-sizing: border-box; border: none; padding: var(--thumb-p);
+            width: var(--thumb-d); height: var(--thumb-d); border-radius: 50%;
+            box-shadow: 0 0 .5px hsla(0, 0%, 0%), inset 0 0 1px 1px hsla(0, 0%, 100%, .05), inset var(--shl), inset 0 0 0 calc(.5*var(--thumb-f)*(var(--thumb-d) + -2*var(--thumb-p)) + var(--thumb-p)) var(--b), .25rem -.25rem .25rem #2a2a2a, -.25rem .25rem .75rem #090909, var(--shl), .75rem -.75rem .75rem #2a2a2a, -.75rem .75rem 1.25rem #090909;
+            background: repeating-conic-gradient(from 60deg, transparent 0%, silver 1deg 59deg, transparent 60deg 50%) 0/ calc(var(--thumb-f) * 100%) 100% space content-box var(--b);
+            transition: box-shadow .35s; cursor: ns-resize;
+        }
+        .length-slider-wrap output {
+            place-self: end; place-content: center; margin-left: .25em;
+            width: 1.25em; aspect-ratio: 1;
+            transform: translatey(calc(50% - var(--pos)));
+            font-size: calc(6.25 * var(--u)); font-weight: 100; line-height: 1.25;
+            counter-reset: val var(--val);
+        }
+        .length-slider-wrap output::after { content: counter(val); }
+        .length-slider-wrap datalist {
+            grid-area: 1/ 1; grid-template-rows: repeat(calc(var(--max) + 1), var(--u));
+            margin: calc(-.5 * var(--u)) 0;
+        }
+        .length-slider-wrap option {
+            --abs: max(var(--val) - var(--idx), var(--idx) - var(--val));
+            --rel: calc(var(--abs) / var(--ruler-m));
+            --sel: max(0, 1 - var(--rel));
+            --off: calc(.5*(1 - cos(var(--sel)*180deg))*var(--input-d));
+            grid-row: calc(var(--max) + 1 - var(--idx)); align-self: center;
+            padding-right: .75em; transform: translate(var(--off));
+            background: linear-gradient(hsl(0, 0%, var(--lum, 32%)) 0 0) 100%/.5em 2px no-repeat;
+            color: hsla(0, 0%, 93%, calc(1 - .0625*var(--abs)));
+            font-size: calc(2 * var(--u)); text-align: right; transition: .2s ease-out;
+        }
+        .length-slider-wrap option[label] { --lum: 90%; }
+    </style>
+</head>
+<body class="min-h-screen flex-col p-4">
+
+    <div class="w-full max-w-4xl mx-auto text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">Υπολογιστής Γραμμικής Θερμικής Διαστολής</h1>
+        <p class="text-lg text-gray-600">
+            Επιλέξτε υλικό, αρχικό μήκος και μεταβολή θερμοκρασίας για να υπολογίσετε τη μεταβολή στο μήκος ενός αντικειμένου.
+        </p>
+    </div>
+
+    <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        
+        <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-center mb-6">Παράμετροι</h2>
+            
+            <div class="mb-8">
+                <label for="material-select" class="block text-lg font-medium text-gray-700 mb-2">1. Επιλέξτε Υλικό:</label>
+                <select id="material-select" class="w-full p-3 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-around items-center gap-8 mt-4">
+                <div class="flex flex-col items-center">
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">2. Αρχικό Μήκος (m)</h3>
+                    <div class="length-slider-wrap">
+                        <input id="length-slider" type="range" list="length-datalist">
+                        <output for="length-slider"></output>
+                        <datalist id="length-datalist"></datalist>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                     <h3 class="text-lg font-medium text-gray-700 mb-4">3. Μεταβολή Θερμοκρασίας (°C)</h3>
+                    <div class="device" id="thermal-device">
+                        <div class="thermal-number" id="thermal-number">0</div>
+                        <div class="thermostat-container">
+                            <div class="glass-container">
+                                <div class="glass"></div> <div class="liquid"><div class="bg"></div></div> <div class="glass-reflection"></div>
+                            </div>
+                            <div class="thermal-slider-control" id="thermal-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 text-white p-8 rounded-2xl shadow-lg h-full flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-center mb-6 text-cyan-300">Αποτελέσματα</h2>
+            <div class="space-y-6 text-xl">
+                <div>
+                    <p class="font-semibold text-gray-300">Νέο Μήκος:</p>
+                    <p id="new-length-result" class="text-4xl font-bold text-white text-center tracking-wider">0.00 m</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-300">Διαφορά Μήκους:</p>
+                    <p id="length-diff-result" class="text-4xl font-bold text-white text-center tracking-wider">0.00 mm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ΡΥΘΜΙΣΕΙΣ ΚΑΙ ΣΤΑΘΕΡΕΣ ---
+            const materials = { 'Σίδηρος': 12e-6, 'Αλουμίνιο': 23.1e-6, 'Χαλκός': 16.5e-6, 'Γυαλί': 8.5e-6, 'Σκυρόδεμα': 12e-6, 'PVC': 52e-6, 'Διαμάντι': 1e-6 };
+            const thermalSliderConfig = { minTemp: -50, maxTemp: 150, initialTemp: 20 };
+            const lengthSliderConfig = { minLength: 0, maxLength: 50, initialLength: 25, majorStep: 5 };
+
+            // --- ΑΡΧΙΚΟΠΟΙΗΣΗ ΣΤΟΙΧΕΙΩΝ DOM ---
+            const materialSelect = document.getElementById('material-select');
+            const newLengthResult = document.getElementById('new-length-result');
+            const lengthDiffResult = document.getElementById('length-diff-result');
+            Object.keys(materials).forEach(name => materialSelect.add(new Option(name, name)));
+            materialSelect.value = 'Σίδηρος';
+
+            // --- LOGIC ΓΙΑ THERMAL SLIDER ---
+            const thermalNumber = document.getElementById("thermal-number");
+            const thermalDevice = document.getElementById("thermal-device");
+            const thermalSlider = document.getElementById("thermal-slider");
+            const tempRange = thermalSliderConfig.maxTemp - thermalSliderConfig.minTemp;
+            const updateThermalSlider = (offsetY) => {
+                const sliderHeight = thermalSlider.offsetHeight;
+                if (sliderHeight === 0) return;
+                const pos = Math.max(0, Math.min(sliderHeight, offsetY));
+                const progress = 100 - (pos / sliderHeight) * 100;
+                const temperature = thermalSliderConfig.minTemp + (progress / 100) * tempRange;
+                thermalNumber.innerText = temperature.toFixed(0);
+                thermalDevice.style.setProperty("--progress", `${progress}%`);
+                thermalSlider.style.setProperty("--pos", `${pos}px`);
+                calculateAndDisplay();
+            };
+            let isThermalPointerDown = false;
+            const handleThermalMove = (e) => { if (!isThermalPointerDown) return; e.preventDefault(); const rect = thermalSlider.getBoundingClientRect(); const offsetY = (e.clientY || e.touches[0].clientY) - rect.top; updateThermalSlider(offsetY); };
+            const startThermalDrag = (e) => { isThermalPointerDown = true; handleThermalMove(e); };
+            const stopThermalDrag = () => { isThermalPointerDown = false; };
+            thermalSlider.addEventListener("pointerdown", startThermalDrag);
+            thermalSlider.addEventListener("touchstart", startThermalDrag, { passive: false });
+            document.addEventListener("pointermove", handleThermalMove);
+            document.addEventListener("touchmove", handleThermalMove, { passive: false });
+            document.addEventListener("pointerup", stopThermalDrag);
+            document.addEventListener("touchend", stopThermalDrag);
+            const initialProgress = ((thermalSliderConfig.initialTemp - thermalSliderConfig.minTemp) / tempRange) * 100;
+            setTimeout(() => { const initialOffsetY = (100 - initialProgress) / 100 * thermalSlider.offsetHeight; updateThermalSlider(initialOffsetY || 0); }, 100);
+
+            // --- LOGIC ΓΙΑ LENGTH SLIDER ---
+            const lengthSliderWrap = document.querySelector('.length-slider-wrap');
+            const lengthSlider = document.getElementById('length-slider');
+            const lengthDatalist = document.getElementById('length-datalist');
+            
+            lengthSlider.min = lengthSliderConfig.minLength;
+            lengthSlider.max = lengthSliderConfig.maxLength;
+            lengthSlider.value = lengthSliderConfig.initialLength;
+            
+            lengthSliderWrap.style.setProperty('--min', lengthSliderConfig.minLength);
+            lengthSliderWrap.style.setProperty('--max', lengthSliderConfig.maxLength);
+            
+            const updateLengthSlider = (value) => {
+                lengthSliderWrap.style.setProperty('--val', value);
+                calculateAndDisplay();
+            };
+
+            for (let i = lengthSliderConfig.minLength; i <= lengthSliderConfig.maxLength; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.style.setProperty('--idx', i);
+                if (i % lengthSliderConfig.majorStep === 0) {
+                    option.label = i;
+                }
+                lengthDatalist.appendChild(option);
+            }
+            
+            lengthSlider.addEventListener('input', (e) => updateLengthSlider(e.target.value));
+            updateLengthSlider(lengthSliderConfig.initialLength); // Αρχική ρύθμιση
+
+            // --- ΚΥΡΙΑ ΛΟΓΙΚΗ ΥΠΟΛΟΓΙΣΜΩΝ ---
+            function calculateAndDisplay() {
+                const a = materials[materialSelect.value];
+                const thermalSliderValue = parseFloat(thermalNumber.innerText);
+                const lengthSliderValue = parseFloat(lengthSlider.value);
+                const newLength = lengthSliderValue * (1 + a * thermalSliderValue);
+                const lengthDifference = lengthSliderValue * a * thermalSliderValue;
+                newLengthResult.textContent = `${newLength.toFixed(4)} m`;
+                lengthDiffResult.textContent = `${(lengthDifference * 1000).toFixed(3)} mm`;
+            }
+
+            materialSelect.addEventListener('change', calculateAndDisplay);
+            calculateAndDisplay();
+        });
+    </script>
+</body>
+</html>

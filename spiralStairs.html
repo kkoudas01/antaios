@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Σπειροειδούς Σκάλας</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-group label {
+            transition: all 0.2s ease-in-out;
+        }
+        .input-group input:focus + label, .input-group input:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.8);
+            color: #63b3ed;
+        }
+        .tab-btn.active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+        }
+        .tab-btn {
+            background-color: #334155; /* slate-700 */
+            color: #cbd5e1; /* slate-300 */
+        }
+        input[readonly] {
+            background-color: #475569; /* slate-600 */
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-gray-200 antialiased">
+
+    <!-- Back to Home Button -->
+    <a href="index.html" class="absolute top-4 left-4 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center z-20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Επιστροφή
+    </a>
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-400">Υπολογιστής Σπειροειδούς Σκάλας</h1>
+            <p class="text-slate-400 mt-2">Οι παράμετροι απεικονίζονται στις εικόνες και η καταχώρησή τους γίνεται παρακάτω.</p>
+        </header>
+
+        <!-- Explanatory Image Section -->
+        <div class="mb-8 rounded-lg overflow-hidden shadow-2xl">
+            <img src="spiralStairs.png" 
+                 alt="Επεξηγηματική εικόνα σπειροειδούς σκάλας"
+                 class="w-full h-auto object-cover">
+        </div>
+
+        <!-- Section 1: Basic Dimensions -->
+        <section class="mb-12 bg-slate-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-6 border-b-2 border-slate-700 pb-3 text-sky-400">Βασικές Διαστάσεις</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-sky-300/80">Είσοδος Δεδομένων</h3>
+                    <div class="space-y-6">
+                        <div class="relative input-group">
+                            <input type="number" id="h" value="700" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" ">
+                            <label for="h" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Ύψος σκάλας (H)</label>
+                        </div>
+                        <div class="relative input-group">
+                            <input type="number" id="sApprox" value="18" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" ">
+                            <label for="sApprox" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Προσεγγιστικό ύψος σκαλοπατιού (υ)</label>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-sky-300/80">Αποτελέσματα</h3>
+                    <div class="space-y-4 text-lg">
+                        <div class="flex justify-between items-center bg-slate-700/50 p-3 rounded-md"><span class="text-slate-300">Πλήθος κατακόρυφων τμημάτων (ρίχτια):</span><span id="nVert" class="font-bold text-amber-400"></span></div>
+                        <div class="flex justify-between items-center bg-slate-700/50 p-3 rounded-md"><span class="text-slate-300">Πραγματικό ύψος σκαλοπατιών (υ):</span><span id="sH" class="font-bold text-amber-400"></span></div>
+                        <div class="flex justify-between items-center bg-slate-700/50 p-3 rounded-md"><span class="text-slate-300">Πλήθος οριζόντιων τμημάτων (πατήματα):</span><span id="nHor" class="font-bold text-amber-400"></span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Tabs -->
+        <section class="bg-slate-800 p-6 rounded-lg shadow-lg">
+             <h2 class="text-2xl font-semibold mb-2 border-b-2 border-slate-700 pb-3 text-sky-400">Λεπτομέρειες Γεωμετρίας</h2>
+            <!-- Tab Buttons -->
+            <div class="flex border-b border-slate-700 mb-6">
+                <button id="tab1-btn" class="tab-btn active font-semibold py-2 px-4 rounded-t-lg -mb-px focus:outline-none">Με βάση το Πάτημα</button>
+                <button id="tab2-btn" class="tab-btn font-semibold py-2 px-4 rounded-t-lg focus:outline-none">Με βάση το Ύψος Στροφής</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div>
+                <!-- Tab 1: Based on User Ascent Point -->
+                <div id="tab1-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <div>
+                            <h3 class="text-xl font-semibold mb-4 text-sky-300/80">Είσοδος Δεδομένων</h3>
+                            <div class="space-y-6">
+                                <div class="relative input-group"><input type="number" id="a1" value="100" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="a1" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Απόσταση από κέντρο κολώνας όπου πατάει ο χρήστης (s)</label></div>
+                                <div class="relative input-group"><input type="number" id="m1" value="23" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="m1" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Μήκος σκαλοπατιού στο σημείο που πατάμε (m)</label></div>
+                                <div class="relative input-group"><input type="number" id="angMain1" value="90" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="angMain1" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Γωνία κεφαλόσκαλου (κ°)</label></div>
+                                <div class="relative input-group"><input type="number" id="r1" value="150" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="r1" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Ακτίνα σκάλας (r)</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 text-sky-300/80">Αποτελέσματα</h3>
+                            <div class="space-y-3 text-sm lg:text-base">
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Γωνία σκαλοπατιού (σ°):</span><span id="angS1" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Ύψος από στροφή σε στροφή (h):</span><span id="hCircle1" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Πλήθος στροφών (ακέραιο):</span><span id="nCirclInt1" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Γωνία σε σχέση με το πάνω μέρος (φ°):</span><span id="finalAngle1" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Μήκος σπειρωτής κουπαστής:</span><span id="railingLength1" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Μήκος κουπαστής (1 κύκλος):</span><span id="railingLengthOneCircle1" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Γωνία κλίσης (σε σχέση με το έδαφος):</span><span id="inclineAngle1" class="font-bold text-amber-400"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Based on Height per Turn -->
+                <div id="tab2-content" class="hidden">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <div>
+                            <h3 class="text-xl font-semibold mb-4 text-sky-300/80">Είσοδος Δεδομένων</h3>
+                            <div class="space-y-6">
+                                <div class="relative input-group"><input type="number" id="hCircle2" value="200" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="hCircle2" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Ύψος από στροφή σε στροφή (hCircle)</label></div>
+                                
+                                <div class="bg-slate-700/50 p-4 rounded-lg">
+                                    <label for="am-select" class="block text-sm font-medium text-slate-300 mb-2">Επιλογή Υπολογισμού Πατήματος</label>
+                                    <select id="am-select" class="w-full bg-slate-600 border border-slate-500 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                        <option value="a">Εισαγωγή 's', Υπολογισμός 'm'</option>
+                                        <option value="m">Εισαγωγή 'm', Υπολογισμός 's'</option>
+                                    </select>
+                                    <div class="relative input-group mt-4">
+                                        <input type="number" id="a2" value="100" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="a2" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Απόσταση από κέντρο κολώνας όπου πατάει ο χρήστης (s)</label>
+                                    </div>
+                                    <div class="relative input-group mt-4">
+                                        <input type="number" id="m2" value="23" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="m2" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Μήκος σκαλοπατιού στο σημείο που πατάμε (m)</label>
+                                    </div>
+                                </div>
+                                <div class="relative input-group"><input type="number" id="angMain2" value="90" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="angMain2" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Γωνία κεφαλόσκαλου (κ°)</label></div>
+                                <div class="relative input-group"><input type="number" id="r2" value="150" class="w-full bg-slate-700 border-2 border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition duration-300" placeholder=" "><label for="r2" class="absolute top-3 left-4 text-slate-400 pointer-events-none">Ακτίνα σκάλας (r)</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 text-sky-300/80">Αποτελέσματα</h3>
+                            <div class="space-y-3 text-sm lg:text-base">
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Ρίχτια ανά στροφή (όχι ακέραιο):</span><span id="n0" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Γωνία σκαλοπατιού (σ°):</span><span id="angS2" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Πλήθος στροφών (ακέραιο):</span><span id="nCirclInt2" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Γωνία σε σχέση με το πάνω μέρος (φ°):</span><span id="finalAngle2" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Μήκος σπειροτής κουπαστής:</span><span id="railingLength2" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Μήκος κουπαστής (1 κύκλος):</span><span id="railingLengthOneCircle2" class="font-bold text-amber-400"></span></div>
+                                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded-md"><span class="text-slate-300">Γωνία κλίσης (σε σχέση με το έδαφος):</span><span id="inclineAngle2" class="font-bold text-amber-400"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <div class="fixed bottom-4 right-4 text-xs text-slate-500">Κώστας Κούδας</div>
+
+    <script>
+        // --- DOM Elements ---
+        const inputs = document.querySelectorAll('input[type="number"], select');
+        const tab1Btn = document.getElementById('tab1-btn');
+        const tab2Btn = document.getElementById('tab2-btn');
+        const tab1Content = document.getElementById('tab1-content');
+        const tab2Content = document.getElementById('tab2-content');
+        const amSelect = document.getElementById('am-select');
+        const a2Input = document.getElementById('a2');
+        const m2Input = document.getElementById('m2');
+
+        // --- Functions ---
+        function degToRad(degrees) { return degrees * (Math.PI / 180); }
+        function radToDeg(radians) { return radians * (180 / Math.PI); }
+
+        function calculate() {
+            // --- Part 1: Basic Calculations (Common for all) ---
+            const h = parseFloat(document.getElementById('h').value) || 0;
+            const sApprox = parseFloat(document.getElementById('sApprox').value) || 0;
+
+            if (h <= 0 || sApprox <= 0) {
+                // Handle invalid basic input
+                return;
+            }
+
+            const nVert = Math.floor(h / sApprox);
+            const sH = h / nVert;
+            const nHor = nVert - 1;
+
+            document.getElementById('nVert').textContent = nVert;
+            document.getElementById('sH').textContent = sH.toFixed(2);
+            document.getElementById('nHor').textContent = nHor;
+
+            // --- Part 2: Tab-specific Calculations ---
+            const activeTab = tab1Content.classList.contains('hidden') ? 'tab2' : 'tab1';
+
+            if (activeTab === 'tab1') {
+                const a = parseFloat(document.getElementById('a1').value) || 0;
+                const m = parseFloat(document.getElementById('m1').value) || 0;
+                const angMain = parseFloat(document.getElementById('angMain1').value) || 0;
+                const r = parseFloat(document.getElementById('r1').value) || 0;
+
+                if (a <= 0 || m <= 0 || r <= 0 || m > 2 * a) { /* Clear outputs */ return; }
+
+                const angS = radToDeg(2 * Math.asin(m / (2 * a)));
+                const hCircle = 360 * sH / angS;
+                const nCirclInt = Math.floor(nHor * angS / 360);
+                const totalAngle = angMain + nHor * angS;
+                const finalAngle = totalAngle - 360 * Math.floor(totalAngle / 360);
+                const railingLength = Math.sqrt(h**2 + (degToRad(nHor * angS) * r)**2);
+                const railingLengthOneCircle = Math.sqrt(hCircle**2 + (2 * Math.PI * r)**2);
+                const inclineAngle = radToDeg(Math.atan(h / (degToRad(nHor * angS) * r)));
+
+                document.getElementById('angS1').textContent = angS.toFixed(2);
+                document.getElementById('hCircle1').textContent = hCircle.toFixed(2);
+                document.getElementById('nCirclInt1').textContent = nCirclInt;
+                document.getElementById('finalAngle1').textContent = finalAngle.toFixed(2);
+                document.getElementById('railingLength1').textContent = railingLength.toFixed(2);
+                document.getElementById('railingLengthOneCircle1').textContent = railingLengthOneCircle.toFixed(2);
+                document.getElementById('inclineAngle1').textContent = inclineAngle.toFixed(2);
+
+            } else { // activeTab === 'tab2'
+                const hCircle = parseFloat(document.getElementById('hCircle2').value) || 0;
+                const angMain = parseFloat(document.getElementById('angMain2').value) || 0;
+                const r = parseFloat(document.getElementById('r2').value) || 0;
+                
+                if (hCircle <= 0 || r <= 0) { /* Clear outputs */ return; }
+
+                const n0 = nVert * hCircle / h;
+                const angS = 360 / (n0 - 1);
+
+                const angSRad = degToRad(angS);
+                if (amSelect.value === 'a') {
+                    const a = parseFloat(a2Input.value) || 0;
+                    if (a > 0) {
+                        const m = 2 * a * Math.sin(angSRad / 2);
+                        m2Input.value = m.toFixed(2);
+                    }
+                } else { // amSelect.value === 'm'
+                    const m = parseFloat(m2Input.value) || 0;
+                    if (m > 0 && Math.sin(angSRad / 2) !== 0) {
+                        const a = m / (2 * Math.sin(angSRad / 2));
+                        a2Input.value = a.toFixed(2);
+                    }
+                }
+                
+                const nCirclInt = Math.floor(nHor * angS / 360);
+                const totalAngle = angMain + nHor * angS;
+                const finalAngle = totalAngle - 360 * Math.floor(totalAngle / 360);
+                const railingLength = Math.sqrt(h**2 + (degToRad(nHor * angS) * r)**2);
+                const railingLengthOneCircle = Math.sqrt(hCircle**2 + (2 * Math.PI * r)**2);
+                const inclineAngle = radToDeg(Math.atan(h / (degToRad(nHor * angS) * r)));
+
+                document.getElementById('n0').textContent = isFinite(n0) ? n0.toFixed(2) : 'Σφάλμα';
+                document.getElementById('angS2').textContent = isFinite(angS) ? angS.toFixed(2) : 'Σφάλμα';
+                document.getElementById('nCirclInt2').textContent = isFinite(nCirclInt) ? nCirclInt : 'Σφάλμα';
+                document.getElementById('finalAngle2').textContent = isFinite(finalAngle) ? finalAngle.toFixed(2) : 'Σφάλμα';
+                document.getElementById('railingLength2').textContent = isFinite(railingLength) ? railingLength.toFixed(2) : 'Σφάλμα';
+                document.getElementById('railingLengthOneCircle2').textContent = isFinite(railingLengthOneCircle) ? railingLengthOneCircle.toFixed(2) : 'Σφάλμα';
+                document.getElementById('inclineAngle2').textContent = isFinite(inclineAngle) ? inclineAngle.toFixed(2) : 'Σφάλμα';
+            }
+        }
+
+        function switchTabs(activeBtn, inactiveBtn, activeContent, inactiveContent) {
+            activeBtn.classList.add('active');
+            inactiveBtn.classList.remove('active');
+            activeContent.classList.remove('hidden');
+            inactiveContent.classList.add('hidden');
+            calculate();
+        }
+
+        function updateAmInputs() {
+            if (amSelect.value === 'a') {
+                // 'a' is the editable input, 'm' is the calculated output
+                a2Input.readOnly = false;
+                m2Input.readOnly = true;
+                // Style 'a' as a normal input (remove output styling)
+                a2Input.classList.remove('font-bold', 'text-amber-400');
+                // Style 'm' as an output (add orange text color and bold font)
+                m2Input.classList.add('font-bold', 'text-amber-400');
+            } else { // amSelect.value === 'm'
+                // 'm' is the editable input, 'a' is the calculated output
+                a2Input.readOnly = true;
+                m2Input.readOnly = false;
+                // Style 'a' as an output (add orange text color and bold font)
+                a2Input.classList.add('font-bold', 'text-amber-400');
+                // Style 'm' as a normal input (remove output styling)
+                m2Input.classList.remove('font-bold', 'text-amber-400');
+            }
+            calculate();
+        }
+
+        // --- Event Listeners ---
+        inputs.forEach(input => input.addEventListener('input', calculate));
+
+        tab1Btn.addEventListener('click', () => switchTabs(tab1Btn, tab2Btn, tab1Content, tab2Content));
+        tab2Btn.addEventListener('click', () => switchTabs(tab2Btn, tab1Btn, tab2Content, tab1Content));
+
+        amSelect.addEventListener('change', updateAmInputs);
+
+        // --- Initial Load ---
+        window.onload = () => {
+            updateAmInputs(); // Set initial readonly state and style for a/m
+            calculate(); // Run initial calculation
+        };
+
+    </script>
+</body>
+</html>

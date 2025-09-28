@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Συγκαλλιέργειες Φυτών</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Slab', serif;
+            background-color: #1a202c;
+            background-image: url('https://www.transparenttextures.com/patterns/dark-wood.png');
+        }
+        .note-dot {
+            height: 10px;
+            width: 10px;
+            /* The background color is now set by Tailwind classes */
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .note-dot:hover {
+            transform: scale(1.2);
+        }
+        .custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23d1d5db' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <!-- Back Button -->
+    <a href="index.html" class="absolute top-4 left-4 bg-green-800 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
+        &#8592; Επιστροφή
+    </a>
+
+    <!-- Signature -->
+    <footer class="fixed bottom-4 right-4 text-sm text-gray-500">
+        Κώστας Κούδας
+    </footer>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-green-300 drop-shadow-lg">Οδηγός Συγκαλλιέργειας</h1>
+            <p class="text-lg text-gray-400 mt-2">Επίλεξε ένα φυτό, για να δεις ποια φυτά ευνοούν και ποια παρεμποδίζουν την ανάπτυξή του.</p>
+        </header>
+
+        <!-- Dropdown Selectors -->
+        <div class="flex flex-col md:flex-row justify-center gap-8 mb-8">
+            <div class="flex-1">
+                <label for="cold-season-select" class="block mb-2 text-xl font-semibold text-cyan-300">Ψυχρής Περιόδου</label>
+                <select id="cold-season-select" class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white">
+                    <option value="">-- Επιλέξτε Φυτό --</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label for="warm-season-select" class="block mb-2 text-xl font-semibold text-orange-300">Θερμής Περιόδου</label>
+                <select id="warm-season-select" class="custom-select w-full p-3 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                    <option value="">-- Επιλέξτε Φυτό --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Display -->
+        <div id="results-container" class="hidden mt-10 p-6 bg-gray-800 bg-opacity-70 rounded-xl shadow-2xl border border-gray-700">
+            <div class="flex items-center mb-6 border-b-2 border-gray-600 pb-4">
+                <h2 id="selected-plant-name" class="text-3xl font-bold text-yellow-300"></h2>
+                <div id="selected-plant-notes" class="flex items-center ml-3"></div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-green-400 mb-4">✅ Φυτά Σύμμαχοι</h3>
+                    <ul id="allies-list" class="space-y-3 list-inside text-lg">
+                        <!-- Allies will be populated here -->
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-red-400 mb-4">❌ Φυτά Παρεμποδιστές</h3>
+                    <ul id="inhibitors-list" class="space-y-3 list-inside text-lg">
+                        <!-- Inhibitors will be populated here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Footnotes -->
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50 opacity-0">
+        <div id="modal-overlay" class="absolute inset-0"></div>
+        <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg z-10 border border-gray-600 relative">
+            <button id="modal-close-btn" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <p id="modal-text" class="text-lg"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- DATA STRUCTURE ---
+        // All data is stored here, including plants, allies, inhibitors, and footnotes.
+        // Note indices are 0-based (i=0, ii=1, etc.)
+
+        const footnotes = [
+            /*i*/ "Διώχνουν τα σκουλήκια των λάχανων.",
+            /*ii*/ "Τα αποφεύγουν τα κουνέλια.",
+            /*iii*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*iv*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*v*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*vi*/ "Διώχνουν τα σκουλήκια των λάχανων.",
+            /*vii*/ "Απωθούν τη μύγα του καρότου.",
+            /*viii*/ "Απωθούν τη μύγα του καρότου.",
+            /*ix*/ "Συμβάλλει στην απομάκρυνση της μύγας του καρότου.",
+            /*x*/ "Απωθούν τις μύγες των καρότων.",
+            /*xi*/ "Απωθούν τη μύγα του καρότου.",
+            /*xii*/ "Αποκτούν τα καρότα πικρή γεύση.",
+            /*xiii*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xiv*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xv*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xvi*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xvii*/ "Διώχνουν τα σκουλήκια των λάχανων.",
+            /*xviii*/ "Μπορεί να μολυνθεί απ' το σκουλήκι που πλήττει το καλαμπόκι.",
+            /*xix*/ "Μειώνεται ο πληθυσμός του φυλλοτρίτη, του κυριότερου εχθρού της.",
+            /*xx*/ "Θα αναπτύσσεται μέχρι ενός δυνατού παγετού.",
+            /*xxi*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xxii*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xxiii*/ "Απωθείται η πιερίδα του λάχανου.",
+            /*xxiv*/ "Καλύτερα να φυτεύονται σε αυλάκια.",
+            /*xxv*/ "Συνδυασμός μέτριας ποσότητας πράσου, φασολιού και ραπανοσέλινου βοηθά στην ανάπτυξη και των τριών φυτών.",
+            /*xxvi*/ "Να είναι υπό σκιά για να μην ξεβλαστρώνει.",
+            /*xxvii*/ "Σε μέτρια ποσότητα είναι ευεργετικά, σε πυκνή όμως περιορίζει την ανάπτυξη.",
+            /*xxviii*/ "Τα σκουλήκια του κρεμμυδιού μεταφέρονται από φυτό σε φυτό, όταν είναι φυτεμένα σε σειρές. Φυτέψτε τα διάσπαρτα στον κήπο.",
+            /*xxix*/ "Εμπλουτίζει με άζωτο το έδαφος.",
+            /*xxx*/ "Ωφελείται απ' το προστατευτικό άρωμα του σιναπιού.",
+            /*xxxi*/ "Τα ραπανάκια γίνονται ιδιαίτερα χυμώδη.",
+            /*xxxii*/ "Χαλαρώνει το χώμα.",
+            /*xxxiii*/ "Κάνει τα ραπανάκια πιο τρυφερά.",
+            /*xxxiv*/ "Προσθέτει σφρίγος στο φυτό.",
+            /*xxxv*/ "Προστατεύουν απ' την προνύμφη και το ενήλικο του σκαθαριού Grioceris asparagi. Επίσης περιορίζει την ανάπτυξη ζιζανίων.",
+            /*xxxvi*/ "Απωθεί τα βλαβερά σκαθάρια.",
+            /*xxxvii*/ "Αλληλοβοηθούνται.",
+            /*xxxviii*/ "Οι καυτερές πιπεριές έχουν τα εκκρίματα ρίζας που αποτρέπουν την αποσύνθεση ρίζας και άλλες fusarium ασθένειες.",
+            /*xxxix*/ "Στήριγμα για φασόλια.",
+            /*xl*/ "Η υγρασία διατηρείται απ' τις ρίζες του.",
+            /*xli*/ "Αποκαθιστά στο χώμα το δεσμευμένο άζωτο.",
+            /*xlii*/ "Αποκαθιστά στο χώμα το δεσμευμένο άζωτο. Στερεώνουν το καλαμπόκι πιο βαθιά στο έδαφος, προστατεύοντάς το έτσι απ' τον άνεμο. Απωθεί τα ζώα η στιβαρή αναρριχώμενη ανάπτυξή τους.",
+            /*xliii*/ "Προστατεύουν από επιδρομές ζώων, τα οποία δεν επιθυμούν να διασχίζουν μεγάλες εκτάσεις με πυκνά αναρριχητικά φυτά.",
+            /*xliv*/ "Πνίγουν ζιζάνια. Επίσης προστατεύουν από επιδρομές ζώων, τα οποία δεν επιθυμούν να διασχίζουν μεγάλες εκτάσεις με πυκνά αναρριχητικά φυτά.",
+            /*xlv*/ "Προστατεύουν από επιδρομές ζώων, τα οποία δεν επιθυμούν να διασχίζουν μεγάλες εκτάσεις με πυκνά αναρριχητικά φυτά.",
+            /*xlvi*/ "Συμβάλει στη μείωση του πληθυσμού του εντόμου Carpophilus.",
+            /*xlvii*/ "Το ιαπωνικό σκαθάρι δεν καταστρέφει τα φύλλα του καλομποκιού",
+            /*xlviii*/ "Συνδυασμός μέτριας ποσότητας πράσου, φασολιού και ραπανοσέλινου βοηθά στην ανάπτυξη και των τριών φυτών.",
+            /*xlix*/ "Συνδυασμός μέτριας ποσότητας πράσου, φασολιού και ραπανοσέλινου βοηθά στην ανάπτυξη και των τριών φυτών.",
+            /*l*/ "Το σκουλήκι της ντομάτας και το σκουλήκι του αραβόσιτου είναι πανομοιότυπα.",
+            /*li*/ "Οι στενές λωρίδες απωθούν τα μυρμήγκια.",
+            /*lii*/ "Να μην εφαρμόζεται η αμειψισπορά, όπως και σε όλα τα μέλη της οικογένειας των κολοκυνθιδών. Επίσης προτιμά τη σκιά.",
+            /*liii*/ "Βελτιώνει τη γεύση και την παραγωγή.",
+            /*liv*/ "Προστατεύει απ' τον ιό που προκαλεί μαρασμό και το ωφελεί με τι σκιά του.",
+            /*lv*/ "Προστασία απ' τα σκαθάρια αγγουριού.",
+            /*lvi*/ "Αποτρέπουν τα σκαθάρια των αγγουριών.",
+            /*lvii*/ "Υπάρχει μεγάλη πιθανότητα να προσβληθούν οι ντομάτες από φυτοφθορά.",
+            /*lviii*/ "Τις κάνει πιο ανθεκτικές στις προσβολές εντόμων.",
+            /*lix*/ "Προστατεύουν απ' το σκαθάρι της πατάτας.",
+            /*lx*/ "Να μην εφαρμόζεται η αμειψισπορά, όπως και σε όλα τα μέλη της οικογένειας των κολοκυνθιδών.",
+            /*lxi*/ "Ενισχύει τη βλάστηση των σπόρων του πεπονιού.",
+            /*lxii*/ "Βοηθάει τα πεπόνια στην ανάπτυξη.",
+            /*lxiii*/ "Τα ωφελεί με τι σκιά του και τα βοηθά στην ανάπτυξη.",
+            /*lxiv*/ "Καταπολεμούν τα σκαθάρια του αγγουριού",
+            /*lxv*/ "Ελέγχει σε ποσοστό 81% τις προσβολές των κονδύλων της πατάτας από την σπογκοσπορίωση.",
+            /*lxvi*/ "Καθιστούν τις πατάτες πιο ευαίσθητες στη φυτοφθορά.",
+            /*lxvii*/ "Να μην εφαρμόζεται η αμειψισπορά, όπως και σε όλα τα μέλη της οικογένειας των κολοκυνθιδών.",
+            /*lxviii*/ "Αποτρέπει τα ζωύφια.",
+            /*lxix*/ "Τις ωφελεί με τι σκιά του.",
+            /*lxx*/ "Αποτρέπει κανθάρους.",
+            /*lxxi*/ "Γενική προστασία απ' τα παράσιτα.",
+            /*lxxii*/ "Αν φυτευτούν πρώιμα ή όψιμα γλυτώνουν συχνά απ' τα φυλλοφάγα έντομα. Ειδικά αν φυτευτούν το φθινόπωρο, μένουν εντελώς ανέπαφα από εντομολογικές προσβολές.",
+            /*lxxiii*/ "Με τρία ραπανάκια φυτεμένα κυκλικά σε κάθε υπερυψωμένο παρτέρι φύτευσης συμβάλλουν στην απομάκρυνση των εντόμων.",
+            /*lxxiv*/ "Απωθούν τα βλαβερά έντομα.",
+            /*lxxv*/ "Καθώς οι πιπεριές είναι εύθραυστα φυτά, οι μπάμιες χρησιμεύουν ως ανεμοθρεύστες.",
+            /*lxxvi*/ "Προτιμούν να αναπτύσσονται κάθε χρόνο στο ίδιο σημείο. Εξαιρουμένης της περίπτωσης ασθενειών, οπότε και αλλάζουμε σημείο.",
+            /*lxxvii*/ "Δρα ανασταλτικά στα νεαρά δένδρα ροδακινιάς.",
+            /*lxxviii*/ "Προστατεύει από τετράνυχο.",
+            /*lxxix*/ "Προσθέτει σφρίγος στο φυτό.",
+            /*lxxx*/ "Προστατεύει τη ντομάτα απ' τα έντομα.",
+            /*lxxxi*/ "Συμβάλλει στη βελτίωση της ποιότητας.",
+            /*lxxxii*/ "Απωθεί τις μύγες, τα κουνούπια, και τα σκουλήκια των καρπών. Βοηθάει στις ασθένειες και συμβάλλει στην ανάπτυξη.",
+            /*lxxxiii*/ "Συμβάλλει στη βελτίωση της ποιότητας.",
+            /*lxxxiv*/ "Συμβάλλει στη βελτίωση της ποιότητας.",
+            /*lxxxv*/ "Έχει ευεργετική δράση.",
+            /*lxxxvi*/ "Εξολοθρεύει τον τετράνυχο.",
+            /*lxxxvii*/ "Έχουν πανομοιότυπο σκουλήκι.",
+            /*lxxxviii*/ "Είναι επιρρεπείς στις ασθένειες που μεταδίδονται μέσω του καπνού των τσιγάρων. Οι καπνιστές να πλένουν πολύ καλά τα χέρια τους, προτού ασχοληθούν μαζί τους.",
+            /*lxxxix*/ "Αλληλοαπωθούνται.",
+            /*xc*/ "Μαζί απωθούν τις αφίδες.",
+            /*xci*/ "Αυξάνει τη γονιμότητα του εδάφους για το σταφύλι.",
+            /*xcii*/ "Τα καρπούζια χρειάζονται άφθονη ηλιοφάνεια.",
+            /*xciii*/ "Καλύτερα να φυτεύεται σε αυλάκια και να αναπτύσσεται σε κύκλο.",
+            /*xciv*/ "Αλληλοβοηθούνται."
+        ];
+
+        const plantData = {
+            coldSeason: [
+                { name: "Παντζάρι", notes: [], allies: [{n:"μαρούλι (και τα περισσότερα μέλη της οικογένειας των κράμβων)"},{n:"κρεμμύδια"},{n:"λάχανο"},{n:"θαμνώδεις φασολιές"}], inhibitors: [{n:"κοινά φασόλια"},{n:"σινάπι του αγρού"}] },
+                { name: "Μπρόκολο", notes: [], allies: [{n:"παντζάρια"},{n:"πατάτες"},{n:"κρεμμύδια"},{n:"αρωματικά φυτά (όπως σέλινο, φασκόμηλο, χαμομήλι, άνηθος, δυόσμος, δεντρολίβανο)", notes:[0]},{n:"θυμάρι"},{n:"αψιθιά"},{n:"ύσσωπος"},{n:"λεβάντα"}], inhibitors: [{n:"φράουλες"},{n:"ντομάτες"},{n:"κοινά φασόλια"}] },
+                { name: "Λάχανο", notes: [], allies: [{n:"κρεμμύδια",notes:[1]},{n:"πατάτες"},{n:"σέλινο"},{n:"μέντα"},{n:"φασκόμηλο"},{n:"χαμομήλι"},{n:"άνηθος"},{n:"δυόσμος"},{n:"δεντρολίβανο"},{n:"θυμάρι",notes:[2]},{n:"αψιθιά",notes:[3]},{n:"ύσσωπος",notes:[4]},{n:"λεβάντα"},{n:"αρωματικά φυτά (και δει αυτά με τα πολλά άνθη)",notes:[5]}], inhibitors: [{n:"φράουλες"},{n:"ντομάτες"},{n:"κοινά φασόλια"}] },
+                { name: "Καρότα", notes: [], allies: [{n:"μπιζέλια"},{n:"παντζάρια",notes:[6]},{n:"βότανα (όπως το δενδρολίβανο, αψιθιά και φασκόμηλο)",notes:[7]},{n:"μαρούλια"},{n:"μαϊντανός",notes:[8]},{n:"σχοινόπρασα"},{n:"ραπανάκια"},{n:"πράσα",notes:[9]},{n:"κρεμμύδια",notes:[10]},{n:"ντομάτα"}], inhibitors: [{n:"άνηθος"},{n:"μηλιά",notes:[11]}] },
+                { name: "Κουνουπίδι", notes: [], allies: [{n:"πατάτες"},{n:"κρεμμύδια"},{n:"σέλινο",notes:[12]},{n:"φασκόμηλο"},{n:"χαμομήλι"},{n:"άνηθος"},{n:"δυόσμος"},{n:"δεντρολίβανο"},{n:"θυμάρι",notes:[13]},{n:"αψιθιά",notes:[14]},{n:"ύσσωπος",notes:[15]},{n:"λεβάντα"},{n:"αρωματικά φυτά",notes:[16]}], inhibitors: [{n:"φράουλες"},{n:"ντομάτες"},{n:"φασόλια"}] },
+                { name: "Φυλλώδη παντζάρια", notes: [], allies: [{n:"μαρούλι"},{n:"κρεμμύδια"},{n:"λάχανο"}], inhibitors: [{n:"κοινά φασόλια"}] },
+                { name: "Κινέζικο λάχανο", notes: [], allies: [{n:"θαμνώδη φασόλια"},{n:"κατιφέδες"},{n:"κρεμμύδια"},{n:"φασκόμηλο"}], inhibitors: [{n:"κοινά φασόλια"},{n:"καλαμπόκι",notes:[17]},{n:"φράουλες"},{n:"ντομάτες"}] },
+                { name: "Λαχανίδα (χειμερινή)", notes: [], allies: [{n:"όψιμο λάχανο"},{n:"πατάτες"},{n:"φασκόμηλο"},{n:"κατιφές"},{n:"νεροκάρδαμο"},{n:"ντομάτες",notes:[18]},{n:"μετά από φύτεμα μπιζελιών και φασολιών",notes:[19]}], inhibitors: [{n:"άγριο σινάπι"}] },
+                { name: "Γογγυλοκράμβη", notes: [], allies: [{n:"παντζάρια"},{n:"αγγούρια"},{n:"κρεμμύδια"},{n:"φασκόμηλο"},{n:"θυμάρι",notes:[20]},{n:"αψιθιά",notes:[21]},{n:"ύσσωπος",notes:[22]}], inhibitors: [{n:"κοινά φασόλια"},{n:"φράουλες"},{n:"ντομάτες"}] },
+                { name: "Πράσα", notes: [23], allies: [{n:"καρότα"},{n:"σέλινο"},{n:"κρεμμύδια"},{n:"φασόλια",notes:[24]}], inhibitors: [{n:"θαμνώδη φασόλια"},{n:"κοινά φασόλια"},{n:"μπιζέλια"},{n:"σόγια"}] },
+                { name: "Μαρούλι", notes: [25], allies: [{n:"κρεμμύδι"},{n:"ραπανάκια"},{n:"φράουλες"},{n:"αγγούρια"},{n:"καρότο"}], inhibitors: [{n:"φασόλια"},{n:"φράουλες"},{n:"ντομάτες"}] },
+                { name: "Κρεμμύδια", notes: [], allies: [{n:"καλοκαιρινό θρουμπί"},{n:"όλα τα μέλη της οικογένειας του λάχανου"},{n:"χαμομήλι"},{n:"παντζάρια"},{n:"φράουλες"},{n:"ντομάτες"},{n:"μαρούλι"},{n:"πράσο"}], inhibitors: [{n:"μπιζέλια"},{n:"φασόλια",notes:[26]},{n:"κρεμμύδια",notes:[27]}] },
+                { name: "Ανατολίτικα φυλλώδη λαχανικά", notes: [], allies: [{n:"φράουλες"}], inhibitors: [] },
+                { name: "Μαϊντανός", notes: [], allies: [{n:"ντομάτες"}], inhibitors: [] },
+                { name: "Μπιζέλια", notes: [28], allies: [{n:"καρότα"},{n:"ρέβες"},{n:"ραπανάκια"},{n:"αγγούρια"},{n:"αρωματικά βότανα"},{n:"καλαμπόκι"},{n:"σέλινο"},{n:"μελιτζάνα"},{n:"σπανάκι"},{n:"μαϊντανός"},{n:"φράουλες"},{n:"πιπεριές"},{n:"γογγύλια"},{n:"φασόλια"},{n:"πατάτες"}], inhibitors: [{n:"κρεμμύδια"},{n:"σκόρδο"},{n:"γλαδιόλες"}] },
+                { name: "Ραπανάκια", notes: [], allies: [{n:"τραχύ βλίτο"},{n:"νεροκάρδαμο"},{n:"σινάπι",notes:[29]},{n:"μαρούλι",notes:[30]},{n:"αμάραντος",notes:[31]},{n:"παντζάρια"},{n:"σπανάκι"},{n:"καρότα"},{n:"παστινάκη"},{n:"θαμνώδη φασόλια"},{n:"κοινά φασόλια"},{n:"μαρούλια",notes:[32]}], inhibitors: [{n:"όλες οι κράμβες"},{n:"όλα τα μέλη της οικογένειας των Σταυρανθών (όπως λάχανο, κουνουπίδι, λαχανάκια Βρυξελών, γογγυλοκράμβες, μπρόκολα ή γογγύλια)"},{n:"ύσσωπος"}] },
+                { name: "Σπανάκι", notes: [], allies: [{n:"φράουλες"}], inhibitors: [] },
+                { name: "Ρέβα", notes: [], allies: [{n:"μπιζέλια"},{n:"τριχωτός βίκος"}], inhibitors: [{n:"σινάπι φράκτη"}] },
+                { name: "Σπαράγγια", notes: [], allies: [{n:"μαϊντανός",notes:[33]},{n:"ντομάτες",notes:[34]}], inhibitors: [] }
+            ],
+            warmSeason: [
+                { name: "Φασόλια", notes: [], allies: [{n:"αγγούρια"},{n:"φράουλες"},{n:"καλαμπόκι"},{n:"ραπανάκι"},{n:"καρότο"},{n:"κουνουπίδι"},{n:"κατηφές",notes:[35]},{n:"μελιτζάνα"},{n:"μπίζα"},{n:"πατάτες"},{n:"θρουμπί"},{n:"σέλινο",notes:[36]}], inhibitors: [{n:"κρεμμύδια"},{n:"μάραθος"},{n:"σκόρδο"},{n:"σχοινόπρασο"},{n:"γλαδιόλες"}] },
+                { name: "Καυτερές πιπεριές", notes: [37], allies: [], inhibitors: [] },
+                { name: "Καλαμπόκι", notes: [38, 39], allies: [{n:"πατάτες"},{n:"μπιζέλια",notes:[40]},{n:"φασόλια",notes:[41]},{n:"αγγούρια",notes:[42]},{n:"κολοκύθες",notes:[43]},{n:"πεπόνι",notes:[44]},{n:"ηλίανθος",notes:[45]},{n:"σόγια"},{n:"φιστίκια"},{n:"αμάραντος"},{n:"μαϊντανός"},{n:"κατιφές",notes:[46]},{n:"πράσα",notes:[47]},{n:"ραπανοσέλινο",notes:[48]}], inhibitors: [{n:"ντομάτες",notes:[49]},{n:"σέλινο"}] },
+                { name: "Αγγούρι", notes: [50, 51], allies: [{n:"θαμνώδη φασόλια"},{n:"κοινά φασόλια"},{n:"νεροκάρδαμο",notes:[52]},{n:"καλαμπόκι",notes:[53]},{n:"πράσα"},{n:"κρεμμύδια"},{n:"μπιζέλια"},{n:"ραπανάκια",notes:[54]},{n:"ηλίανθοι"},{n:"ραδίκια",notes:[55]},{n:"καρότα"}], inhibitors: [{n:"πατάτες"},{n:"ντομάτες",notes:[56]},{n:"αρωματικά βότανα (και δει φασκομηλιά)"}] },
+                { name: "Μελιτζάνα", notes: [], allies: [{n:"αμάραντος",notes:[57]},{n:"κατηφές"},{n:"τραχύ βλίτο"},{n:"φρέσκα φασόλια",notes:[58]}], inhibitors: [] },
+                { name: "Πεπόνι", notes: [59], allies: [{n:"ιπομοία η πορφυρή",notes:[60]},{n:"ηλίανθος",notes:[61]},{n:"καλαμπόκι",notes:[62]},{n:"ραπανάκια",notes:[63]}], inhibitors: [{n:"πατάτες"}] },
+                { name: "Μπάμιες", notes: [], allies: [{n:"καμπανοειδείς πιπεριές"},{n:"μελιτζάνες"}], inhibitors: [] },
+                { name: "Πατάτες (πρώιμες και όψιμες)", notes: [], allies: [{n:"καρότο"},{n:"σέλινο"},{n:"μπιζέλι"},{n:"κρεμμύδια"},{n:"λινάρι"},{n:"θαμνώδη φασόλια"},{n:"λάχανο"},{n:"καλαμπόκι"},{n:"μελιτζάνα"},{n:"κατιφές"},{n:"νεροκάρδαμο"},{n:"τάτουλας",notes:[64]}], inhibitors: [{n:"αγγούρια"},{n:"κολοκύθα"},{n:"ηλίανθοι"},{n:"ντομάτες",notes:[65]},{n:"γογγύλι"},{n:"μάραθος"}] },
+                { name: "Κολοκύθα", notes: [66], allies: [{n:"ραπανάκια"},{n:"νεροκάρδαμο",notes:[67]},{n:"καλαμπόκι",notes:[68]},{n:"πεπόνι"},{n:"τάτουλας"},{n:"καπουτσίνος"},{n:"κατιφές",notes:[69]},{n:"ρίγανη",notes:[70]}], inhibitors: [{n:"ναστούρτιο"},{n:"πατάτες"}] },
+                { name: "Κολοκυνθοειδή", notes: [71], allies: [{n:"ραπανάκια",notes:[72]},{n:"καπουτσίνοι",notes:[73]}], inhibitors: [] },
+                { name: "Γλυκές πιπεριές", notes: [], allies: [{n:"βασιλικός"},{n:"μπάμιες",notes:[74]},{n:"κρεμμύδια"},{n:"μαϊντανός"},{n:"καρότα"}], inhibitors: [{n:"μάραθος"},{n:"γογγύλια"}] },
+                { name: "Ντοματίνια", notes: [], allies: [{n:"βασιλικός"}], inhibitors: [] },
+                { name: "Ντομάτες", notes: [75, 76], allies: [{n:"σπαράγγια"},{n:"καρότα"},{n:"σέλινο"},{n:"σχοινόπρασο"},{n:"σκόρδο",notes:[77]},{n:"κρεμμύδια"},{n:"μαϊντανός",notes:[78]},{n:"κατιφές",notes:[79]},{n:"καπουτσίνος"},{n:"καρότο"},{n:"τσουκνίδα",notes:[80]},{n:"βασιλικός",notes:[81]},{n:"μέντα",notes:[82]},{n:"μελισσόχορτο",notes:[83]},{n:"αμάραντος",notes:[84]},{n:"ραπανάκια",notes:[85]}], inhibitors: [{n:"καλαμπόκι",notes:[86]},{n:"πατάτες"},{n:"μάραθος"},{n:"αγγούρι"},{n:"λάχανο"},{n:"μπρόκολο"},{n:"κουνουπίδι"},{n:"γογγύλι"},{n:"άνηθος"},{n:"καπνός",notes:[87]},{n:"όλα τα μέλη της οικογένειας των σταυρανθών",notes:[88]},{n:"όχι κάτω από καρυδιές."}] },
+                { name: "Σταφύλι", notes: [], allies: [{n:"ύσσωπος"},{n:"βασιλικός"},{n:"φασόλια"},{n:"μπιζέλι"},{n:"σχοινόπρασο",notes:[89]},{n:"τριφύλλι",notes:[90]}], inhibitors: [] },
+                { name: "Καρπούζι", notes: [], allies: [{n:"πατάτες"}], inhibitors: [{n:"ψηλά φυτά",notes:[91]}] },
+                { name: "Σέλινο", notes: [92], allies: [{n:"πράσα"},{n:"ντομάτες"},{n:"κουνουπίδι"},{n:"λάχανο"},{n:"θαμνώδεις φασολιές",notes:[93]}], inhibitors: [] }
+            ]
+        };
+
+        // --- DOM ELEMENTS ---
+        const coldSelect = document.getElementById('cold-season-select');
+        const warmSelect = document.getElementById('warm-season-select');
+        const resultsContainer = document.getElementById('results-container');
+        const selectedPlantName = document.getElementById('selected-plant-name');
+        const selectedPlantNotes = document.getElementById('selected-plant-notes');
+        const alliesList = document.getElementById('allies-list');
+        const inhibitorsList = document.getElementById('inhibitors-list');
+        const modal = document.getElementById('modal');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalText = document.getElementById('modal-text');
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Populates a select dropdown with plant options.
+         * @param {HTMLSelectElement} selectElement The dropdown to populate.
+         * @param {Array<Object>} plants The array of plant objects.
+         */
+        function populateDropdown(selectElement, plants) {
+            plants.forEach(plant => {
+                const option = document.createElement('option');
+                option.value = plant.name;
+                option.textContent = plant.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        /**
+         * Creates a list item for a plant, including note dots if any.
+         * @param {Object} plant The plant object {n: name, notes: [...]}.
+         * @param {string} type The type of plant ('ally' or 'inhibitor') to determine dot color.
+         * @returns {HTMLLIElement} The created list item element.
+         */
+        function createPlantListItem(plant, type) {
+            const li = document.createElement('li');
+            li.className = 'flex items-center';
+            const plantName = document.createElement('span');
+            plantName.textContent = plant.n;
+            li.appendChild(plantName);
+
+            if (plant.notes && plant.notes.length > 0) {
+                plant.notes.forEach(noteIndex => {
+                    const dot = createNoteDot(noteIndex, type);
+                    li.appendChild(dot);
+                });
+            }
+            return li;
+        }
+
+        /**
+         * Creates a single colored dot element with a click event to show the modal.
+         * @param {number} noteIndex The index of the footnote in the footnotes array.
+         * @param {string} type The type ('main', 'ally', 'inhibitor') to determine the color.
+         * @returns {HTMLSpanElement} The created dot element.
+         */
+        function createNoteDot(noteIndex, type = 'inhibitor') {
+            const dot = document.createElement('span');
+            let colorClass = 'bg-red-500'; // Default to red for inhibitors
+            if (type === 'main') {
+                colorClass = 'bg-yellow-400'; // Yellow for main plant
+            } else if (type === 'ally') {
+                colorClass = 'bg-green-500'; // Green for allies
+            }
+            
+            dot.className = `note-dot ${colorClass}`;
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering other events
+                showModal(noteIndex);
+            });
+            return dot;
+        }
+
+        /**
+         * Displays the information for the selected plant.
+         * @param {string} plantName The name of the selected plant.
+         */
+        function displayPlantInfo(plantName) {
+            // Find the plant object from both seasons
+            const plant = [...plantData.coldSeason, ...plantData.warmSeason].find(p => p.name === plantName);
+
+            // Clear previous results
+            alliesList.innerHTML = '';
+            inhibitorsList.innerHTML = '';
+            selectedPlantNotes.innerHTML = '';
+
+            if (plant) {
+                selectedPlantName.textContent = plant.name;
+                
+                // Add notes for the main selected plant
+                if (plant.notes && plant.notes.length > 0) {
+                    plant.notes.forEach(noteIndex => {
+                        const dot = createNoteDot(noteIndex, 'main');
+                        selectedPlantNotes.appendChild(dot);
+                    });
+                }
+
+                // Populate allies
+                if (plant.allies && plant.allies.length > 0) {
+                    plant.allies.forEach(ally => {
+                        alliesList.appendChild(createPlantListItem(ally, 'ally'));
+                    });
+                } else {
+                    alliesList.innerHTML = '<li class="text-gray-400 italic">Δεν βρέθηκαν σύμμαχοι.</li>';
+                }
+
+                // Populate inhibitors
+                if (plant.inhibitors && plant.inhibitors.length > 0) {
+                    plant.inhibitors.forEach(inhibitor => {
+                        inhibitorsList.appendChild(createPlantListItem(inhibitor, 'inhibitor'));
+                    });
+                } else {
+                    inhibitorsList.innerHTML = '<li class="text-gray-400 italic">Δεν βρέθηκαν παρεμποδιστές.</li>';
+                }
+
+                resultsContainer.classList.remove('hidden');
+            } else {
+                resultsContainer.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Shows the modal with the specified footnote text.
+         * @param {number} noteIndex The index of the footnote.
+         */
+        function showModal(noteIndex) {
+            modalText.textContent = footnotes[noteIndex];
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10); // For transition
+        }
+
+        /**
+         * Hides the modal.
+         */
+        function hideModal() {
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300); // Wait for transition
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Handle dropdown changes
+        coldSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                warmSelect.value = ''; // Reset the other dropdown
+                displayPlantInfo(e.target.value);
+            } else {
+                resultsContainer.classList.add('hidden');
+            }
+        });
+
+        warmSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                coldSelect.value = ''; // Reset the other dropdown
+                displayPlantInfo(e.target.value);
+            } else {
+                resultsContainer.classList.add('hidden');
+            }
+        });
+
+        // Handle modal closing
+        modalCloseBtn.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', hideModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && !modal.classList.contains('hidden')) {
+                hideModal();
+            }
+        });
+
+        // --- INITIALIZATION ---
+        populateDropdown(coldSelect, plantData.coldSeason);
+        populateDropdown(warmSelect, plantData.warmSeason);
+
+    </script>
+</body>
+</html>

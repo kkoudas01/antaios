@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Αναμονής Ουράς</title>
+    <!-- Βιβλιοθήκη jStat για στατιστικούς υπολογισμούς (Gamma Distribution & Gamma Functions) -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <style>
+        /* Γενικό στυλ και Dark Theme */
+        :root {
+            --bg-color: #1a1a2e;
+            --primary-color: #16213e;
+            --secondary-color: #0f3460;
+            --accent-color: #e94560;
+            --text-color: #dcdcdc;
+            --input-bg: #2a2a4a;
+            --border-color: #535374;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 25px;
+            background-color: var(--primary-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Κουμπί επιστροφής */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Επικεφαλίδες και παράγραφοι */
+        h1, h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            text-align: justify;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 15px;
+        }
+
+        /* Φόρμες και πεδία εισόδου */
+        .form-section {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.3);
+        }
+
+        /* Καρτέλες */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-button {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 1.1em;
+            font-weight: 600;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--accent-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .tab-button.active {
+            color: var(--accent-color);
+        }
+        
+        .tab-button.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Αποτελέσματα */
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--input-bg);
+            border-radius: 8px;
+            border: 1px dashed var(--accent-color);
+            text-align: center;
+        }
+
+        .result-box .label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .result-box .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Υπογραφή */
+        .signature {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.8em;
+            color: #aaa;
+            opacity: 0.6;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                margin: 10px auto;
+                padding: 15px;
+            }
+            .back-button {
+                top: 10px;
+                left: 10px;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .tab-button {
+                width: 100%;
+                text-align: center;
+                border-bottom: 1px solid var(--border-color);
+            }
+             .tab-button::after {
+                display: none;
+             }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Κουμπί Επιστροφής -->
+    <a href="index.html" class="back-button">Επιστροφή</a>
+
+    <div class="container">
+        <h1>Υπολογιστής Αναμονής σε Ουρά</h1>
+        <p class="intro">
+            Είσαι στο ταχυδρομείο ή σε κάποια άλλη υπηρεσία με ουρά αναμονής. Σε πόση ώρα αναμένουμε να εξυπηρετηθείς; Χρειάζεται να λείψεις για λίγο. Ποια η πιθανότητα να χάσεις τη σειρά σου; Θέλεις να είσαι σίγουρος ότι δεν θα χάσεις τη σειρά σου. Πόση ώρα πρέπει να λείψεις; Συμπλήρωσε τα κατάλληλα κενά, ώστε να έχεις τις απαντήσεις σε αυτά τα ερωτήματα.
+        </p>
+
+        <!-- Βασικά Στοιχεία Εισόδου -->
+        <div class="form-section">
+            <h2>Βασικά Δεδομένα</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="t1">Ώρα πρώτης εξυπηρέτησης:</label>
+                    <input type="time" id="t1" value="08:00">
+                </div>
+                <div class="form-group">
+                    <label for="t2">Ώρα άφιξής σου:</label>
+                    <input type="time" id="t2" value="11:00">
+                </div>
+                <div class="form-group">
+                    <label for="n0">Τρεχούμενος αριθμός προτεραιότητας:</label>
+                    <input type="number" id="n0" value="23" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="n1">Δικός σου αριθμός προτεραιότητας:</label>
+                    <input type="number" id="n1" value="31" min="1">
+                </div>
+            </div>
+             <div class="result-box">
+                <span class="label">Αναμενόμενη διάρκεια παραμονής (λεπτά):</span>
+                <span id="tMeanResult" class="value">0.00</span>
+            </div>
+        </div>
+
+        <!-- Καρτέλες Υπολογισμών -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'tabProb')">Εύρεση Πιθανότητας βάσει Χρόνου</button>
+            <button class="tab-button" onclick="openTab(event, 'tabTime')">Εύρεση Χρόνου βάσει Πιθανότητας</button>
+        </div>
+
+        <!-- Καρτέλα 1: Εύρεση Πιθανότητας -->
+        <div id="tabProb" class="tab-content active">
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="tMin">Θέλεις να απουσιάσεις τουλάχιστον (λεπτά):</label>
+                        <input type="number" id="tMin" value="27.83" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="tMax">Θέλεις να απουσιάσεις το πολύ (λεπτά):</label>
+                        <input type="number" id="tMax" value="46.38" min="0">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <span class="label">Η πιθανότητα να έρθει ο αριθμός σου όση ώρα θα λείπεις είναι:</span>
+                    <span id="probResult" class="value">0.00 %</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Καρτέλα 2: Εύρεση Χρόνου -->
+        <div id="tabTime" class="tab-content">
+            <div class="form-section">
+                <div class="form-grid">
+                     <div class="form-group">
+                        <label for="probX">Θέλεις να ΜΗ χάσεις τη σειρά σου. Και θέλεις να είσαι σίγουρος γι' αυτό με πιθανότητα μεγαλύτερη από (%):</label>
+                        <input type="number" id="probX" value="90" min="0" max="100">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <span class="label">Θα πρέπει να λείψεις λιγότερο από (λεπτά):</span>
+                    <span id="timeResult" class="value">0.00</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Υπογραφή -->
+    <div class="signature">
+        Κώστας Κούδας
+    </div>
+
+    <script>
+        // Βεβαιωνόμαστε ότι το DOM έχει φορτωθεί πλήρως
+        document.addEventListener('DOMContentLoaded', () => {
+            // Επιλογή όλων των στοιχείων εισόδου και αποτελεσμάτων
+            const inputs = {
+                t1: document.getElementById('t1'),
+                t2: document.getElementById('t2'),
+                n0: document.getElementById('n0'),
+                n1: document.getElementById('n1'),
+                tMin: document.getElementById('tMin'),
+                tMax: document.getElementById('tMax'),
+                probX: document.getElementById('probX'),
+            };
+
+            const outputs = {
+                tMean: document.getElementById('tMeanResult'),
+                prob: document.getElementById('probResult'),
+                time: document.getElementById('timeResult'),
+            };
+
+            // Συνάρτηση για τη μετατροπή της ώρας (HH:MM) σε λεπτά
+            function timeToMinutes(timeStr) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            }
+
+            // Κύρια συνάρτηση υπολογισμού
+            function calculate() {
+                // Ανάγνωση και μετατροπή τιμών
+                const t1 = timeToMinutes(inputs.t1.value);
+                const t2 = timeToMinutes(inputs.t2.value);
+                const n0 = Number(inputs.n0.value);
+                const n1 = Number(inputs.n1.value);
+                
+                // Έλεγχος εγκυρότητας βασικών δεδομένων
+                if (n0 <= 0 || n1 <= n0 || t2 <= t1) {
+                    outputs.tMean.textContent = 'Μη έγκυρα δεδομένα';
+                    outputs.prob.textContent = 'N/A';
+                    outputs.time.textContent = 'N/A';
+                    return;
+                }
+
+                // Υπολογισμοί σύμφωνα με τον κώδικα Mathematica
+                const tD = t2 - t1;
+                const tMean = tD * (n1 - n0) / n0;
+                outputs.tMean.textContent = tMean.toFixed(2);
+
+                const shape = n1 - n0;
+                
+                if (shape <= 0) {
+                     outputs.prob.textContent = 'N/A';
+                     outputs.time.textContent = 'N/A';
+                     return;
+                }
+                
+                // --- Υπολογισμοί Καρτέλας 1: Εύρεση Πιθανότητας (ΝΕΑ ΦΟΡΜΟΥΛΑ) ---
+                const tMin = Number(inputs.tMin.value);
+                const tMax = Number(inputs.tMax.value);
+                
+                if (tMin >= 0 && tMax > tMin && tD > 0) {
+                    // Υλοποίηση της νέας φόρμουλας από το Mathematica
+                    // όπου a = n1-n0 και z = (n1*t)/tD
+                    const a = shape;
+                    const z_max = (n1 * tMax) / tD;
+                    const z_min = (n1 * tMin) / tD;
+
+                    // FIX: Η jStat.gammaq δεν υπάρχει. Χρησιμοποιούμε τον σωστό υπολογισμό.
+                    // Η συνάρτηση jStat.gamma.cdf(x, shape, scale) υπολογίζει την κάτω κανονικοποιημένη ατελή συνάρτηση γάμμα P(shape, x) με scale.
+                    // Για την κανονικοποιημένη (scale=1), η άνω (Q) είναι 1 - P.
+                    // Αυτό αντιστοιχεί στο Gamma[a, z] / Gamma[a] της Mathematica.
+                    const upperRegularizedGamma = (alpha, zValue) => 1 - jStat.gamma.cdf(zValue, alpha, 1);
+
+                    const gamma_q_a_zmax = upperRegularizedGamma(a, z_max);
+                    const gamma_q_a_zmin = upperRegularizedGamma(a, z_min);
+
+                    // Για τον όρο Gamma[a+1, z] / Gamma[a], χρησιμοποιούμε την ιδιότητα:
+                    // Gamma[a+1, z] = a * Gamma[a, z] + z^a * exp(-z)
+                    // Διαιρώντας με Gamma[a], παίρνουμε:
+                    // a * (Gamma[a, z] / Gamma[a]) + (z^a * exp(-z)) / Gamma[a]
+                    const gammafn_a = jStat.gammafn(a);
+
+                    const term_zmax = (Math.pow(z_max, a) * Math.exp(-z_max)) / gammafn_a;
+                    const term_zmin = (Math.pow(z_min, a) * Math.exp(-z_min)) / gammafn_a;
+                    
+                    const gamma_div_a1_zmax = a * gamma_q_a_zmax + term_zmax;
+                    const gamma_div_a1_zmin = a * gamma_q_a_zmin + term_zmin;
+
+                    // Τώρα συνθέτουμε τον αριθμητή και τον παρονομαστή της αρχικής φόρμουλας,
+                    // διαιρώντας και τους δύο με τον κοινό όρο Gamma[a].
+                    const numerator = (n1 * (tMax - tMin))
+                                    - (n1 * tMax * gamma_q_a_zmax)
+                                    + (n1 * tMin * gamma_q_a_zmin)
+                                    + (tD * gamma_div_a1_zmax)
+                                    - (tD * gamma_div_a1_zmin);
+
+                    const denominator = n1 * (tMax - tMin);
+
+                    if (denominator !== 0 && isFinite(numerator)) {
+                        const prob = 100 * (numerator / denominator);
+                        outputs.prob.textContent = `${prob.toFixed(2)} %`;
+                    } else {
+                        outputs.prob.textContent = 'N/A';
+                    }
+                } else {
+                    outputs.prob.textContent = 'Μη έγκυρος χρόνος';
+                }
+
+
+                // --- Υπολογισμοί Καρτέλας 2: Εύρεση Χρόνου ---
+                // Η λογική εδώ παραμένει η ίδια, χρησιμοποιώντας την αρχική κατανομή Gamma.
+                const probX = Number(inputs.probX.value);
+                const scale = tD / n1; // Όπως στον αρχικό κώδικα Mathematica
+
+                if (probX > 0 && probX < 100 && scale > 0 && isFinite(scale)) {
+                    const probabilityThreshold = 1 - (probX / 100);
+                    const time = jStat.gamma.inv(probabilityThreshold, shape, scale);
+                    outputs.time.textContent = `${time.toFixed(2)}`;
+                } else {
+                     outputs.time.textContent = 'Μη έγκυρη πιθανότητα';
+                }
+            }
+
+            // Προσθήκη event listener σε όλα τα πεδία εισόδου
+            Object.values(inputs).forEach(input => {
+                input.addEventListener('input', calculate);
+            });
+
+            // Εκτέλεση του υπολογισμού μία φορά κατά τη φόρτωση της σελίδας
+            calculate();
+        });
+
+        // Συνάρτηση για την εναλλαγή των καρτελών
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove('active');
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove('active');
+            }
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+    </script>
+
+</body>
+</html>

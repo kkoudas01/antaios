@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Θερμική Διαστολή Υλικών</title>
+    <style>
+        /* Γενικά στυλ σελίδας */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f7fbfc, #bcc7d3);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .results {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .slider-container {
+            margin: 30px 0;
+        }
+        
+        /* CSS για τον ThermalSlider */
+        .device {
+            background: transparent;
+            width: 25svmin;
+            aspect-ratio: 3/5.5;
+            border-radius: 4vmin;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2.5vmin;
+            --progress: 0%;
+            transform: scale(1);
+            margin: 0 auto;
+        }
+
+        .number {
+            font-size: 7vmin;
+            font-weight: bold;
+            color: #2c3e50;
+            position: relative;
+            text-shadow: -0.5vmin -0.5vmin 1vmin hsla(0, 0%, 100%, 0.4),
+                0.5vmin 0.5vmin 0.8vmin hsla(0, 0%, 0%, 0.2);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .number:after {
+            content: "°C";
+            position: absolute;
+            font-size: 3vmin;
+            top: -1vmin;
+            right: -5vmin;
+        }
+
+        .thermostat {
+            height: 24vmin;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1vmin;
+            position: relative;
+            place-items: center;
+        }
+
+        /* Υπόλοιπος CSS για τον ThermalSlider */
+        @supports (background: paint(houdini)) {
+            @property --progress {
+                syntax: "<percentage>";
+                inherits: true;
+                initial-value: 0%;
+            }
+
+            @property --x {
+                syntax: "<percentage>";
+                inherits: true;
+                initial-value: 0%;
+            }
+
+            @property --y {
+                syntax: "<percentage>";
+                inherits: true;
+                initial-value: 0%;
+            }
+        }
+
+        :root {
+            --c1: #00adff;
+            --c2: #39d469;
+            --c3: #ffeb00;
+            --c4: #ff8100;
+            --c5: #b50f0f;
+            --surface: #fffeff;
+            --on-surface: #636571;
+            --outline: #000001;
+            --background: #112;
+            --v: 1;
+        }
+
+        .liquid {
+            position: absolute;
+            inset: 0;
+            border-radius: 10vmin;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .liquid .bg {
+            position: absolute;
+            inset: 0;
+        }
+
+        .liquid .bg:before,
+        .liquid .bg:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            --gp: calc(100% - var(--progress));
+            background: linear-gradient(to bottom,
+                    var(--c5) calc(5% - var(--gp)),
+                    var(--c4) calc(25% - var(--gp)),
+                    var(--c3) calc(50% - var(--gp)),
+                    var(--c2) calc(75% - var(--gp)),
+                    var(--c1) calc(100% - var(--gp)));
+            transform: translateY(calc(100% - var(--progress)));
+            animation: wave 1s linear infinite;
+            transition: all 0.3s linear;
+            filter: saturate(0.65);
+        }
+
+        .liquid .bg:after {
+            transform: scaleX(-1) translateY(calc(100% - var(--progress)));
+            opacity: 0;
+            --o: 0.6;
+            animation-delay: 0.55s;
+        }
+
+        @keyframes wave {
+            from {
+                opacity: var(--o, 1);
+                clip-path: polygon(100% 100%,
+                        0% 100%,
+                        0% 27.83%,
+                        7.14% 28.61%,
+                        14.29% 28.98%,
+                        21.43% 28.9%,
+                        28.57% 28.4%,
+                        35.71% 27.49%,
+                        42.86% 26.22%,
+                        50% 24.65%,
+                        57.14% 22.86%,
+                        64.29% 20.95%,
+                        71.43% 19%,
+                        78.57% 17.12%,
+                        85.71% 15.4%,
+                        92.86% 13.92%,
+                        100% 12.77%);
+            }
+
+            25% {
+                clip-path: polygon(100% 100%,
+                        0% 100%,
+                        0% 17.77%,
+                        7.14% 16.02%,
+                        14.29% 14%,
+                        21.43% 11.82%,
+                        28.57% 9.58%,
+                        35.71% 7.4%,
+                        42.86% 5.38%,
+                        50% 3.63%,
+                        57.14% 2.23%,
+                        64.29% 1.26%,
+                        71.43% 0.76%,
+                        78.57% 0.76%,
+                        85.71% 1.26%,
+                        92.86% 2.23%,
+                        100% 3.63%);
+            }
+
+            50% {
+                clip-path: polygon(100% 100%,
+                        0% 100%,
+                        0% 2.21%,
+                        7.14% 1.34%,
+                        14.29% 0.93%,
+                        21.43% 1.01%,
+                        28.57% 1.58%,
+                        35.71% 2.6%,
+                        42.86% 4.03%,
+                        50% 5.8%,
+                        57.14% 7.81%,
+                        64.29% 9.97%,
+                        71.43% 12.16%,
+                        78.57% 14.28%,
+                        85.71% 16.22%,
+                        92.86% 17.88%,
+                        100% 19.19%);
+            }
+
+            to {
+                opacity: var(--o, 1);
+                clip-path: polygon(100% 100%,
+                        0% 100%,
+                        0% 31.33%,
+                        7.14% 32.11%,
+                        14.29% 32.48%,
+                        21.43% 32.4%,
+                        28.57% 31.9%,
+                        35.71% 30.99%,
+                        42.86% 29.72%,
+                        50% 28.15%,
+                        57.14% 26.36%,
+                        64.29% 24.45%,
+                        71.43% 22.5%,
+                        78.57% 20.62%,
+                        85.71% 18.9%,
+                        92.86% 17.42%,
+                        100% 16.27%);
+            }
+        }
+
+        @keyframes b1 {
+            from {
+                --x: 50%;
+                --y: 60%;
+                opacity: 0;
+            }
+
+            50% {
+                --x: 60%;
+                --y: 45%;
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+            to {
+                --x: 50%;
+                --y: 30%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes b2 {
+            from {
+                --x: 50%;
+                --y: 80%;
+                opacity: 0;
+            }
+
+            50% {
+                --x: 10%;
+                --y: 55%;
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+            to {
+                --x: 60%;
+                --y: 30%;
+                opacity: 0;
+            }
+        }
+
+        @supports (background: paint(houdini)) {
+            .bubbles {
+                position: absolute;
+                inset: 0;
+            }
+
+            .bubbles:before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                --x: 50%;
+                --y: 80%;
+                background: radial-gradient(0.02vmin at var(--x) var(--y),
+                        hsla(0, 0%, 100%, 0.8) .2vmin,
+                        transparent .4vmin,
+                        transparent) center center no-repeat,
+                    radial-gradient(0.03vmin at calc(var(--x) * 1.9) calc(var(--y) * 1.9),
+                        hsla(0, 0%, 100%, 0.8) .2vmin,
+                        transparent .4vmin,
+                        transparent) center center no-repeat;
+                mix-blend-mode: soft-light;
+                animation: b2 linear 3.5s infinite;
+            }
+
+            .bubbles:after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                --x: 30%;
+                --y: 60%;
+                background: radial-gradient(0.02vmin at var(--x) var(--y),
+                        hsla(0, 0%, 100%, 0.1) 0.1vmin,
+                        transparent .4vmin,
+                        transparent) center center no-repeat,
+                    radial-gradient(0.03vmin at calc(var(--x) * 1.2) calc(var(--y) * 1.5),
+                        hsla(0, 0%, 100%, 0.1) .1vmin,
+                        transparent .4vmin,
+                        transparent) center center no-repeat;
+                mix-blend-mode: soft-light;
+                animation: b1 linear 6s infinite;
+            }
+        }
+
+        .glass {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10vmin;
+        }
+
+        .glass-container {
+            height: 24vmin;
+            width: 6vmin;
+            border-radius: 10vmin;
+            position: relative;
+            border: 0.1vmin solid hsla(0, 0%, 100%, 0.2);
+            box-shadow: -1px 0.1vmin 0 1px hsla(0, 0%, 100%, 0.5),
+                1px 0.1vmin 0 1px hsla(0, 0%, 100%, 0.2);
+        }
+
+        .glass-container:before {
+            border-radius: 10vmin;
+            content: "";
+            position: absolute;
+            --size: 2vmin;
+            inset: calc(var(--size) * -1);
+            border-left: var(--size) solid hsla(0, 0%, 100%, 0.5);
+            border-right: var(--size) solid hsla(0, 0%, 50%, 0.2);
+            filter: blur(0.5vmin);
+        }
+
+        .glass-reflection {
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            position: absolute;
+            border-radius: 10vmin;
+            overflow: hidden;
+            inset: 0;
+        }
+
+        .glass-reflection:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right,
+                    hsla(0, 0%, 100%, 0.5),
+                    hsla(0, 0%, 100%, 0.5)) no-repeat,
+                linear-gradient(to right, hsla(0, 0%, 100%, 0.5), hsla(0, 0%, 100%, 0.1)) no-repeat;
+            background-size: 0.5vmin 19vmin, 1.8vmin 21vmin;
+            background-position: 1vmin 3vmin, 3vmin 2vmin;
+            filter: blur(0.4vmin);
+        }
+
+        .glass-reflection:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(4vmin 14vmin at 1vmin 20%,
+                    hsla(0, 0%, 100%, 0.3) 10%,
+                    transparent 50%,
+                    transparent),
+                radial-gradient(2vmin 2vmin at 2vmin 5%,
+                    hsla(0, 0%, 100%, 0.9),
+                    transparent,
+                    transparent),
+                radial-gradient(7vmin 7vmin at 2vmin 5%,
+                    hsla(0, 0%, 100%, 0.9),
+                    transparent,
+                    transparent);
+        }
+
+        .slider#thermal-slider {
+            place-self: center;
+            --gp: calc(100% - var(--progress));
+            --pos: 0px;
+            background: linear-gradient(to bottom, #333 var(--gp), white var(--gp));
+            box-shadow: -0.1vmin 0 0 0.1vmin hsla(0, 0%, 0%, 0.08);
+            width: 0.1vmin;
+            border-radius: 1vmin;
+            height: 20vmin;
+            position: relative;
+        }
+
+        .slider#thermal-slider:before {
+            content: "";
+            position: absolute;
+            inset: -1vmin -2vmin;
+        }
+
+        .slider#thermal-slider:after {
+            content: "";
+            position: absolute;
+            top: calc(10vmin * var(--gp) / 100);
+            width: 3vmin;
+            height: 3vmin;
+            background: radial-gradient(30% 30% at 50% 50%, white, transparent),
+                radial-gradient(70% 70% at 50% 50%, #f6f0f0, #bfc1cd), white;
+            border-radius: 50%;
+            transform: translate(-50%, var(--pos, 0));
+            border-left: 0.1vmin solid white;
+            box-shadow: -0.5vmin -0.5vmin 1vmin hsla(0, 0%, 100%, 0.8),
+                0.5vmin 0.5vmin 1vmin hsla(0, 0%, 10%, 0.2);
+        }
+
+        /* CSS για τον LengthSlider - Διορθωμένο */
+        .length-slider-container {
+            margin: 40px auto;
+            width: 90%;
+        }
+
+        .wrap {
+            --min: 0;
+            --val: 5;
+            --max: 10;
+            --rng: calc(var(--max) - var(--min));
+            --prg: calc((var(--val) - var(--min)) / var(--rng));
+            --prc: calc(var(--prg) * 100%);
+            --pos: calc(var(--val) * 1rem);
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
+            gap: 1.25rem;
+            place-items: center;
+            color: #daff47;
+            font: 1em trebuchet ms, ubuntu, verdana, arial, sans-serif;
+            transition: 0.35s;
+            position: relative;
+        }
+
+        .wrap:not(:focus-within):not(:hover) {
+            filter: sepia(1);
+        }
+
+        input#length-range {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            --sel: 0;
+            place-self: center;
+            width: 100%;
+            height: 1.25rem;
+            background: transparent;
+            font: inherit;
+            cursor: pointer;
+            margin: 0;
+            z-index: 2;
+        }
+
+        input#length-range:focus {
+            outline: none;
+        }
+
+        input#length-range:hover, input#length-range:focus {
+            --sel: 1;
+        }
+
+        input#length-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            --shl: 0 0 0 calc((1 - .375*var(--sel))*1rem) hsla(0, 0%, 19%, var(--sel));
+            box-sizing: border-box;
+            border: none;
+            padding: 0.625rem;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 .5px hsla(0, 0%, 0%),
+                inset 0 0 1px 1px hsla(0, 0%, 100%, .05),
+                inset var(--shl),
+                inset 0 0 0 calc(.5*0.42*(3rem + -2*0.625rem) + 0.625rem) #1f1f1f,
+                .25rem -.25rem .25rem #2a2a2a,
+                -.25rem .25rem .75rem #090909,
+                var(--shl),
+                .75rem -.75rem .75rem #2a2a2a,
+                -.75rem .75rem 1.25rem #090909;
+            background: 
+                repeating-conic-gradient(from 60deg, transparent 0%, silver 1deg 59deg, transparent 60deg 50%)
+                0/ 42% 100% space content-box
+                #1f1f1f;
+            transition: box-shadow .35s;
+            cursor: ew-resize;
+        }
+
+        input#length-range::-moz-range-thumb {
+            --shl: 0 0 0 calc((1 - .375*var(--sel))*1rem) hsla(0, 0%, 19%, var(--sel));
+            box-sizing: border-box;
+            border: none;
+            padding: 0.625rem;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 .5px hsla(0, 0%, 0%),
+                inset 0 0 1px 1px hsla(0, 0%, 100%, .05),
+                inset var(--shl),
+                inset 0 0 0 calc(.5*0.42*(3rem + -2*0.625rem) + 0.625rem) #1f1f1f,
+                .25rem -.25rem .25rem #2a2a2a,
+                -.25rem .25rem .75rem #090909,
+                var(--shl),
+                .75rem -.75rem .75rem #2a2a2a,
+                -.75rem .75rem 1.25rem #090909;
+            background: 
+                repeating-conic-gradient(from 60deg, transparent 0%, silver 1deg 59deg, transparent 60deg 50%)
+                0/ 42% 100% space content-box
+                #1f1f1f;
+            transition: box-shadow .35s;
+            cursor: ew-resize;
+        }
+
+        input#length-range::-webkit-slider-runnable-track {
+            height: 0.5rem;
+            background: #666;
+            border-radius: 0.5rem;
+        }
+
+        input#length-range::-moz-range-track {
+            height: 0.5rem;
+            background: #666;
+            border-radius: 0.5rem;
+        }
+
+        output {
+            position: absolute;
+            top: -2.5rem;
+            left: calc(var(--prc) - 1.25rem);
+            place-content: center;
+            width: 2.5rem;
+            aspect-ratio: 1;
+            font-size: 1.25rem;
+            font-weight: bold;
+            line-height: 2.5rem;
+            text-align: center;
+            counter-reset: val var(--val);
+            background: #2c3e50;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: left 0.2s ease;
+        }
+
+        output::after {
+            content: counter(val);
+        }
+
+        datalist#length-markers {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0 1.5rem;
+            box-sizing: border-box;
+        }
+
+        datalist#length-markers option {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            --abs: max(var(--val) - var(--idx), var(--idx) - var(--val));
+            --rel: calc(var(--abs) / 6);
+            --sel: max(0, 1 - var(--rel));
+            --off: calc(var(--sel) * 0.5rem);
+            padding-top: 1.5rem;
+            transform: translateY(var(--off));
+            color: hsla(0, 0%, 93%, calc(1 - .0625*var(--abs)));
+            font-size: 0.75rem;
+            text-align: center;
+            transition: 0.2s ease-out;
+        }
+
+        datalist#length-markers option::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 0.75rem;
+            background: hsl(0, 0%, 32%);
+        }
+
+        datalist#length-markers option[label]::before {
+            height: 1.25rem;
+            background: hsl(0, 0%, 90%);
+        }
+
+        #length-display {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Υπολογισμός Θερμικής Διαστολής</h1>
+        <p>Αυτή η εφαρμογή σας επιτρέπει να υπολογίσετε τη θερμική διαστολή ενός υλικού με βάση την αλλαγή της θερμοκρασίας και το αρχικό μήκος. Επιλέξτε το υλικό, ρυθμίστε τη θερμοκρασία και το μήκος, και τα αποτελέσματα θα εμφανιστούν αυτόματα.</p>
+    </div>
+
+    <div class="container">
+        <div class="input-group">
+            <label for="material-select">Επιλογή Υλικού:</label>
+            <select id="material-select">
+                <option value="12e-6">Σίδηρος (α = 12×10⁻⁶/°C)</option>
+                <option value="24e-6">Αλουμίνιο (α = 24×10⁻⁶/°C)</option>
+                <option value="17e-6">Χαλκός (α = 17×10⁻⁶/°C)</option>
+                <option value="9e-6">Γυαλί (α = 9×10⁻⁶/°C)</option>
+                <option value="0.5e-6">Διαμάντι (α = 0.5×10⁻⁶/°C)</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <h2>Θερμοκρασία: <span id="temperature-value">0</span> °C</h2>
+            <div class="device" id="device">
+                <div class="number" id="number">0</div>
+                <div class="thermostat">
+                    <div class="bar"></div>
+                    <div class="glass-container">
+                        <div class="glass"></div>
+                        <div class="liquid">
+                            <div class="bg"></div>
+                            <div class="bubbles"></div>
+                        </div>
+                        <div class="glass-reflection"></div>
+                    </div>
+                    <div class="slider" id="thermal-slider"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <h2>Μήκος: <span id="length-value">5</span> m</h2>
+            <div class="length-slider-container">
+                <div class="wrap" role="group" aria-label="slider with ruler" style="--min: 0; --val: 5; --max: 10">
+                    <input id="length-range" type="range" list="length-markers" min="0" value="5" max="10" step="0.1">
+                    <output for="length-range"></output>
+                    <datalist id="length-markers">
+                        <option value="0" style="--idx: 0" label="0"></option>
+                        <option value="1" style="--idx: 1"></option>
+                        <option value="2" style="--idx: 2" label="2"></option>
+                        <option value="3" style="--idx: 3"></option>
+                        <option value="4" style="--idx: 4"></option>
+                        <option value="5" style="--idx: 5" label="5"></option>
+                        <option value="6" style="--idx: 6"></option>
+                        <option value="7" style="--idx: 7"></option>
+                        <option value="8" style="--idx: 8" label="8"></option>
+                        <option value="9" style="--idx: 9"></option>
+                        <option value="10" style="--idx: 10" label="10"></option>
+                    </datalist>
+                </div>
+                <div id="length-display">5 m</div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h2>Αποτελέσματα</h2>
+            <p>Νέο μήκος: <span id="new-length">5</span> m</p>
+            <p>Διαφορά μηκών: <span id="length-difference">0</span> mm</p>
+        </div>
+    </div>
+
+    <script>
+        // Σταθερές και μεταβλητές
+        let thermalValue = 0; // Θερμοκρασία σε °C
+        let lengthValue = 5;  // Μήκος σε m
+        let a = 12e-6;        // Προεπιλεγμένος συντελεστής για σίδηρο
+
+        // Αρχικοποίηση ThermalSlider
+        const number = document.getElementById("number");
+        const device = document.getElementById("device");
+        const thermalSlider = document.getElementById("thermal-slider");
+        const temperatureDisplay = document.getElementById("temperature-value");
+        
+        // Συνάρτηση ενημέρωσης ThermalSlider
+        const updateThermalSlider = (offsetY) => {
+            const pos = Math.max(0, Math.min(thermalSlider.offsetHeight - 20, offsetY));
+            thermalSlider.style.setProperty("--pos", `${pos}px`);
+            const progress = Math.max(
+                0,
+                Math.min(100, 100 - (offsetY / thermalSlider.offsetHeight) * 100)
+            );
+            thermalValue = Math.round(progress * 0.42); // Μετατροπή σε °C (0-42°C)
+            number.innerText = thermalValue;
+            device.style.setProperty("--progress", `${progress}%`);
+            temperatureDisplay.textContent = thermalValue;
+            calculateResults();
+        };
+
+        // Αρχική θέση του ThermalSlider (στο 0)
+        updateThermalSlider(thermalSlider.offsetHeight - 20);
+
+        // Event listeners για ThermalSlider
+        let pointerdown = false;
+        thermalSlider.addEventListener("pointerdown", (e) => {
+            pointerdown = true;
+            updateThermalSlider(e.offsetY);
+        });
+        
+        thermalSlider.addEventListener("pointermove", (e) => {
+            if (pointerdown) {
+                updateThermalSlider(e.offsetY);
+            }
+        });
+        
+        thermalSlider.addEventListener("pointerup", () => {
+            pointerdown = false;
+        });
+        
+        thermalSlider.addEventListener("pointerleave", () => {
+            pointerdown = false;
+        });
+
+        // LengthSlider
+        const lengthRange = document.getElementById("length-range");
+        const lengthOutput = lengthRange.nextElementSibling;
+        const lengthDisplay = document.getElementById("length-display");
+        const lengthValueSpan = document.getElementById("length-value");
+        
+        // Συνάρτηση ενημέρωσης LengthSlider
+        const updateLengthSlider = () => {
+            lengthValue = parseFloat(lengthRange.value);
+            lengthValueSpan.textContent = lengthValue;
+            lengthDisplay.textContent = `${lengthValue} m`;
+            lengthRange.parentNode.style.setProperty('--val', lengthValue);
+            calculateResults();
+        };
+        
+        // Event listener για LengthSlider
+        lengthRange.addEventListener("input", updateLengthSlider);
+        
+        // Αρχικοποίηση LengthSlider
+        updateLengthSlider();
+
+        // Ενημέρωση του συντελεστή α όταν αλλάζει το υλικό
+        document.getElementById("material-select").addEventListener("change", function() {
+            a = parseFloat(this.value);
+            calculateResults();
+        });
+
+        // Συνάρτηση υπολογισμού αποτελεσμάτων
+        function calculateResults() {
+            const newLength = (1 + a * thermalValue) * lengthValue;
+            const lengthDifference = a * thermalValue * lengthValue * 1000; // σε mm
+            
+            document.getElementById("new-length").textContent = newLength.toFixed(4);
+            document.getElementById("length-difference").textContent = lengthDifference.toFixed(2);
+        }
+
+        // Αρχικός υπολογισμός
+        calculateResults();
+    </script>
+</body>
+</html>

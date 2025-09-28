@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Στοιχεία Τριγώνου</title>
+    <style>
+        /* Google Fonts Import - Stencil/Mechanical like */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Staatliches&display=swap');
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #5D6D7E; /* Σκούρο γκρι-μπλε βάση */
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+                              linear-gradient(225deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+                              linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+                              linear-gradient(315deg, rgba(255,255,255,0.05) 25%, transparent 25%);
+            background-size: 30px 30px; /* "Metallic" pattern */
+            color: #ECF0F1; /* Ανοιχτόχρωμο κείμενο */
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #2C3E50; /* Σκούρο μπλε */
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 3px solid #AEB6BF; /* Ανοιχτό γκρι σαν μέταλλο */
+        }
+
+        header h1 {
+            margin: 0;
+            font-family: 'Staatliches', cursive;
+            font-size: 2.5em;
+            color: #F1C40F; /* Κίτρινο για αντίθεση, σαν εργαλείο */
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #home-button {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background-color: #7F8C8D; /* Γκρι κουμπί */
+            color: #ECF0F1;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-family: 'Staatliches', cursive;
+            border: 1px solid #BDC3C7;
+            transition: background-color 0.3s ease;
+        }
+        #home-button:hover {
+            background-color: #95A5A6;
+        }
+
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            justify-content: center;
+        }
+
+        .triangle-container, .controls {
+            background-color: rgba(44, 62, 80, 0.85); /* Ημιδιαφανές σκούρο φόντο */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            flex: 1;
+            min-width: 320px; /* Ελάχιστο πλάτος */
+            max-width: 500px; /* Μέγιστο πλάτος για να μην απλώνει πολύ σε μεγάλες οθόνες */
+        }
+        
+        .triangle-container {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+        }
+
+        #triangle-svg {
+            width: 100%;
+            max-width: 350px; /* Μέγιστο πλάτος SVG */
+            height: auto; /* Διατήρηση αναλογιών */
+            border: 1px solid #7F8C8D;
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .triangle-shape {
+            fill: rgba(241, 196, 15, 0.6); /* Ημιδιαφανές κίτρινο */
+            stroke: #F1C40F; /* Κίτρινο περίγραμμα */
+            stroke-width: 2;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .svg-label { /* Γενική κλάση για τις ετικέτες στο SVG */
+            font-family: 'Roboto Condensed', sans-serif;
+            fill: #ECF0F1;
+            font-size: 12px;
+            text-anchor: middle; /* Στοίχιση στο κέντρο */
+        }
+
+
+        .input-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .input-group label {
+            min-width: 90px; /* Σταθερό πλάτος για τις ετικέτες */
+            margin-right: 10px;
+            font-weight: bold;
+            color: #BDC3C7; /* Ανοιχτό γκρι για ετικέτες */
+        }
+
+        .input-group input[type="number"],
+        .input-group select {
+            flex-grow: 1; /* Να πιάνουν τον υπόλοιπο χώρο */
+            padding: 8px;
+            background-color: #34495E; /* Σκούρο μπλε-γκρι */
+            color: #ECF0F1;
+            border: 1px solid #7F8C8D;
+            border-radius: 4px;
+            font-family: 'Roboto Condensed', sans-serif;
+            min-width: 70px; /* Ελάχιστο πλάτος για select/input */
+        }
+        .input-group input[type="number"] {
+            width: calc(100% - 100px - 70px); /* Προσαρμογή για να χωράει και το select */
+        }
+        .input-group select {
+            min-width: 60px; /* Πλάτος για τις μονάδες */
+            margin-left: 5px;
+        }
+        
+        .output-unit-selector {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .output-unit-selector label {
+             color: #BDC3C7;
+             font-weight: bold;
+        }
+        .output-unit-selector select {
+            padding: 8px;
+            background-color: #34495E;
+            color: #ECF0F1;
+            border: 1px solid #7F8C8D;
+            border-radius: 4px;
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+
+
+        button {
+            background-color: #E67E22; /* Πορτοκαλί σαν εργαλείο */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Staatliches', cursive;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin-right: 10px;
+            margin-top: 5px; /* Add some top margin for buttons */
+        }
+        button:hover {
+            background-color: #D35400; /* Σκουρότερο πορτοκαλί */
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .results {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #7F8C8D;
+        }
+        .results h3 {
+            margin-top: 0;
+            font-family: 'Staatliches', cursive;
+            color: #F1C40F;
+        }
+        .message {
+            font-weight: bold;
+            margin-top:10px;
+        }
+        #error-message { color: #E74C3C; } /* Κόκκινο για σφάλματα */
+        #indicative-message { color: #2ECC71; } /* Πράσινο για ενημερωτικά */
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #2C3E50;
+            border-top: 3px solid #AEB6BF;
+            margin-top: 20px;
+        }
+        .signature {
+            font-size: 0.9em;
+            color: #BDC3C7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+                align-items: center; /* Στοίχιση των items στο κέντρο */
+            }
+            .triangle-container, .controls {
+                width: 90%; /* Πιο ελεγχόμενο πλάτος σε κινητά */
+                max-width: none; /* Αφαίρεση max-width για να χρησιμοποιεί το 90% */
+            }
+            header h1 {
+                font-size: 2em;
+            }
+            #home-button {
+                font-size: 0.9em;
+                padding: 6px 10px;
+                top: 10px;
+                left:10px;
+            }
+            .input-group input[type="number"] {
+                width: calc(100% - 90px - 70px); /* Προσαρμογή πλάτους για μικρές οθόνες */
+            }
+             .output-unit-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .output-unit-selector select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" id="home-button">Αρχική</a>
+        <h1>Στοιχεία Τριγώνου</h1>
+    </header>
+
+    <main>
+        <div class="triangle-container">
+            <svg id="triangle-svg" viewBox="0 0 200 170">
+                <polygon id="triangle-polygon" points="25,150 175,150 100,20" class="triangle-shape"/>
+                <text id="label-side-a" x="140" y="95" class="svg-label">a</text>
+                <text id="label-side-b" x="60" y="95" class="svg-label">b</text>
+                <text id="label-side-c" x="100" y="160" class="svg-label">c</text>
+                <text id="label-angle-A" x="170" y="145" class="svg-label">A</text>
+                <text id="label-angle-B" x="30" y="145" class="svg-label">B</text>
+                <text id="label-angle-C" x="100" y="35" class="svg-label">C</text>
+            </svg>
+            <p id="indicative-message" class="message" style="display:none;">Ενδεικτικό σχήμα</p>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <label for="side-a">Πλευρά α:</label>
+                <input type="number" id="side-a" step="any" min="0">
+                <select id="unit-a">
+                    <option value="m" selected>m</option><option value="cm">cm</option><option value="mm">mm</option>
+                    <option value="dm">dm</option><option value="km">km</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="side-b">Πλευρά β:</label>
+                <input type="number" id="side-b" step="any" min="0">
+                <select id="unit-b">
+                    <option value="m" selected>m</option><option value="cm">cm</option><option value="mm">mm</option>
+                    <option value="dm">dm</option><option value="km">km</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="side-c">Πλευρά γ:</label>
+                <input type="number" id="side-c" step="any" min="0">
+                <select id="unit-c">
+                    <option value="m" selected>m</option><option value="cm">cm</option><option value="mm">mm</option>
+                    <option value="dm">dm</option><option value="km">km</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="angle-A">Γωνία A (°):</label>
+                <input type="number" id="angle-A" step="any" min="0" max="179.999">
+            </div>
+            <div class="input-group">
+                <label for="angle-B">Γωνία B (°):</label>
+                <input type="number" id="angle-B" step="any" min="0" max="179.999">
+            </div>
+            <div class="input-group">
+                <label for="angle-C">Γωνία C (°):</label>
+                <input type="number" id="angle-C" step="any" min="0" max="179.999">
+            </div>
+            
+            <div class="output-unit-selector">
+                <label for="output-unit">Μον. Αποτελεσμάτων:</label>
+                <select id="output-unit">
+                    <option value="m" selected>μέτρα (m, m²)</option>
+                    <option value="cm">εκατοστά (cm, cm²)</option>
+                    <option value="mm">χιλιοστά (mm, mm²)</option>
+                    <option value="dm">δεκατόμετρα (dm, dm²)</option>
+                    <option value="km">χιλιόμετρα (km, km²)</option>
+                </select>
+            </div>
+
+            <button id="calculate-button">Υπολογισμός</button>
+            <button id="clear-button">Καθαρισμός</button>
+
+            <div class="results">
+                <h3>Αποτελέσματα:</h3>
+                <p>Εμβαδόν: <span id="area-result">-</span> <span id="area-unit">m²</span></p>
+                <p>Περίμετρος: <span id="perimeter-result">-</span> <span id="perimeter-unit">m</span></p>
+                <p id="error-message" class="message" style="display:none;"></p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p class="signature">Δημιουργία από AI (2025) - Βασισμένο σε προδιαγραφές χρήστη</p>
+    </footer>
+
+    <script>
+        // DOM Element References
+        const sideAInput = document.getElementById('side-a');
+        const sideBInput = document.getElementById('side-b');
+        const sideCInput = document.getElementById('side-c');
+        const angleAInput = document.getElementById('angle-A');
+        const angleBInput = document.getElementById('angle-B');
+        const angleCInput = document.getElementById('angle-C');
+
+        const unitASelect = document.getElementById('unit-a');
+        const unitBSelect = document.getElementById('unit-b');
+        const unitCSelect = document.getElementById('unit-c');
+        const outputUnitSelect = document.getElementById('output-unit');
+
+
+        const calculateButton = document.getElementById('calculate-button');
+        const clearButton = document.getElementById('clear-button');
+
+        const areaResultSpan = document.getElementById('area-result');
+        const areaUnitSpan = document.getElementById('area-unit'); 
+        const perimeterResultSpan = document.getElementById('perimeter-result');
+        const perimeterUnitSpan = document.getElementById('perimeter-unit');
+        const errorMessageP = document.getElementById('error-message');
+        const indicativeMessageP = document.getElementById('indicative-message');
+
+        const trianglePolygon = document.getElementById('triangle-polygon');
+        const defaultPolygonPoints = "25,150 175,150 100,20"; // Default SVG shape
+
+        // SVG Label References
+        const svgLabelSideA = document.getElementById('label-side-a');
+        const svgLabelSideB = document.getElementById('label-side-b');
+        const svgLabelSideC = document.getElementById('label-side-c');
+        const svgLabelAngleA = document.getElementById('label-angle-A');
+        const svgLabelAngleB = document.getElementById('label-angle-B');
+        const svgLabelAngleC = document.getElementById('label-angle-C');
+
+        // Constants and Helper Functions
+        const units = { 'mm': 0.001, 'cm': 0.01, 'dm': 0.1, 'm': 1, 'km': 1000 };
+        const precision = 1e-9; // For floating point comparisons
+
+        function toMeters(value, unit) { return value * units[unit]; }
+        function fromMeters(value, unit) { return value / units[unit]; }
+        function toRadians(degrees) { return degrees * Math.PI / 180; }
+        function toDegrees(radians) { return radians * 180 / Math.PI; }
+
+        // Function to clear the form and reset SVG
+        function clearForm() {
+            sideAInput.value = ''; sideBInput.value = ''; sideCInput.value = '';
+            angleAInput.value = ''; angleBInput.value = ''; angleCInput.value = '';
+            unitASelect.value = 'm'; unitBSelect.value = 'm'; unitCSelect.value = 'm';
+            outputUnitSelect.value = 'm'; // Reset output unit selector
+
+            areaResultSpan.textContent = '-';
+            areaUnitSpan.textContent = 'm²'; 
+            perimeterResultSpan.textContent = '-';
+            perimeterUnitSpan.textContent = 'm';
+
+            errorMessageP.textContent = ''; errorMessageP.style.display = 'none';
+            indicativeMessageP.style.display = 'none';
+            trianglePolygon.setAttribute('points', defaultPolygonPoints);
+            
+            // Reset SVG labels to default positions/text
+            svgLabelSideA.setAttribute('x', '140'); svgLabelSideA.setAttribute('y', '95'); svgLabelSideA.textContent = 'a';
+            svgLabelSideB.setAttribute('x', '60');  svgLabelSideB.setAttribute('y', '95'); svgLabelSideB.textContent = 'b';
+            svgLabelSideC.setAttribute('x', '100'); svgLabelSideC.setAttribute('y', '160');svgLabelSideC.textContent = 'c';
+            svgLabelAngleA.setAttribute('x', '170');svgLabelAngleA.setAttribute('y', '145');svgLabelAngleA.textContent = 'A';
+            svgLabelAngleB.setAttribute('x', '30'); svgLabelAngleB.setAttribute('y', '145');svgLabelAngleB.textContent = 'B';
+            svgLabelAngleC.setAttribute('x', '100');svgLabelAngleC.setAttribute('y', '35'); svgLabelAngleC.textContent = 'C';
+        }
+
+        // Function to display error messages
+        function displayError(message) {
+            errorMessageP.textContent = message;
+            errorMessageP.style.display = 'block';
+            indicativeMessageP.style.display = 'none'; 
+            areaResultSpan.textContent = '-'; 
+            perimeterResultSpan.textContent = '-';
+            const selectedOutputUnit = outputUnitSelect.value;
+            areaUnitSpan.textContent = selectedOutputUnit + '²';
+            perimeterUnitSpan.textContent = selectedOutputUnit;
+        }
+        
+        // Function to round numbers for display
+        function round(value, decimals = 3) {
+            if (isNaN(value) || !isFinite(value)) return '-'; 
+            return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+        }
+
+        // Function to update the SVG representation of the triangle
+        function updateSVG(a, b, c, A_rad, B_rad, C_rad) {
+            if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(A_rad) || isNaN(B_rad) || isNaN(C_rad) ||
+                a <= 0 || b <= 0 || c <= 0 || A_rad <= 0 || B_rad <= 0 || C_rad <= 0 ||
+                Math.abs(A_rad + B_rad + C_rad - Math.PI) > precision * 100) { 
+                trianglePolygon.setAttribute('points', defaultPolygonPoints); 
+                svgLabelSideA.textContent = 'a'; svgLabelSideB.textContent = 'b'; svgLabelSideC.textContent = 'c';
+                svgLabelAngleA.textContent = 'A'; svgLabelAngleB.textContent = 'B'; svgLabelAngleC.textContent = 'C';
+                return;
+            }
+
+            const viewBoxWidth = 200; 
+            const viewBoxHeight = 170; 
+            const padding = 15; 
+
+            let pAx = padding;
+            let pAy = viewBoxHeight - padding;
+            
+            const maxInputSide = Math.max(a,b,c);
+            let scale = Math.min( (viewBoxWidth - 2*padding) / c, (viewBoxHeight - 2*padding) / (b*Math.sin(A_rad) || maxInputSide)  );
+            scale = Math.min(scale, (viewBoxWidth - 2*padding) / (b*Math.cos(A_rad) || maxInputSide) );
+            
+            if (!isFinite(scale) || scale <=0) scale = Math.min((viewBoxWidth - 2*padding)/maxInputSide, (viewBoxHeight - 2*padding)/maxInputSide) || 1;
+
+
+            let c_scaled = c * scale;
+            let b_scaled = b * scale;
+            
+             if (c_scaled < 5 && b_scaled < 5 && maxInputSide > 0) { // Avoid overly small triangles if inputs are valid
+                scale = 20 / maxInputSide; // Ensure at least one side is 20px
+                c_scaled = c * scale;
+                b_scaled = b * scale;
+             }
+
+
+            let pBx = pAx + c_scaled;
+            let pBy = pAy;
+
+            let pCx = pAx + b_scaled * Math.cos(A_rad);
+            let pCy = pAy - b_scaled * Math.sin(A_rad); 
+
+             if (isNaN(pAx) || isNaN(pAy) || isNaN(pBx) || isNaN(pBy) || isNaN(pCx) || isNaN(pCy) ||
+                !isFinite(pAx) || !isFinite(pAy) || !isFinite(pBx) || !isFinite(pBy) || !isFinite(pCx) || !isFinite(pCy)) {
+                trianglePolygon.setAttribute('points', defaultPolygonPoints);
+                return;
+            }
+            
+            const points = [{x:pAx, y:pAy}, {x:pBx, y:pBy}, {x:pCx, y:pCy}];
+
+            let minX = Math.min(...points.map(p => p.x));
+            let maxX = Math.max(...points.map(p => p.x));
+            let minY = Math.min(...points.map(p => p.y));
+            let maxY = Math.max(...points.map(p => p.y));
+
+            const currentWidth = maxX - minX;
+            const currentHeight = maxY - minY;
+
+            if (currentWidth < precision || currentHeight < precision ) { 
+                 trianglePolygon.setAttribute('points', defaultPolygonPoints); return;
+            }
+
+            const scaleToFitX = (viewBoxWidth - 2 * padding) / currentWidth;
+            const scaleToFitY = (viewBoxHeight - 2 * padding) / currentHeight;
+            const finalScale = Math.min(scaleToFitX, scaleToFitY); 
+            
+            const finalPoints = points.map(p => {
+                return {
+                    x: (p.x - minX) * finalScale + padding + ((viewBoxWidth - 2*padding) - currentWidth * finalScale)/2 ,
+                    y: (p.y - minY) * finalScale + padding + ((viewBoxHeight - 2*padding) - currentHeight * finalScale)/2
+                };
+            });
+
+            trianglePolygon.setAttribute('points', `${finalPoints[0].x},${finalPoints[0].y} ${finalPoints[1].x},${finalPoints[1].y} ${finalPoints[2].x},${finalPoints[2].y}`);
+            
+            const selectedDisplayUnit = outputUnitSelect.value;
+
+            svgLabelSideA.textContent = `a=${round(fromMeters(a, selectedDisplayUnit),2)}`;
+            svgLabelSideA.setAttribute('x', (finalPoints[1].x + finalPoints[2].x) / 2);
+            svgLabelSideA.setAttribute('y', (finalPoints[1].y + finalPoints[2].y) / 2);
+
+            svgLabelSideB.textContent = `b=${round(fromMeters(b, selectedDisplayUnit),2)}`;
+            svgLabelSideB.setAttribute('x', (finalPoints[0].x + finalPoints[2].x) / 2);
+            svgLabelSideB.setAttribute('y', (finalPoints[0].y + finalPoints[2].y) / 2);
+
+            svgLabelSideC.textContent = `c=${round(fromMeters(c, selectedDisplayUnit),2)}`;
+            svgLabelSideC.setAttribute('x', (finalPoints[0].x + finalPoints[1].x) / 2);
+            svgLabelSideC.setAttribute('y', (finalPoints[0].y + finalPoints[1].y) / 2 + 7); 
+
+            svgLabelAngleA.textContent = `A=${round(toDegrees(A_rad),1)}°`;
+            svgLabelAngleA.setAttribute('x', finalPoints[0].x + (finalPoints[0].x - finalPoints[2].x > 0 && finalPoints[0].x - finalPoints[1].x > 0 ? 7 : -7) * (finalScale > 0.5 ? 1 : 0.7) );
+            svgLabelAngleA.setAttribute('y', finalPoints[0].y + (finalPoints[0].y > viewBoxHeight - 30 ? -5 : 10) );
+            
+            svgLabelAngleB.textContent = `B=${round(toDegrees(B_rad),1)}°`;
+            svgLabelAngleB.setAttribute('x', finalPoints[1].x + (finalPoints[1].x - finalPoints[0].x > 0 && finalPoints[1].x - finalPoints[2].x > 0 ? 7 : -7) * (finalScale > 0.5 ? 1 : 0.7));
+            svgLabelAngleB.setAttribute('y', finalPoints[1].y + (finalPoints[1].y > viewBoxHeight - 30 ? -5 : 10) );
+
+            svgLabelAngleC.textContent = `C=${round(toDegrees(C_rad),1)}°`;
+            svgLabelAngleC.setAttribute('x', finalPoints[2].x);
+            svgLabelAngleC.setAttribute('y', finalPoints[2].y + (finalPoints[2].y < 30 ? 12 : -5) );
+        }
+
+        // Event Listener for the Calculate Button
+        calculateButton.addEventListener('click', () => {
+            errorMessageP.style.display = 'none'; errorMessageP.textContent = '';
+            indicativeMessageP.style.display = 'none';
+
+            let sA_val = parseFloat(sideAInput.value);
+            let sB_val = parseFloat(sideBInput.value);
+            let sC_val = parseFloat(sideCInput.value);
+            let angA_deg_val = parseFloat(angleAInput.value);
+            let angB_deg_val = parseFloat(angleBInput.value);
+            let angC_deg_val = parseFloat(angleCInput.value);
+
+            let a = isNaN(sA_val) ? null : toMeters(sA_val, unitASelect.value);
+            let b = isNaN(sB_val) ? null : toMeters(sB_val, unitBSelect.value);
+            let c = isNaN(sC_val) ? null : toMeters(sC_val, unitCSelect.value);
+            let A_rad = isNaN(angA_deg_val) ? null : toRadians(angA_deg_val);
+            let B_rad = isNaN(angB_deg_val) ? null : toRadians(angB_deg_val);
+            let C_rad = isNaN(angC_deg_val) ? null : toRadians(angC_deg_val);
+
+            const knownSidesCount = [a, b, c].filter(x => x !== null && x > 0).length;
+            const knownAnglesCount = [A_rad, B_rad, C_rad].filter(x => x !== null && x > 0 && x < Math.PI - precision).length;
+
+            if (knownSidesCount + knownAnglesCount < 3) {
+                displayError("Παρακαλώ δώστε τουλάχιστον 3 έγκυρα στοιχεία (πλευρές > 0, γωνίες > 0 και < 180)."); return;
+            }
+
+            let indicative = false;
+            let calculationSuccess = false;
+
+            // Case IV: AAA (3 angles, 0 sides)
+            if (knownAnglesCount === 3 && knownSidesCount === 0) {
+                if (Math.abs(A_rad + B_rad + C_rad - Math.PI) > precision * 10) { 
+                    displayError("Το άθροισμα των γωνιών πρέπει να είναι 180°."); return;
+                }
+                a = 1; 
+                if (Math.sin(A_rad) < precision) { displayError("Η γωνία Α δεν μπορεί να είναι 0 ή 180 μοίρες."); return; }
+                b = (a * Math.sin(B_rad)) / Math.sin(A_rad);
+                c = (a * Math.sin(C_rad)) / Math.sin(A_rad);
+                indicative = true;
+                indicativeMessageP.style.display = 'block';
+                calculationSuccess = true;
+            }
+            // Case I: ASA, AAS (1 side, 2 angles)
+            else if (knownSidesCount === 1 && knownAnglesCount === 2) {
+                if (A_rad && B_rad && C_rad === null) C_rad = Math.PI - A_rad - B_rad;
+                else if (A_rad && C_rad && B_rad === null) B_rad = Math.PI - A_rad - C_rad;
+                else if (B_rad && C_rad && A_rad === null) A_rad = Math.PI - B_rad - C_rad;
+                
+                if (A_rad <= precision || B_rad <= precision || C_rad <= precision || A_rad + B_rad + C_rad > Math.PI + precision*10 ) {
+                     displayError("Μη έγκυρες γωνίες (άθροισμα ~180°, μη θετικές, ή μία γωνία πολύ μεγάλη)."); return;
+                }
+
+                if (a !== null) {
+                    if (Math.sin(A_rad) < precision) { displayError("Η γωνία Α δεν μπορεί να είναι 0 ή 180 για υπολογισμό."); return; }
+                    b = (a * Math.sin(B_rad)) / Math.sin(A_rad);
+                    c = (a * Math.sin(C_rad)) / Math.sin(A_rad);
+                } else if (b !== null) {
+                    if (Math.sin(B_rad) < precision) { displayError("Η γωνία B δεν μπορεί να είναι 0 ή 180 για υπολογισμό."); return; }
+                    a = (b * Math.sin(A_rad)) / Math.sin(B_rad);
+                    c = (b * Math.sin(C_rad)) / Math.sin(B_rad);
+                } else if (c !== null) {
+                    if (Math.sin(C_rad) < precision) { displayError("Η γωνία C δεν μπορεί να είναι 0 ή 180 για υπολογισμό."); return; }
+                    a = (c * Math.sin(A_rad)) / Math.sin(C_rad);
+                    b = (c * Math.sin(B_rad)) / Math.sin(C_rad);
+                }
+                calculationSuccess = true;
+            }
+            // Case III: SSS (3 sides, 0 angles)
+            else if (knownSidesCount === 3 && knownAnglesCount === 0) {
+                if (a + b <= c + precision || a + c <= b + precision || b + c <= a + precision) {
+                    displayError("Οι πλευρές δεν σχηματίζουν τρίγωνο (τριγωνική ανισότητα)."); return;
+                }
+                let cosA_arg = (b*b + c*c - a*a) / (2 * b * c);
+                let cosB_arg = (a*a + c*c - b*b) / (2 * a * c);
+                if (Math.abs(cosA_arg) > 1 + precision || Math.abs(cosB_arg) > 1 + precision) {
+                    displayError("Αδύνατος υπολογισμός γωνιών από τις πλευρές (εκτός ορίων για arccos)."); return;
+                }
+                A_rad = Math.acos(Math.max(-1, Math.min(1, cosA_arg))); 
+                B_rad = Math.acos(Math.max(-1, Math.min(1, cosB_arg)));
+                C_rad = Math.PI - A_rad - B_rad;
+                calculationSuccess = true;
+            }
+            // Case II: SAS, SSA (2 sides, 1 angle)
+            else if (knownSidesCount === 2 && knownAnglesCount === 1) {
+                if (a !== null && b !== null && C_rad !== null) { // SAS: a, b, C
+                    c = Math.sqrt(a*a + b*b - 2*a*b*Math.cos(C_rad));
+                    if (2*b*c < precision && Math.abs(b*b + c*c - a*a) > precision ) { displayError("Πρόβλημα υπολογισμού γωνίας Α (διαίρεση με ~μηδέν)."); return; }
+                    let cosA_arg = (b*b + c*c - a*a) / (2*b*c);
+                    if (Math.abs(cosA_arg) > 1 + precision) { displayError("Αδύνατος υπολογισμός γωνίας Α (εκτός ορίων arccos)."); return; }
+                    A_rad = Math.acos(Math.max(-1, Math.min(1, cosA_arg)));
+                    B_rad = Math.PI - A_rad - C_rad;
+                    calculationSuccess = true;
+                } else if (a !== null && c !== null && B_rad !== null) { // SAS: a, c, B
+                    b = Math.sqrt(a*a + c*c - 2*a*c*Math.cos(B_rad));
+                     if (2*b*c < precision && Math.abs(b*b + c*c - a*a) > precision) { displayError("Πρόβλημα υπολογισμού γωνίας Α (διαίρεση με ~μηδέν)."); return; }
+                    let cosA_arg = (b*b + c*c - a*a) / (2*b*c); 
+                    if (Math.abs(cosA_arg) > 1 + precision) { displayError("Αδύνατος υπολογισμός γωνίας Α (εκτός ορίων arccos)."); return; }
+                    A_rad = Math.acos(Math.max(-1, Math.min(1, cosA_arg)));
+                    C_rad = Math.PI - A_rad - B_rad;
+                    calculationSuccess = true;
+                } else if (b !== null && c !== null && A_rad !== null) { // SAS: b, c, A
+                    a = Math.sqrt(b*b + c*c - 2*b*c*Math.cos(A_rad));
+                    if (2*a*c < precision && Math.abs(a*a + c*c - b*b) > precision) { displayError("Πρόβλημα υπολογισμού γωνίας B (διαίρεση με ~μηδέν)."); return; }
+                    let cosB_arg = (a*a + c*c - b*b) / (2*a*c); 
+                     if (Math.abs(cosB_arg) > 1 + precision) { displayError("Αδύνατος υπολογισμός γωνίας B (εκτός ορίων arccos)."); return; }
+                    B_rad = Math.acos(Math.max(-1, Math.min(1, cosB_arg)));
+                    C_rad = Math.PI - A_rad - B_rad;
+                    calculationSuccess = true;
+                }
+                // SSA cases
+                else if (a !== null && b !== null && A_rad !== null) { // Given a, b, A (A opposite a)
+                    if (a < precision || Math.sin(A_rad) < precision) { displayError("Πλευρά 'a' ή sin(A) πολύ μικρή για SSA."); return; }
+                    let sinB_val = (b * Math.sin(A_rad)) / a;
+                    if (sinB_val > 1 + precision || sinB_val < -1 - precision) { displayError("Αδύνατο τρίγωνο (sinB εκτός ορίων)."); return; }
+                    B_rad = Math.asin(Math.max(-1, Math.min(1, sinB_val)));
+                    if (A_rad + B_rad >= Math.PI - precision) {
+                        B_rad = Math.PI - B_rad; 
+                        if (A_rad + B_rad >= Math.PI - precision) { displayError("Αδύνατο τρίγωνο με τις γωνίες (SSA)."); return; }
+                    }
+                    C_rad = Math.PI - A_rad - B_rad;
+                    if (C_rad <= precision) { displayError("Η γωνία C είναι πολύ μικρή/αρνητική (SSA)."); return; }
+                    c = (a * Math.sin(C_rad)) / Math.sin(A_rad);
+                    calculationSuccess = true;
+                }
+                else if (b !== null && a !== null && B_rad !== null) { // Given b, a, B (B opposite b)
+                    if (b < precision || Math.sin(B_rad) < precision) { displayError("Πλευρά 'b' ή sin(B) πολύ μικρή για SSA."); return; }
+                    let sinA_val = (a * Math.sin(B_rad)) / b;
+                    if (sinA_val > 1 + precision || sinA_val < -1 - precision) { displayError("Αδύνατο τρίγωνο (sinA εκτός ορίων)."); return; }
+                    A_rad = Math.asin(Math.max(-1, Math.min(1, sinA_val)));
+                    if (B_rad + A_rad >= Math.PI - precision) {
+                        A_rad = Math.PI - A_rad;
+                        if (B_rad + A_rad >= Math.PI - precision) { displayError("Αδύνατο τρίγωνο με τις γωνίες (SSA)."); return; }
+                    }
+                    C_rad = Math.PI - B_rad - A_rad;
+                     if (C_rad <= precision) { displayError("Η γωνία C είναι πολύ μικρή/αρνητική (SSA)."); return; }
+                    c = (b * Math.sin(C_rad)) / Math.sin(B_rad); // Use Law of Sines for c
+                    calculationSuccess = true;
+                }
+                 // Add other SSA cases: (a,c,C_rad given C), (c,a,A_rad given A), (b,c,C_rad given C), (c,b,B_rad given B)
+                else if (a !== null && c !== null && C_rad !== null) { // Given a, c, C (C opposite c)
+                    if (c < precision || Math.sin(C_rad) < precision) { displayError("Πλευρά 'c' ή sin(C) πολύ μικρή για SSA."); return; }
+                    let sinA_val = (a * Math.sin(C_rad)) / c;
+                    if (sinA_val > 1 + precision || sinA_val < -1 - precision) { displayError("Αδύνατο τρίγωνο (sinA εκτός ορίων)."); return; }
+                    A_rad = Math.asin(Math.max(-1, Math.min(1, sinA_val)));
+                    if (C_rad + A_rad >= Math.PI - precision) {
+                        A_rad = Math.PI - A_rad;
+                        if (C_rad + A_rad >= Math.PI - precision) { displayError("Αδύνατο τρίγωνο με τις γωνίες (SSA)."); return; }
+                    }
+                    B_rad = Math.PI - C_rad - A_rad;
+                    if (B_rad <= precision) { displayError("Η γωνία B είναι πολύ μικρή/αρνητική (SSA)."); return; }
+                    b = (c * Math.sin(B_rad)) / Math.sin(C_rad);
+                    calculationSuccess = true;
+                }
+                 else { displayError("Μη υποστηριζόμενος συνδυασμός 2 πλευρών & 1 γωνίας ή ανεπαρκείς πληροφορίες για SSA/SAS."); return;}
+            }
+             else {
+                displayError("Ανεπαρκή ή μη υποστηριζόμενα δεδομένα για υπολογισμό."); return;
+            }
+
+            if (!calculationSuccess || isNaN(a) || isNaN(b) || isNaN(c) || isNaN(A_rad) || isNaN(B_rad) || isNaN(C_rad) ||
+                a <= precision || b <= precision || c <= precision || 
+                A_rad <= precision || B_rad <= precision || C_rad <= precision ||
+                A_rad >= Math.PI - precision || B_rad >= Math.PI - precision || C_rad >= Math.PI - precision ||
+                Math.abs(A_rad + B_rad + C_rad - Math.PI) > precision * 100) { 
+                displayError("Προέκυψαν μη έγκυρες τιμές τριγώνου μετά τον υπολογισμό.");
+                updateSVG(NaN,NaN,NaN,NaN,NaN,NaN); 
+                return;
+            }
+            
+            const selectedOutputUnit = outputUnitSelect.value;
+            const outputUnitFactor = units[selectedOutputUnit];
+
+            if (isNaN(sA_val) || (indicative && sideAInput.value === '')) sideAInput.value = round(fromMeters(a, unitASelect.value));
+            if (isNaN(sB_val) || (indicative && sideBInput.value === '')) sideBInput.value = round(fromMeters(b, unitBSelect.value));
+            if (isNaN(sC_val) || (indicative && sideCInput.value === '')) sideCInput.value = round(fromMeters(c, unitCSelect.value));
+            if (isNaN(angA_deg_val) || (indicative && angleAInput.value === '')) angleAInput.value = round(toDegrees(A_rad));
+            if (isNaN(angB_deg_val) || (indicative && angleBInput.value === '')) angleBInput.value = round(toDegrees(B_rad));
+            if (isNaN(angC_deg_val) || (indicative && angleCInput.value === '')) angleCInput.value = round(toDegrees(C_rad));
+
+            const perimeter_m = a + b + c;
+            const displayPerimeter = perimeter_m / outputUnitFactor;
+            perimeterResultSpan.textContent = round(displayPerimeter);
+            perimeterUnitSpan.textContent = selectedOutputUnit;
+
+            const s_hero = perimeter_m / 2; // Use perimeter in meters for Hero's formula
+            const area_m2 = Math.sqrt(s_hero * (s_hero - a) * (s_hero - b) * (s_hero - c));
+            
+            if (isNaN(area_m2) || area_m2 < precision) {
+                areaResultSpan.textContent = '-'; 
+            } else {
+                const displayArea = area_m2 / (outputUnitFactor * outputUnitFactor);
+                areaResultSpan.textContent = round(displayArea); 
+            }
+            areaUnitSpan.textContent = selectedOutputUnit + '²'; 
+            
+            updateSVG(a, b, c, A_rad, B_rad, C_rad);
+        });
+
+        clearButton.addEventListener('click', clearForm);
+        
+    </script>
+</body>
+</html>
