@@ -1183,7 +1183,7 @@
 
 			75% {
 				transform: translate(-20px, 10px) rotate(-65deg);
-			}
+				}
 
 			80% {
 				transform: translate(-35px, 60px) rotate(-90deg);
@@ -1876,8 +1876,6 @@
 			z-index: 2;
 		}
 
-
-
 		/* ========================================================= */
 		/* ΓΕΝΙΚΟ STYLING & ΣΤΑΤΙΚΟ ΦΟΝΤΟ ΜΕ SVG GRADIENT */
 		/* ========================================================= */
@@ -1888,8 +1886,7 @@
 			height: 100vh;
 			background: #111;
 			overflow: auto;
-			/* Η προηγούμενη διόρθωση */
-			min-width: 600px;
+			min-width: 320px;
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
@@ -1923,11 +1920,9 @@
 			cursor: default;
 			white-space: normal;
 			line-height: 1.5;
-			/* Νέα στυλ για παραγράφους */
 			margin-bottom: 8px;
 		}
 
-		/* Ειδικό στυλ για κείμενο με <br> */
 		.menu-text br {
 			display: block;
 			content: "";
@@ -2024,7 +2019,6 @@
 			}
 		}
 
-		/* Προσαρμογή της μπάρας κύλισης */
 		#submenu-container::-webkit-scrollbar {
 			width: 8px;
 		}
@@ -2051,15 +2045,12 @@
 		#submenu-container h3 {
 			margin-top: 0;
 			margin-bottom: 10px;
-			/* Αλλαγή χρώματος γραμμάτων */
 			color: #00ff11;
-			/* Χρυσό χρώμα */
 			text-align: center;
 			font-size: 1.2em;
 			width: 100%;
 			border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 			padding-bottom: 8px;
-			/* Μαύρο περίγραμμα γύρω από τα γράμματα */
 			text-shadow:
 				-0.5px -0.5px 0 #000,
 				0.5px -0.5px 0 #000,
@@ -2111,9 +2102,7 @@
 
 		.menu-link,
 		.submenu-toggle {
-			/* Αλλαγή χρώματος γραμμάτων */
 			color: #f6d500;
-			/* Γαλαζοπράσινο χρώμα */
 			text-decoration: none;
 			padding: 8px 12px;
 			margin: 4px 0;
@@ -2126,7 +2115,6 @@
 			align-items: center;
 			box-sizing: border-box;
 			cursor: pointer;
-			/* Μαύρο περίγραμμα γύρω από τα γράμματα */
 			text-shadow:
 				-0.5px -0.5px 0 #000,
 				0.5px -0.5px 0 #000,
@@ -2137,9 +2125,7 @@
 		.menu-link:hover,
 		.submenu-toggle:hover {
 			background: rgba(255, 255, 255, 0.2);
-			/* Αλλαγή χρώματος στο hover */
 			color: #FFFFFF;
-			/* Λευκό χρώμα */
 		}
 
 		.submenu-toggle::after {
@@ -2148,7 +2134,6 @@
 			font-size: 1.2em;
 			transform: rotate(0deg);
 			transition: transform 0.3s ease;
-			/* Μαύρο περίγραμμα γύρω από το βέλος */
 			text-shadow:
 				-0.5px -0.5px 0 #000,
 				0.5px -0.5px 0 #000,
@@ -2189,29 +2174,20 @@
 		/* ========================================================= */
 		/* STYLING ΓΙΑ ΤΙΣ ΕΤΙΚΕΤΕΣ ΜΕΝΟΥ */
 		/* ========================================================= */
-
-
-
-
 		#demo {
 			width: 90vw;
 			height: auto;
 			max-width: 720px;
 			overflow: visible;
 			margin-top: 0;
-			/* Βεβαιώσου ότι δεν έχει extra margin */
 		}
 
-		/* ========================================================= */
-		/* STYLING ΓΙΑ ΤΙΣ ΕΤΙΚΕΤΕΣ ΜΕΝΟΥ - ΠΑΝΩ ΑΠΟ ΤΑ SVG */
-		/* ========================================================= */
 		.menu-labels {
 			display: flex;
 			justify-content: space-between;
 			width: 90vw;
 			max-width: 720px;
 			margin-bottom: -70px;
-			/* Μείωση από 10px σε 5px */
 			position: relative;
 		}
 
@@ -2223,25 +2199,12 @@
 			transition: all 0.3s ease;
 			opacity: 1;
 			margin-bottom: 10;
-			/* Καμία επιπλέον απόσταση */
 			padding: 0;
-			/* Καμία padding */
 		}
 
 		.menu-label.hidden {
 			opacity: 0;
 			transform: translateY(-5px);
-			/* Μικρότερη κίνηση */
-		}
-
-		/* Βεβαιώσου ότι το SVG δεν προσθέτει επιπλέον απόσταση */
-		#demo {
-			width: 90vw;
-			height: auto;
-			max-width: 720px;
-			overflow: visible;
-			margin-top: 0;
-			/* Καμία απόσταση από πάνω */
 		}
 
 		.menu-text a.text-link {
@@ -2258,17 +2221,158 @@
 			border-radius: 4px;
 		}
 
-		/* Βεβαιώσου ότι το κείμενο μπορεί να περιέχει HTML */
 		.menu-text {
 			white-space: normal;
 			line-height: 1.5;
+		}
+
+		/* ========================================================= */
+		/* RESPONSIVE STYLES */
+		/* ========================================================= */
+		
+		/* Για κινητά σε portrait */
+		@media (max-width: 768px) {
+			body {
+				min-height: 100vh;
+				height: auto;
+				padding: 20px 0;
+				overflow-x: hidden;
+			}
+
+			h1 {
+				font-size: 1.5em;
+				margin-bottom: 10px;
+			}
+
+			.menu-labels {
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 5px;
+				margin-bottom: -50px;
+				z-index: 20;
+				position: relative;
+			}
+
+			.menu-label {
+				font-size: 10px;
+				width: 60px;
+				margin: 2px;
+			}
+
+			#demo {
+				width: 95vw;
+				max-width: none;
+				margin-top: 20px;
+			}
+
+			.animated-scene {
+				order: 3;
+				margin-top: 20px;
+				transform: scale(0.8);
+				transform-origin: top center;
+			}
+
+			.section-center {
+				width: 100%;
+				max-width: 400px;
+				height: 300px;
+			}
+
+			.section-up {
+				height: 180px;
+			}
+
+			.section-down {
+				height: 120px;
+				top: 180px;
+			}
+
+			#submenu-container {
+				position: fixed;
+				top: 50% !important;
+				left: 50% !important;
+				transform: translate(-50%, -50%);
+				max-height: 80vh;
+				z-index: 1000;
+			}
+
+			.mega-menu {
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.mega-section {
+				min-width: 100%;
+			}
+		}
+
+		/* Για κινητά σε landscape */
+		@media (max-width: 768px) and (orientation: landscape) {
+			body {
+				padding: 10px 0;
+				height: auto;
+				min-height: 100vh;
+			}
+
+			.animated-scene {
+				display: none;
+			}
+
+			.menu-labels {
+				margin-bottom: -30px;
+			}
+
+			#demo {
+				margin-top: 10px;
+			}
+
+			#submenu-container {
+				max-height: 60vh;
+			}
+		}
+
+		/* Για πολύ μικρές οθόνες */
+		@media (max-width: 480px) {
+			.menu-label {
+				font-size: 9px;
+				width: 50px;
+			}
+
+			#demo {
+				width: 98vw;
+			}
+
+			.section-center {
+				max-width: 320px;
+				height: 240px;
+			}
+
+			.section-up {
+				height: 144px;
+			}
+
+			.section-down {
+				height: 96px;
+				top: 144px;
+			}
+
+			.animated-scene {
+				transform: scale(0.7);
+			}
+		}
+
+		/* Για να αποφύγουμε το zoom σε κινητά */
+		@media (max-width: 768px) {
+			input, select, textarea {
+				font-size: 16px;
+			}
 		}
 	</style>
 </head>
 
 <body>
 	<h1>Ανταίος</h1>
-	<!--<p>Ψηλαφίζοντας τὴ μορφή, τὴ δομὴ καὶ τὴ λειτουργεία τοῦ κόσμου</p>-->
+	
 	<!-- Ετικέτες μενού -->
 	<div id="menu-labels" class="menu-labels">
 		<div class="menu-label" data-for-menu="menu1">Περί...</div>
@@ -3175,6 +3279,19 @@
 		submenuContainer.addEventListener('click', function (e) {
 			e.stopPropagation();
 		});
+
+		// Προσθήκη event listener για responsive behavior
+		window.addEventListener('resize', function() {
+			if (window.innerWidth <= 768 && window.innerHeight <= 480) {
+				// Σε landscape mode για κινητά, απόκρυψη του animated scene
+				document.querySelector('.animated-scene').style.display = 'none';
+			} else {
+				document.querySelector('.animated-scene').style.display = 'block';
+			}
+		});
+
+		// Κλήση αρχικά για να ρυθμίσει το display
+		window.dispatchEvent(new Event('resize'));
 	</script>
 </body>
 
