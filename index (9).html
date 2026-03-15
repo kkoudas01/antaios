@@ -1993,7 +1993,7 @@
 		/* STYLING ΓΙΑ ΤΟ GLASSMORHISM SUBMENU */
 		/* ========================================================= */
 		#submenu-container {
-			position: absolute;
+			position: fixed;
 			min-width: 280px;
 			max-width: min(500px, 90vw);
 			width: auto;
@@ -2249,11 +2249,6 @@
 			background: rgba(255,255,255,0.3);
 		}
 
-		/* Το submenu container χρειάζεται position:absolute ώστε το scroll offset να λειτουργεί */
-		#submenu-container {
-			position: absolute;
-		}
-
 		.menu-text {
 			white-space: normal;
 			line-height: 1.5;
@@ -2370,9 +2365,8 @@
 				visibility: hidden;
 				position: absolute !important;
 				pointer-events: none !important;
-				width: 0 !important; height: 0 !important;
-				overflow: hidden;
-				clip: rect(0,0,0,0);
+				top: -9999px !important;
+				left: -9999px !important;
 			}
 
 			body {
@@ -2636,7 +2630,7 @@
 	<div id="menu-labels" class="menu-labels">
 		<div class="menu-label" data-for-menu="menu1">Περί...</div>
 		<div class="menu-label" data-for-menu="menu2">Καθημερινά</div>
-		<div class="menu-label" data-for-menu="menu3">Κατασκευαστικά</div>
+		<div class="menu-label" data-for-menu="menu3">Κατασκευές</div>
 		<div class="menu-label" data-for-menu="menu4">Αγροτικά</div>
 		<div class="menu-label" data-for-menu="menu5">Οικονομικά</div>
 		<div class="menu-label" data-for-menu="menu6">Αταξινόμητα</div>
@@ -3187,35 +3181,25 @@
 					{
 						type: "text",
 						content: `
-                    Η παρούσα σελίδα είναι ένα εργαλείο πρακτικής φύσεως. 
-					Σε αυτήν προσπαθούμε να αυτοματοποιήσουμε κάποιους πρακτικούς
-					υπολογισμούς, ώστε να μην χρειάζεται ο ενδιαφερόμενος χρήστης να 
-					μπορεί να μοντελοποιήσει μαθηματικώς το πρόβλημά του ή πόσω μάλλον
-					να επιλύσει το μαθηματικό μοντέλο που το περιγράφει. Στη σελίδα
-					αυτή, επίσης, παρουσιάζονται κάποιες πληροφορίες με έναν συνοπτικό
-					και αυτοματοποιημένο τρόπο, ώστε η πρόσβαση σε αυτές να είναι 
-					άμεση και εύκολη.
-                    <br><br>
-                    Ο Ανταίος ήταν ένας μυθικός γίγαντας, γιος της Γης και του θεού Ποσειδώνα.
-					Αντλούσε τη δύναμή του ερχόμενος σε επαφή με τη γη και γι' αυτό επιλέχθηκε
-					το όνομά του για μια ιστοσελίδα που καταπιάνεται με χειροπιαστά ζητήματα.
-                    <br><br>
-                    Όσον αφορά εμένα ονομάζομαι Κώστας Κούδας, είμαι εκπαιδευτικός μαθηματικών 
-					και ζω στην Κέρκυρα. Άλλες ιστοσελίδες που διαχειρίζομαι είναι οι:
-					<br><br>
-					 ➭ <a href="https://kkoudas01.github.io/r4social/index.html" target="_blank" class="text-link">Στοχαστικά Μαθηματικά χωρίς… μαθηματικά για κοινωνικούς επιστήμονες με τη συνδρομή της R</a>,
-					 <br><br>
-					 ➭ <a href="https://epipsayseis.pages.dev/" target="_blank" class="text-link">ἐπιψαύσεις</a>,
-					 <br><br>
-					 ➭ <a href="https://dromos.pages.dev/" target="_blank" class="text-link">δρόμος</a>.
-                `
+Η παρούσα σελίδα είναι ένα εργαλείο πρακτικής φύσεως. Σε αυτήν προσπαθούμε να αυτοματοποιήσουμε κάποιους πρακτικούς υπολογισμούς, ώστε να μην χρειάζεται ο ενδιαφερόμενος χρήστης να μπορεί να μοντελοποιήσει μαθηματικώς το πρόβλημά του ή πόσω μάλλον να επιλύσει το μαθηματικό μοντέλο που το περιγράφει. Στη σελίδα αυτή, επίσης, παρουσιάζονται κάποιες πληροφορίες με έναν συνοπτικό και αυτοματοποιημένο τρόπο, ώστε η πρόσβαση σε αυτές να είναι άμεση και εύκολη.
+<br><br>
+Ο Ανταίος ήταν ένας μυθικός γίγαντας, γιος της Γης και του θεού Ποσειδώνα. Αντλούσε τη δύναμή του ερχόμενος σε επαφή με τη γη και γι' αυτό επιλέχθηκε το όνομά του για μια ιστοσελίδα που καταπιάνεται με χειροπιαστά ζητήματα.
+<br><br>
+Όσον αφορά εμένα ονομάζομαι Κώστας Κούδας, είμαι εκπαιδευτικός μαθηματικών και ζω στην Κέρκυρα. Άλλες ιστοσελίδες που διαχειρίζομαι είναι οι:
+<br><br>
+<a href="https://kkoudas01.github.io/r4social/index.html" target="_blank" class="text-link">Στοχαστικά Μαθηματικά χωρίς… μαθηματικά για κοινωνικούς επιστήμονες με τη συνδρομή της R</a>,
+<br><br>
+<a href="https://epipsayseis.pages.dev/" target="_blank" class="text-link">ἐπιψαύσεις</a>,
+<br><br>
+<a href="https://dromos.pages.dev/" target="_blank" class="text-link">δρόμος</a>.
+						`
 					}
 				]
 			},
 			menu2: {
 				title: "Καθημερινά",
 				items: [
-					{ text: "Χρόνος αναμονής σε ουρά", link: "anamoni.html" }
+					{ text: "Χρόνος αναμονής σε ουρά", link: "anamoni.html" },
 				]
 			},
 			menu3: {
@@ -3227,14 +3211,15 @@
 						items: [
 							{ text: "Στοιχεία Τριγώνου", link: "stoixeiaTrigonoy.html" },
 							{ text: "Στοιχεία Κύκλου", link: "stoixeiaKykloy.html" },
-							{ text: "Όγκοι (υπό κατασκευή)", link: "#" }
+							{ text: "Όγκοι (υπό κατασκευή)", link: "#" },
+							{ text: "Έλλειψη (υπό κατασκευή)", link: "#" },
 						]
 					},
 					{
 						title: "Σκάλες",
 						items: [
 							{ text: "Υπολογιστής Γωνιακών Σκαλοπατιών", link: "stairs.html" },
-							{ text: "Υπολογιστής Σπειροειδούς Σκάλας", link: "spiralStairs.html" }
+							{ text: "Υπολογιστής Σπειροειδούς Σκάλας", link: "spiralStairs.html" },
 						]
 					},
 					{
@@ -3242,37 +3227,36 @@
 						items: [
 							{ text: "Υπολογιστής Τόξου", link: "toxo.html" },
 							{ text: "Βραχυστόχρονη (υπό κατασκευή)", link: "#" },
-							{ text: "Αλυσσοειδής (υπό κατασκευή)", link: "#" }
+							{ text: "Αλυσσοειδής (υπό κατασκευή)", link: "#" },
 						]
 					},
 					{
 						title: "Υδραυλικά",
 						items: [
-							{ text: "Χαρακτηριστικές καμπύλες (υπό κατασκευή)", link: "#" }
+							{ text: "Χαρακτηριστικές καμπύλες (υπό κατασκευή)", link: "#" },
 						]
-					}
+					},
 				]
 			},
-
 			menu4: {
 				title: "Αγροτικά",
 				items: [
-					{ text: "Οδηγός Συγκαλλιέργειας", link: "sygkalliergeies.html" }
+					{ text: "Οδηγός Συγκαλλιέργειας", link: "sygkalliergeies.html" },
 				]
 			},
 			menu5: {
 				title: "Οικονομικά",
 				items: [
-					{ text: "Αναμενόμενο κέρδος (υπό κατασκευή)", link: "#" }
+					{ text: "Αναμενόμενο κέρδος (υπό κατασκευή)", link: "#" },
 				]
 			},
 			menu6: {
 				title: "Αταξινόμητα",
 				items: [
 					{ text: "Ανάλυση Δεδομένων", link: "continVar.html" },
-					{ text: "Αναδιάταξη σελίδων για εκτύπωση στο μισό μέγεθος", link: "ektyposi.html" }
+					{ text: "Αναδιάταξη σελίδων για εκτύπωση στο μισό μέγεθος", link: "ektyposi.html" },
 				]
-			}
+			},
 		};
 
 		targets.forEach((obj, i) => {
@@ -3345,7 +3329,7 @@
 			return html;
 		}
 
-		function showSubmenu(dotIndex) {
+										function showSubmenu(dotIndex) {
 			const menuId = targets[dotIndex].dataset.menuId;
 			const content = submenuContent[menuId];
 
@@ -3375,38 +3359,27 @@
 				activeDot = -1;
 			});
 
-			// Scroll-aware positioning
+			// Positioning βάσει του SVG icon
 			const iconRect = targets[dotIndex].getBoundingClientRect();
-			const scrollY = window.scrollY || window.pageYOffset;
-			const scrollX = window.scrollX || window.pageXOffset;
 
-			// Προσωρινά ορατό για μέτρηση
 			submenuContainer.style.visibility = 'hidden';
 			submenuContainer.style.opacity = '0';
 			submenuContainer.classList.add('visible');
 
 			const menuW = submenuContainer.offsetWidth;
-			const menuH = submenuContainer.offsetHeight;
 			const viewW = window.innerWidth;
 			const viewH = window.innerHeight;
 
-			let top = iconRect.bottom + scrollY + 20;
-			let left = iconRect.left + scrollX + (iconRect.width / 2) - (menuW / 2);
+			// Οριζόντια κεντράρισμα κάτω από το icon
+			let top  = iconRect.bottom + 20;
+			let left = iconRect.left + (iconRect.width / 2) - (menuW / 2);
 
-			// Μην ξεφεύγει δεξιά
-			if (left + menuW > scrollX + viewW - 10) {
-				left = scrollX + viewW - menuW - 10;
-			}
-			// Μην ξεφεύγει αριστερά
-			if (left < scrollX + 10) {
-				left = scrollX + 10;
-			}
-			// Αν δεν χωράει κάτω, βάλτο πάνω από το εικονίδιο
-			if (iconRect.bottom + menuH + 30 > viewH) {
-				top = iconRect.top + scrollY - menuH - 10;
-			}
+			if (left + menuW > viewW - 10) left = viewW - menuW - 10;
+			if (left < 10) left = 10;
+			// Πάντα κάτω από το icon — το max-height+overflow-y χειρίζεται το clipping
+			if (top > viewH - 60) top = iconRect.bottom + 10;
 
-			submenuContainer.style.top = `${top}px`;
+			submenuContainer.style.top  = `${top}px`;
 			submenuContainer.style.left = `${left}px`;
 			submenuContainer.style.visibility = '';
 			submenuContainer.style.opacity = '';
@@ -3520,12 +3493,12 @@
 
 			// Δεδομένα μενού (ίδια με submenuContent — ανακτώνται απ' εκεί)
 			const menuMeta = [
-				{ id: 'menu1', label: 'Περί...'         },
-				{ id: 'menu2', label: 'Καθημερινά'      },
-				{ id: 'menu3', label: 'Κατασκευαστικά'  },
-				{ id: 'menu4', label: 'Αγροτικά'        },
-				{ id: 'menu5', label: 'Οικονομικά'      },
-				{ id: 'menu6', label: 'Αταξινόμητα'     },
+				{ id: 'menu1', label: 'Περί...' },
+				{ id: 'menu2', label: 'Καθημερινά' },
+				{ id: 'menu3', label: 'Κατασκευές' },
+				{ id: 'menu4', label: 'Αγροτικά' },
+				{ id: 'menu5', label: 'Οικονομικά' },
+				{ id: 'menu6', label: 'Αταξινόμητα' },
 			];
 
 			// Εξάγουμε τα SVG paths από το ήδη-υπάρχον #icons

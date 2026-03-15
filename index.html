@@ -1993,7 +1993,7 @@
 		/* STYLING ΓΙΑ ΤΟ GLASSMORHISM SUBMENU */
 		/* ========================================================= */
 		#submenu-container {
-			position: absolute;
+			position: fixed;
 			min-width: 280px;
 			max-width: min(500px, 90vw);
 			width: auto;
@@ -2249,11 +2249,6 @@
 			background: rgba(255,255,255,0.3);
 		}
 
-		/* Το submenu container χρειάζεται position:absolute ώστε το scroll offset να λειτουργεί */
-		#submenu-container {
-			position: absolute;
-		}
-
 		.menu-text {
 			white-space: normal;
 			line-height: 1.5;
@@ -2370,9 +2365,8 @@
 				visibility: hidden;
 				position: absolute !important;
 				pointer-events: none !important;
-				width: 0 !important; height: 0 !important;
-				overflow: hidden;
-				clip: rect(0,0,0,0);
+				top: -9999px !important;
+				left: -9999px !important;
 			}
 
 			body {
@@ -3335,7 +3329,7 @@
 			return html;
 		}
 
-		function showSubmenu(dotIndex) {
+										function showSubmenu(dotIndex) {
 			const menuId = targets[dotIndex].dataset.menuId;
 			const content = submenuContent[menuId];
 
@@ -3365,38 +3359,27 @@
 				activeDot = -1;
 			});
 
-			// Scroll-aware positioning
+			// Positioning βάσει του SVG icon
 			const iconRect = targets[dotIndex].getBoundingClientRect();
-			const scrollY = window.scrollY || window.pageYOffset;
-			const scrollX = window.scrollX || window.pageXOffset;
 
-			// Προσωρινά ορατό για μέτρηση
 			submenuContainer.style.visibility = 'hidden';
 			submenuContainer.style.opacity = '0';
 			submenuContainer.classList.add('visible');
 
 			const menuW = submenuContainer.offsetWidth;
-			const menuH = submenuContainer.offsetHeight;
 			const viewW = window.innerWidth;
 			const viewH = window.innerHeight;
 
-			let top = iconRect.bottom + scrollY + 20;
-			let left = iconRect.left + scrollX + (iconRect.width / 2) - (menuW / 2);
+			// Οριζόντια κεντράρισμα κάτω από το icon
+			let top  = iconRect.bottom + 20;
+			let left = iconRect.left + (iconRect.width / 2) - (menuW / 2);
 
-			// Μην ξεφεύγει δεξιά
-			if (left + menuW > scrollX + viewW - 10) {
-				left = scrollX + viewW - menuW - 10;
-			}
-			// Μην ξεφεύγει αριστερά
-			if (left < scrollX + 10) {
-				left = scrollX + 10;
-			}
-			// Αν δεν χωράει κάτω, βάλτο πάνω από το εικονίδιο
-			if (iconRect.bottom + menuH + 30 > viewH) {
-				top = iconRect.top + scrollY - menuH - 10;
-			}
+			if (left + menuW > viewW - 10) left = viewW - menuW - 10;
+			if (left < 10) left = 10;
+			// Πάντα κάτω από το icon — το max-height+overflow-y χειρίζεται το clipping
+			if (top > viewH - 60) top = iconRect.bottom + 10;
 
-			submenuContainer.style.top = `${top}px`;
+			submenuContainer.style.top  = `${top}px`;
 			submenuContainer.style.left = `${left}px`;
 			submenuContainer.style.visibility = '';
 			submenuContainer.style.opacity = '';
