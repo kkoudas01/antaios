@@ -5,14 +5,9 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Ανταίος</title>
-	<style>
-		/* Poppins-like system font stack - zero external dependencies */
-		@font-face {
-			font-family: 'Poppins';
-			font-weight: 400;
-			src: local('Nunito'), local('Varela Round'), local('Century Gothic'), local('Trebuchet MS'), local('Calibri'), local('Arial Rounded MT Bold');
-		}
-	</style>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 <style>
 		/* ========================================================= */
 		/* ΚΙΝΟΥΜΕΝΟ SCENE STYLES - ΟΛΟΚΛΗΡΟ ΤΟ CSS */
@@ -1885,7 +1880,7 @@
 		/* ΓΕΝΙΚΟ STYLING & ΣΤΑΤΙΚΟ ΦΟΝΤΟ ΜΕ SVG GRADIENT */
 		/* ========================================================= */
 		body {
-			font-family: "Poppins", "Nunito", "Varela Round", "Century Gothic", "Trebuchet MS", "Calibri", sans-serif;
+			font-family: "Poppins", sans-serif;
 			color: white;
 			display: flex;
 			height: 100vh;
@@ -2226,34 +2221,6 @@
 			border-radius: 4px;
 		}
 
-		.submenu-close-btn {
-			display: none;
-			position: absolute;
-			top: 8px;
-			right: 8px;
-			background: rgba(255,255,255,0.15);
-			border: 1px solid rgba(255,255,255,0.3);
-			color: #fff;
-			border-radius: 50%;
-			width: 28px;
-			height: 28px;
-			font-size: 14px;
-			line-height: 1;
-			cursor: pointer;
-			align-items: center;
-			justify-content: center;
-			transition: background 0.2s;
-			flex-shrink: 0;
-		}
-		.submenu-close-btn:hover {
-			background: rgba(255,255,255,0.3);
-		}
-
-		/* Το submenu container χρειάζεται position:absolute ώστε το scroll offset να λειτουργεί */
-		#submenu-container {
-			position: absolute;
-		}
-
 		.menu-text {
 			white-space: normal;
 			line-height: 1.5;
@@ -2287,13 +2254,11 @@
 			}
 
 			.menu-label {
-				font-size: 9px;
+				font-size: 10px;
 				width: 60px;
 				margin: 2px;
-				display: block;
-				text-align: center;
-				color: #f6d500;
-				text-shadow: -0.5px -0.5px 0 #000, 0.5px -0.5px 0 #000, -0.5px 0.5px 0 #000, 0.5px 0.5px 0 #000;
+				/* ΑΠΑΙΤΟΥΜΕΝΗ ΑΛΛΑΓΗ: ΑΠΟΚΡΥΨΗ ΤΙΤΛΩΝ ΣΕ ΚΙΝΗΤΑ */
+				display: none;
 			}
 
 			#demo {
@@ -2304,16 +2269,33 @@
 
 			.animated-scene {
 				order: 3;
-				margin-top: 10px;
+				margin-top: 20px;
+				transform: scale(0.8);
+				transform-origin: top center;
+			}
+
+			.section-center {
+				width: 100%;
+				max-width: 400px;
+				height: 300px;
+			}
+
+			.section-up {
+				height: 180px;
+			}
+
+			.section-down {
+				height: 120px;
+				top: 180px;
 			}
 
 			#submenu-container {
+				position: fixed;
+				top: 50% !important;
+				left: 50% !important;
+				transform: translate(-50%, -50%);
 				max-height: 80vh;
 				z-index: 1000;
-			}
-
-			.submenu-close-btn {
-				display: flex;
 			}
 
 			.mega-menu {
@@ -2334,6 +2316,18 @@
 				min-height: 100vh;
 			}
 
+			.animated-scene {
+				display: none;
+			}
+
+			.menu-labels {
+				margin-bottom: -30px;
+			}
+
+			#demo {
+				margin-top: 10px;
+			}
+
 			#submenu-container {
 				max-height: 60vh;
 			}
@@ -2342,301 +2336,54 @@
 		/* Για πολύ μικρές οθόνες */
 		@media (max-width: 480px) {
 			.menu-label {
-				font-size: 8px;
+				font-size: 9px;
 				width: 50px;
-				display: block;
+				/* ΑΠΑΙΤΟΥΜΕΝΗ ΑΛΛΑΓΗ: ΑΠΟΚΡΥΨΗ ΤΙΤΛΩΝ ΣΕ ΚΙΝΗΤΑ */
+				display: none;
+			}
+
+			#demo {
+				width: 98vw;
+			}
+
+			.section-center {
+				max-width: 320px;
+				height: 240px;
+			}
+
+			.section-up {
+				height: 144px;
+			}
+
+			.section-down {
+				height: 96px;
+				top: 144px;
+			}
+
+			.animated-scene {
+				transform: scale(0.7);
 			}
 		}
 
 		/* Για να αποφύγουμε το zoom σε κινητά */
 		@media (max-width: 768px) {
-			input, select, textarea { font-size: 16px; }
+			input, select, textarea {
+				font-size: 16px;
+			}
 		}
 
-		/* ========================================================= */
-		/* SIDE DRAWER — κινητά μόνο (≤768px)                        */
-		/* ========================================================= */
-		/* Κρύβουμε τα drawer elements σε desktop */
-		.side-drawer, .drawer-overlay, .hamburger-btn { display: none; }
 		
-
-		@media (max-width: 768px) {
-			/* Κρύβουμε το desktop menu.
-			   Το #demo ΔΕΝ παίρνει display:none γιατί το getBBox()
-			   δεν δουλεύει σε hidden elements — χρειαζόμαστε το
-			   getBBox() για να φτιάξουμε σωστό viewBox στα drawer icons */
-			.menu-labels, #submenu-container { display: none !important; }
-			#demo {
-				visibility: hidden;
-				position: absolute !important;
-				pointer-events: none !important;
-				width: 0 !important; height: 0 !important;
-				overflow: hidden;
-				clip: rect(0,0,0,0);
-			}
-
-			body {
-				justify-content: center;
-				align-items: center;
-				padding: 0;
-			}
-			h1 { margin-bottom: 8px; }
-
-			/* Scene: κρατάμε 600×450, το JS κάνει scale */
-			.animated-scene {
-				transform: none;
-				margin: 0;
-				order: 0;
-				width: 100%;
-				display: flex;
-				justify-content: center;
-				overflow: hidden;
-			}
-			.section-center {
-				width: 600px;
-				height: 450px;
-				transform-origin: top center;
-				flex-shrink: 0;
-			}
-
-			/* --- Hamburger --- */
-			.hamburger-btn {
-				display: flex;
-				position: fixed;
-				top: 14px;
-				right: 16px;
-				z-index: 1100;
-				background: rgba(40, 28, 110, 0.88);
-				border: 1px solid rgba(255,255,255,0.22);
-				border-radius: 10px;
-				width: 46px;
-				height: 46px;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-				gap: 5px;
-				cursor: pointer;
-				backdrop-filter: blur(8px);
-				-webkit-backdrop-filter: blur(8px);
-				transition: background 0.2s;
-			}
-			.hamburger-btn span {
-				display: block;
-				width: 22px;
-				height: 2px;
-				background: #fff;
-				border-radius: 2px;
-				transition: transform 0.28s, opacity 0.2s;
-			}
-			.hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-			.hamburger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-			.hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-			/* --- Overlay --- */
-			.drawer-overlay {
-				display: none;
-				position: fixed;
-				inset: 0;
-				background: rgba(0,0,0,0.5);
-				z-index: 1050;
-			}
-			.drawer-overlay.visible { display: block; }
-
-			/* --- Drawer panel --- */
-			.side-drawer {
-				position: fixed;
-				top: 0; right: 0;
-				width: min(300px, 86vw);
-				height: 100dvh;
-				/* Glassmorphism — ίδιο με το desktop submenu */
-				background: rgba(255, 255, 255, 0.08);
-				backdrop-filter: blur(20px);
-				-webkit-backdrop-filter: blur(20px);
-				border-left: 1px solid rgba(255,255,255,0.2);
-				box-shadow: -8px 0 32px 0 rgba(31, 38, 135, 0.45);
-				z-index: 1100;
-				transform: translateX(105%);
-				transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-				display: flex;
-				flex-direction: column;
-				overflow: hidden;
-			}
-			.side-drawer.open { transform: translateX(0); }
-
-			.drawer-header {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				padding: 15px 16px 11px;
-				border-bottom: 1px solid rgba(255,255,255,0.1);
-				flex-shrink: 0;
-			}
-			.drawer-title {
-				color: #fff;
-				font-size: 1.05em;
-				font-weight: 700;
-				opacity: 0.8;
-				letter-spacing: 0.05em;
-			}
-			.drawer-close {
-				background: rgba(255,255,255,0.08);
-				border: 1px solid rgba(255,255,255,0.18);
-				color: #fff;
-				border-radius: 50%;
-				width: 30px; height: 30px;
-				font-size: 15px;
-				cursor: pointer;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				transition: background 0.18s;
-			}
-			.drawer-close:hover { background: rgba(255,255,255,0.22); }
-
-			.drawer-body {
-				flex: 1;
-				overflow-y: auto;
-				padding: 6px 0 20px;
-				overscroll-behavior: contain;
-			}
-			.drawer-body::-webkit-scrollbar { width: 3px; }
-			.drawer-body::-webkit-scrollbar-thumb {
-				background: rgba(255,255,255,0.18);
-				border-radius: 3px;
-			}
-
-			/* --- Κάθε menu row --- */
-			.drawer-item { border-bottom: 1px solid rgba(255,255,255,0.07); }
-
-			.drawer-item-btn {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-				width: 100%;
-				padding: 11px 16px;
-				background: none;
-				border: none;
-				cursor: pointer;
-				text-align: left;
-				transition: background 0.15s;
-			}
-			.drawer-item-btn:active,
-			.drawer-item-btn.active { background: rgba(255,255,255,0.09); }
-
-			/* SVG εικονίδιο — inline SVG σε μικρό container */
-			.drawer-icon {
-				width: 36px; height: 36px;
-				flex-shrink: 0;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				overflow: hidden;
-			}
-			.drawer-icon svg {
-				width: 36px; height: 36px;
-				overflow: hidden;
-				display: block;
-			}
-			.drawer-icon svg path { fill: #fff; }
-			.drawer-icon svg rect  { fill: transparent; }
-
-			.drawer-item-label {
-				flex: 1;
-				color: #f6d500;
-				font-size: 0.97em;
-				font-weight: 600;
-				text-shadow: -0.5px -0.5px 0 #000, 0.5px 0.5px 0 #000;
-			}
-			.drawer-arrow {
-				color: rgba(255,255,255,0.45);
-				font-size: 1.1em;
-				transition: transform 0.25s;
-				flex-shrink: 0;
-			}
-			.drawer-item-btn.active .drawer-arrow { transform: rotate(90deg); }
-
-			/* --- Glassmorphism submenu panel μέσα στο drawer --- */
-			.drawer-submenu {
-				max-height: 0;
-				overflow: hidden;
-				transition: max-height 0.32s ease;
-				background: rgba(255, 255, 255, 0.07);
-				border-left: 2px solid rgba(255,255,255,0.15);
-				margin: 0 12px 0 50px;
-				border-radius: 0 0 10px 10px;
-				backdrop-filter: blur(10px);
-				-webkit-backdrop-filter: blur(10px);
-			}
-			.drawer-submenu.open { max-height: 700px; }
-			.drawer-submenu-inner {
-				padding: 8px 14px 14px 14px;
-				border-radius: 10px;
-			}
-
-			.drawer-submenu .menu-link,
-			.drawer-submenu .submenu-toggle {
-				color: #f6d500 !important;
-				display: block !important;
-				padding: 9px 10px !important;
-				text-decoration: none;
-				font-size: 0.91em;
-				border-radius: 6px;
-				transition: background 0.15s;
-				text-shadow: -0.5px -0.5px 0 #000, 0.5px 0.5px 0 #000;
-			}
-			.drawer-submenu .menu-link:hover,
-			.drawer-submenu .submenu-toggle:hover { background: rgba(255,255,255,0.09); }
-			.drawer-submenu .menu-text {
-				color: #f6d500;
-				font-size: 0.86em;
-				line-height: 1.55;
-				padding: 6px 10px;
-			}
-			.drawer-submenu .mega-menu { flex-direction: column; gap: 14px; }
-			.drawer-submenu .mega-section h4 {
-				color: #00ff11;
-				font-size: 0.84em;
-				margin: 10px 0 4px;
-				padding-bottom: 4px;
-				border-bottom: 1px solid rgba(255,255,255,0.12);
-				text-shadow: -0.5px -0.5px 0 #000, 0.5px 0.5px 0 #000;
-			}
-			.drawer-submenu .submenu {
-				margin-left: 8px;
-				max-height: none !important;
-				background: transparent;
-			}
-			.drawer-submenu .submenu.visible { display: block; }
-		}
 	</style>
 </head>
 
 <body>
 	<h1>Ανταίος</h1>
-
-	<!-- ===== SIDE DRAWER (κινητά) ===== -->
-	<button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού">
-		<span></span><span></span><span></span>
-	</button>
-
-	<div class="drawer-overlay" id="drawerOverlay"></div>
-
-	<div class="side-drawer" id="sideDrawer">
-		<div class="drawer-header">
-			<span class="drawer-title">Ανταίος</span>
-			<button class="drawer-close" id="drawerClose" aria-label="Κλείσιμο">✕</button>
-		</div>
-		<div class="drawer-body" id="drawerBody">
-			<!-- Γεμίζει δυναμικά από JS -->
-		</div>
-	</div>
-	<!-- ===== /SIDE DRAWER ===== -->
 	
 	<!-- Ετικέτες μενού -->
 	<div id="menu-labels" class="menu-labels">
 		<div class="menu-label" data-for-menu="menu1">Περί...</div>
 		<div class="menu-label" data-for-menu="menu2">Καθημερινά</div>
-		<div class="menu-label" data-for-menu="menu3">Κατασκευές</div>
+		<div class="menu-label" data-for-menu="menu3">Κατασκευαστικά</div>
 		<div class="menu-label" data-for-menu="menu4">Αγροτικά</div>
 		<div class="menu-label" data-for-menu="menu5">Οικονομικά</div>
 		<div class="menu-label" data-for-menu="menu6">Αταξινόμητα</div>
@@ -3073,112 +2820,27 @@
 
 
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+
 	<script>
-		// ============================================================
-		// VANILLA JS REPLACEMENT FOR GSAP + MotionPathPlugin
-		// Implements quadratic bezier motion path for the "jumpers"
-		// ============================================================
+		console.clear();
+		gsap.registerPlugin(MotionPathPlugin);
 
-		// Easing functions
-		const ease = {
-			sineInOut: t => -(Math.cos(Math.PI * t) - 1) / 2
-		};
-
-		// Quadratic bezier point: P = (1-t)^2*P0 + 2(1-t)t*P1 + t^2*P2
-		function quadBezier(t, p0, p1, p2) {
-			const mt = 1 - t;
-			return mt * mt * p0 + 2 * mt * t * p1 + t * t * p2;
-		}
-
-		let targets = Array.from(document.querySelectorAll("#icons g"));
+		let targets = gsap.utils.toArray("#icons g");
 		let submenuContainer = document.getElementById("submenu-container");
 
 		let dotCenters = [50, 150, 250, 350, 450, 550];
 		let yCenter = 112;
 		let maxTravel = 500;
 		let minTravel = 100;
-		let maxDur = 1000; // ms
-		let maxArc = 150;
-		let staggers = [200, 160, 135, 120, 110]; // ms
-
-		// mapRange(minTravel, maxTravel, 0.5, 1) → linear
-		function mapRange(inMin, inMax, outMin, outMax, val) {
-			return outMin + (outMax - outMin) * ((val - inMin) / (inMax - inMin));
-		}
-
+		let mapper = gsap.utils.mapRange(minTravel, maxTravel, 0.5, 1);
+		let anim;
 		let activeDot = -1;
 		let targetDot;
-		let animationId = null;
-		let jumpers = null;
-
-		// Get jumpers lazily after DOM ready
-		function getJumpers() {
-			if (!jumpers) jumpers = Array.from(document.querySelectorAll(".jumper"));
-			return jumpers;
-		}
-
-		// Cancel any running animation
-		function cancelAnim() {
-			if (animationId !== null) {
-				cancelAnimationFrame(animationId);
-				animationId = null;
-			}
-		}
-
-		// Animate jumpers (SVG <rect> elements) along quadratic bezier path, staggered
-		// Rects: width=80, height=80, so center = x+40, y+40
-		const RECT_W = 80;
-		const RECT_H = 80;
-
-		function animateJumpers(oldX, newX, arc, dur, stagger, onComplete) {
-			cancelAnim();
-			const jmps = getJumpers();
-			const startTime = performance.now();
-			const totalDur = dur + stagger * (jmps.length - 1);
-			const cpX = (oldX + newX) / 2;
-			const cpY = arc;
-
-			function frame(now) {
-				const elapsed = now - startTime;
-
-				jmps.forEach((j, i) => {
-					const delay = i * stagger;
-					const t_raw = (elapsed - delay) / dur;
-					if (t_raw < 0) return;
-
-					const t = ease.sineInOut(Math.min(t_raw, 1));
-
-					// Center position along bezier
-					const cx = quadBezier(t, oldX, cpX, newX);
-					const cy = quadBezier(t, yCenter, cpY, yCenter);
-
-					// rect x/y is top-left corner
-					j.setAttribute("x", cx - RECT_W / 2);
-					j.setAttribute("y", cy - RECT_H / 2);
-
-					// Squish: stretch at arc peak
-					const squishT = Math.sin(Math.PI * Math.min(t_raw, 1));
-					j.setAttribute("rx", 26 + squishT * 14);
-					j.setAttribute("ry", 26 - squishT * 12);
-				});
-
-				if (elapsed < totalDur) {
-					animationId = requestAnimationFrame(frame);
-				} else {
-					// Snap all to final resting position
-					jmps.forEach(j => {
-						j.setAttribute("x", newX - RECT_W / 2);
-						j.setAttribute("y", yCenter - RECT_H / 2);
-						j.setAttribute("rx", 26);
-						j.setAttribute("ry", 26);
-					});
-					animationId = null;
-					onComplete();
-				}
-			}
-
-			animationId = requestAnimationFrame(frame);
-		}
+		let maxDur = 1;
+		let maxArc = 150;
+		let staggers = [0.2, 0.16, 0.135, 0.12, 0.11];
 
 		const submenuContent = {
 			menu1: {
@@ -3187,25 +2849,35 @@
 					{
 						type: "text",
 						content: `
-Η παρούσα σελίδα είναι ένα εργαλείο πρακτικής φύσεως. Σε αυτήν προσπαθούμε να αυτοματοποιήσουμε κάποιους πρακτικούς υπολογισμούς, ώστε να μην χρειάζεται ο ενδιαφερόμενος χρήστης να μπορεί να μοντελοποιήσει μαθηματικώς το πρόβλημά του ή πόσω μάλλον να επιλύσει το μαθηματικό μοντέλο που το περιγράφει. Στη σελίδα αυτή, επίσης, παρουσιάζονται κάποιες πληροφορίες με έναν συνοπτικό και αυτοματοποιημένο τρόπο, ώστε η πρόσβαση σε αυτές να είναι άμεση και εύκολη.
-<br><br>
-Ο Ανταίος ήταν ένας μυθικός γίγαντας, γιος της Γης και του θεού Ποσειδώνα. Αντλούσε τη δύναμή του ερχόμενος σε επαφή με τη γη και γι' αυτό επιλέχθηκε το όνομά του για μια ιστοσελίδα που καταπιάνεται με χειροπιαστά ζητήματα.
-<br><br>
-Όσον αφορά εμένα ονομάζομαι Κώστας Κούδας, είμαι εκπαιδευτικός μαθηματικών και ζω στην Κέρκυρα. Άλλες ιστοσελίδες που διαχειρίζομαι είναι οι:
-<br><br>
-<a href="https://kkoudas01.github.io/r4social/index.html" target="_blank" class="text-link">Στοχαστικά Μαθηματικά χωρίς… μαθηματικά για κοινωνικούς επιστήμονες με τη συνδρομή της R</a>,
-<br><br>
-<a href="https://epipsayseis.pages.dev/" target="_blank" class="text-link">ἐπιψαύσεις</a>,
-<br><br>
-<a href="https://dromos.pages.dev/" target="_blank" class="text-link">δρόμος</a>.
-						`
+                    Η παρούσα σελίδα είναι ένα εργαλείο πρακτικής φύσεως. 
+					Σε αυτήν προσπαθούμε να αυτοματοποιήσουμε κάποιους πρακτικούς
+					υπολογισμούς, ώστε να μην χρειάζεται ο ενδιαφερόμενος χρήστης να 
+					μπορεί να μοντελοποιήσει μαθηματικώς το πρόβλημά του ή πόσω μάλλον
+					να επιλύσει το μαθηματικό μοντέλο που το περιγράφει. Στη σελίδα
+					αυτή, επίσης, παρουσιάζονται κάποιες πληροφορίες με έναν συνοπτικό
+					και αυτοματοποιημένο τρόπο, ώστε η πρόσβαση σε αυτές να είναι 
+					άμεση και εύκολη.
+                    <br><br>
+                    Ο Ανταίος ήταν ένας μυθικός γίγαντας, γιος της Γης και του θεού Ποσειδώνα.
+					Αντλούσε τη δύναμή του ερχόμενος σε επαφή με τη γη και γι' αυτό επιλέχθηκε
+					το όνομά του για μια ιστοσελίδα που καταπιάνεται με χειροπιαστά ζητήματα.
+                    <br><br>
+                    Όσον αφορά εμένα ονομάζομαι Κώστας Κούδας, είμαι εκπαιδευτικός μαθηματικών 
+					και ζω στην Κέρκυρα. Άλλες ιστοσελίδες που διαχειρίζομαι είναι οι:
+					<br><br>
+					 ➭ <a href="https://kkoudas01.github.io/r4social/index.html" target="_blank" class="text-link">Στοχαστικά Μαθηματικά χωρίς… μαθηματικά για κοινωνικούς επιστήμονες με τη συνδρομή της R</a>,
+					 <br><br>
+					 ➭ <a href="https://epipsayseis.pages.dev/" target="_blank" class="text-link">ἐπιψαύσεις</a>,
+					 <br><br>
+					 ➭ <a href="https://dromos.pages.dev/" target="_blank" class="text-link">δρόμος</a>.
+                `
 					}
 				]
 			},
 			menu2: {
 				title: "Καθημερινά",
 				items: [
-					{ text: "Χρόνος αναμονής σε ουρά", link: "anamoni.html" },
+					{ text: "Χρόνος αναμονής σε ουρά", link: "anamoni.html" }
 				]
 			},
 			menu3: {
@@ -3217,15 +2889,14 @@
 						items: [
 							{ text: "Στοιχεία Τριγώνου", link: "stoixeiaTrigonoy.html" },
 							{ text: "Στοιχεία Κύκλου", link: "stoixeiaKykloy.html" },
-							{ text: "Όγκοι (υπό κατασκευή)", link: "#" },
-							{ text: "Έλλειψη (υπό κατασκευή)", link: "#" },
+							{ text: "Όγκοι (υπό κατασκευή)", link: "#" }
 						]
 					},
 					{
 						title: "Σκάλες",
 						items: [
 							{ text: "Υπολογιστής Γωνιακών Σκαλοπατιών", link: "stairs.html" },
-							{ text: "Υπολογιστής Σπειροειδούς Σκάλας", link: "spiralStairs.html" },
+							{ text: "Υπολογιστής Σπειροειδούς Σκάλας", link: "spiralStairs.html" }
 						]
 					},
 					{
@@ -3233,36 +2904,37 @@
 						items: [
 							{ text: "Υπολογιστής Τόξου", link: "toxo.html" },
 							{ text: "Βραχυστόχρονη (υπό κατασκευή)", link: "#" },
-							{ text: "Αλυσσοειδής (υπό κατασκευή)", link: "#" },
+							{ text: "Αλυσσοειδής (υπό κατασκευή)", link: "#" }
 						]
 					},
 					{
 						title: "Υδραυλικά",
 						items: [
-							{ text: "Χαρακτηριστικές καμπύλες (υπό κατασκευή)", link: "#" },
+							{ text: "Χαρακτηριστικές καμπύλες (υπό κατασκευή)", link: "#" }
 						]
-					},
+					}
 				]
 			},
+
 			menu4: {
 				title: "Αγροτικά",
 				items: [
-					{ text: "Οδηγός Συγκαλλιέργειας", link: "sygkalliergeies.html" },
+					{ text: "Οδηγός Συγκαλλιέργειας", link: "sygkalliergeies.html" }
 				]
 			},
 			menu5: {
 				title: "Οικονομικά",
 				items: [
-					{ text: "Αναμενόμενο κέρδος (υπό κατασκευή)", link: "#" },
+					{ text: "Αναμενόμενο κέρδος (υπό κατασκευή)", link: "#" }
 				]
 			},
 			menu6: {
 				title: "Αταξινόμητα",
 				items: [
 					{ text: "Ανάλυση Δεδομένων", link: "continVar.html" },
-					{ text: "Αναδιάταξη σελίδων για εκτύπωση στο μισό μέγεθος", link: "ektyposi.html" },
+					{ text: "Αναδιάταξη σελίδων για εκτύπωση στο μισό μέγεθος", link: "ektyposi.html" }
 				]
-			},
+			}
 		};
 
 		targets.forEach((obj, i) => {
@@ -3272,11 +2944,13 @@
 
 		// Χρήση event delegation για τα toggle buttons
 		submenuContainer.addEventListener('click', function (e) {
+			// Ελέγχουμε αν το κλικ ήταν σε ένα στοιχείο με κλάση 'submenu-toggle'
 			if (e.target.classList.contains('submenu-toggle')) {
 				e.stopPropagation();
 				const submenu = e.target.nextElementSibling;
 				const isVisible = submenu.classList.contains('visible');
 
+				// Κλείσιμο όλων των υπο-μενου που δεν είναι αυτό
 				document.querySelectorAll('.submenu.visible').forEach(menu => {
 					if (menu !== submenu && !menu.contains(submenu)) {
 						menu.classList.remove('visible');
@@ -3284,6 +2958,7 @@
 					}
 				});
 
+				// Άνοιγμα/κλείσιμο του τρέχοντος
 				if (isVisible) {
 					submenu.classList.remove('visible');
 					e.target.classList.remove('expanded');
@@ -3335,19 +3010,18 @@
 			return html;
 		}
 
+		// Δυναμική τοποθέτηση του submenu κάτω από το κλικαρισμένο εικονίδιο
 		function showSubmenu(dotIndex) {
 			const menuId = targets[dotIndex].dataset.menuId;
 			const content = submenuContent[menuId];
 
+			// Απόκρυψη της ετικέτας του τρέχοντος menu
 			const currentLabel = document.querySelector(`.menu-label[data-for-menu="${menuId}"]`);
 			if (currentLabel) {
 				currentLabel.classList.add('hidden');
 			}
 
-			// Κουμπί κλεισίματος (ορατό μόνο σε κινητά μέσω CSS)
-			let closeBtn = `<button class="submenu-close-btn" aria-label="Κλείσιμο">✕</button>`;
-
-			let html = closeBtn + `<h3>${content.title}</h3>`;
+			let html = `<h3>${content.title}</h3>`;
 			if (content.type === "mega") {
 				html += generateMegaMenu(content);
 			} else {
@@ -3358,50 +3032,18 @@
 
 			submenuContainer.innerHTML = html;
 
-			// Κουμπί κλεισίματος
-			submenuContainer.querySelector('.submenu-close-btn').addEventListener('click', (e) => {
-				e.stopPropagation();
-				hideSubmenu();
-				activeDot = -1;
-			});
-
-			// Scroll-aware positioning
+			// Υπολογισμός της θέσης του εικονιδίου
 			const iconRect = targets[dotIndex].getBoundingClientRect();
-			const scrollY = window.scrollY || window.pageYOffset;
-			const scrollX = window.scrollX || window.pageXOffset;
 
-			// Προσωρινά ορατό για μέτρηση
-			submenuContainer.style.visibility = 'hidden';
-			submenuContainer.style.opacity = '0';
+			// Τοποθέτηση του submenu κάτω από το κλικαρισμένο εικονίδιο
+			submenuContainer.style.top = `${iconRect.bottom + 20}px`;
+			submenuContainer.style.left = `${iconRect.left + (iconRect.width / 2) - (submenuContainer.offsetWidth / 2)}px`;
+
 			submenuContainer.classList.add('visible');
-
-			const menuW = submenuContainer.offsetWidth;
-			const menuH = submenuContainer.offsetHeight;
-			const viewW = window.innerWidth;
-			const viewH = window.innerHeight;
-
-			let top = iconRect.bottom + scrollY + 20;
-			let left = iconRect.left + scrollX + (iconRect.width / 2) - (menuW / 2);
-
-			// Μην ξεφεύγει δεξιά
-			if (left + menuW > scrollX + viewW - 10) {
-				left = scrollX + viewW - menuW - 10;
-			}
-			// Μην ξεφεύγει αριστερά
-			if (left < scrollX + 10) {
-				left = scrollX + 10;
-			}
-			// Αν δεν χωράει κάτω, βάλτο πάνω από το εικονίδιο
-			if (iconRect.bottom + menuH + 30 > viewH) {
-				top = iconRect.top + scrollY - menuH - 10;
-			}
-
-			submenuContainer.style.top = `${top}px`;
-			submenuContainer.style.left = `${left}px`;
-			submenuContainer.style.visibility = '';
-			submenuContainer.style.opacity = '';
 		}
 
+		// Βοηθητική συνάρτηση για δημιουργία υπο-μενου
+		// Αντικατάσταση της συνάρτησης generateSubmenuItems με αυτήν:
 		function generateSubmenuItems(items) {
 			let html = '';
 			items.forEach(item => {
@@ -3411,15 +3053,20 @@
 		}
 
 		function hideSubmenu() {
+			// Κλείσιμο όλων των υπο-μενου πρώτα
 			document.querySelectorAll('.submenu.visible').forEach(menu => {
 				menu.classList.remove('visible');
 			});
 			document.querySelectorAll('.submenu-toggle.expanded').forEach(button => {
 				button.classList.remove('expanded');
 			});
+
+			// Εμφάνιση όλων των ετικετών
 			document.querySelectorAll('.menu-label').forEach(label => {
 				label.classList.remove('hidden');
 			});
+
+			// Μετά κλείσιμο του κύριου μενού
 			submenuContainer.classList.remove('visible');
 		}
 
@@ -3432,31 +3079,49 @@
 				return;
 			}
 
-			hideSubmenu();
+			// Αρχικά κρύβουμε το μενού για να το εμφανίσουμε στη νέα θέση μετά την κίνηση
+			hideSubmenu(); // Αυτό θα εμφανίσει ΌΛΕΣ τις ετικέτες
 
-			// Snap any in-progress animation
-			cancelAnim();
+			if (anim && anim.isActive()) {
+				anim.progress(1);
+			}
 
 			let oldX = (activeDot === -1) ? dotCenters[0] : dotCenters[activeDot];
 			let newX = dotCenters[targetDot];
 			let travel = Math.abs(oldX - newX);
-			let factor = mapRange(minTravel, maxTravel, 0.5, 1, Math.max(minTravel, Math.min(maxTravel, travel)));
+			let factor = mapper(travel);
 			let newArc = yCenter - maxArc * factor;
 			let dur = maxDur * factor;
-			let staggerIdx = travel / 100 - 1;
-			let newStagger = staggers[Math.round(staggerIdx)] || 200;
+			let newStagger = staggers[travel / 100 - 1] || 0.2;
+			let newPath = `M${oldX},${yCenter} Q${travel / 2 + Math.min(oldX, newX)},${newArc} ${newX},${yCenter}`;
 
-			// Update the visual path (decorative)
-			const cpX = (oldX + newX) / 2;
-			document.getElementById("main").setAttribute("d", `M${oldX},${yCenter} Q${cpX},${newArc} ${newX},${yCenter}`);
-
-			animateJumpers(oldX, newX, newArc, dur, newStagger, () => {
-				showSubmenu(targetDot);
-			});
+			gsap.set("#main", { attr: { d: newPath } });
+			anim = gsap
+				.timeline({
+					onComplete: () => {
+						showSubmenu(targetDot);
+					}
+				})
+				.to(".jumper", {
+					motionPath: {
+						path: "#main",
+						align: "#main",
+						alignOrigin: [0.5, 0.5]
+					},
+					stagger: newStagger,
+					duration: dur,
+					ease: "sine.inOut"
+				})
+				.to(
+					".jumper",
+					{ duration: dur / 2, attr: { rx: 40, ry: 40 }, yoyo: true, repeat: 1 },
+					0
+				);
 
 			activeDot = targetDot;
 		}
 
+		// Κλείσιμο μενού όταν γίνεται κλικ έξω από αυτό
 		document.addEventListener('click', function (e) {
 			if (!submenuContainer.contains(e.target) && !e.target.closest('#icons g')) {
 				hideSubmenu();
@@ -3464,199 +3129,23 @@
 			}
 		});
 
+		// Αποτροπή κλεισίματος όταν γίνεται κλικ μέσα στο μενού
 		submenuContainer.addEventListener('click', function (e) {
 			e.stopPropagation();
 		});
 
-		window.dispatchEvent(new Event('resize'));
-
-		// ============================================================
-		// MOBILE SCENE SCALING
-		// Κλιμακώνει το section-center (600×450) ανάλογα με το πλάτος
-		// ώστε να χωράει στην οθόνη χωρίς να σπάσει τα absolute elements
-		// ============================================================
-		function scaleMobileScene() {
-			const isMobile = window.innerWidth <= 768;
-			const scene = document.querySelector('.animated-scene');
-			const center = document.querySelector('.section-center');
-			if (!scene || !center) return;
-
-			if (isMobile && !(window.innerWidth <= 768 && window.innerHeight <= 480)) {
-				const availW = Math.min(window.innerWidth * 0.98, 600);
-				const sc = availW / 600;
-				center.style.transform = `scale(${sc})`;
-				// Αφαιρούμε το whitespace που δημιουργεί το scale
-				center.style.marginBottom = `${(sc - 1) * 450}px`;
-				scene.style.display = 'flex';
-			} else if (isMobile && window.innerHeight <= 480) {
-				// landscape mobile — κρύβουμε
-				scene.style.display = 'none';
+		// Προσθήκη event listener για responsive behavior
+		window.addEventListener('resize', function() {
+			if (window.innerWidth <= 768 && window.innerHeight <= 480) {
+				// Σε landscape mode για κινητά, απόκρυψη του animated scene
+				document.querySelector('.animated-scene').style.display = 'none';
 			} else {
-				// desktop — reset
-				center.style.transform = '';
-				center.style.marginBottom = '';
-				scene.style.display = 'block';
+				document.querySelector('.animated-scene').style.display = 'block';
 			}
-		}
+		});
 
-		window.addEventListener('resize', scaleMobileScene);
-		scaleMobileScene();
-		(function() {
-			const hamburger  = document.getElementById('hamburgerBtn');
-			const overlay    = document.getElementById('drawerOverlay');
-			const drawer     = document.getElementById('sideDrawer');
-			const closeBtn   = document.getElementById('drawerClose');
-			const drawerBody = document.getElementById('drawerBody');
-
-			// Δεδομένα μενού (ίδια με submenuContent — ανακτώνται απ' εκεί)
-			const menuMeta = [
-				{ id: 'menu1', label: 'Περί...' },
-				{ id: 'menu2', label: 'Καθημερινά' },
-				{ id: 'menu3', label: 'Κατασκευές' },
-				{ id: 'menu4', label: 'Αγροτικά' },
-				{ id: 'menu5', label: 'Οικονομικά' },
-				{ id: 'menu6', label: 'Αταξινόμητα' },
-			];
-
-			// Εξάγουμε τα SVG paths από το ήδη-υπάρχον #icons
-			function getIconSVG(menuId) {
-				const g = document.querySelector(`#icons g[data-menu-id="${menuId}"]`);
-				if (!g) return '';
-
-				// Χρησιμοποιούμε getBBox() για το πραγματικό bounding box του path
-				// (τα <rect> είναι hit areas για το desktop, όχι bounds του path)
-				const path = g.querySelector('path');
-				if (!path) return '';
-
-				let vx, vy, vw, vh;
-				try {
-					const bb = path.getBBox();
-					// Μικρό padding
-					const pad = bb.width * 0.05;
-					vx = bb.x - pad;
-					vy = bb.y - pad;
-					vw = bb.width + pad * 2;
-					vh = bb.height + pad * 2;
-				} catch(e) {
-					// Fallback αν getBBox αποτύχει (π.χ. hidden element)
-					vx = 0; vy = 0; vw = 500; vh = 500;
-				}
-
-				const inner = g.innerHTML;
-				return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx} ${vy} ${vw} ${vh}">${inner}</svg>`;
-			}
-
-			// Κατασκευή drawer items
-			let openItemId = null;
-
-			function buildDrawer() {
-				drawerBody.innerHTML = '';
-				menuMeta.forEach(({ id, label }) => {
-					const item = document.createElement('div');
-					item.className = 'drawer-item';
-
-					const btn = document.createElement('button');
-					btn.className = 'drawer-item-btn';
-					btn.dataset.menuId = id;
-
-					const iconDiv = document.createElement('div');
-					iconDiv.className = 'drawer-icon';
-					iconDiv.innerHTML = getIconSVG(id);
-
-					const labelEl = document.createElement('span');
-					labelEl.className = 'drawer-item-label';
-					labelEl.textContent = label;
-
-					const arrow = document.createElement('span');
-					arrow.className = 'drawer-arrow';
-					arrow.textContent = '›';
-
-					btn.appendChild(iconDiv);
-					btn.appendChild(labelEl);
-					btn.appendChild(arrow);
-
-					const submenuDiv = document.createElement('div');
-					submenuDiv.className = 'drawer-submenu';
-					const inner = document.createElement('div');
-					inner.className = 'drawer-submenu-inner';
-					submenuDiv.appendChild(inner);
-
-					btn.addEventListener('click', () => {
-						const isOpen = submenuDiv.classList.contains('open');
-
-						// Κλείνουμε όλα
-						drawerBody.querySelectorAll('.drawer-item-btn.active').forEach(b => b.classList.remove('active'));
-						drawerBody.querySelectorAll('.drawer-submenu.open').forEach(s => s.classList.remove('open'));
-
-						if (!isOpen) {
-							// Γεμίζουμε με περιεχόμενο (lazy)
-							if (!inner.dataset.filled) {
-								const content = submenuContent[id];
-								let html = '';
-								if (content.type === 'mega') {
-									html = generateMegaMenu(content);
-								} else {
-									content.items.forEach(it => { html += generateMenuItem(it); });
-								}
-								inner.innerHTML = html;
-								inner.dataset.filled = '1';
-
-								// Submenu toggles μέσα στο drawer
-								inner.addEventListener('click', function(e) {
-									if (e.target.classList.contains('submenu-toggle')) {
-										e.stopPropagation();
-										const sub = e.target.nextElementSibling;
-										const vis = sub.classList.contains('visible');
-										inner.querySelectorAll('.submenu.visible').forEach(m => {
-											m.classList.remove('visible');
-											m.previousElementSibling.classList.remove('expanded');
-										});
-										if (!vis) {
-											sub.classList.add('visible');
-											e.target.classList.add('expanded');
-										}
-									}
-								});
-							}
-							btn.classList.add('active');
-							submenuDiv.classList.add('open');
-						}
-					});
-
-					item.appendChild(btn);
-					item.appendChild(submenuDiv);
-					drawerBody.appendChild(item);
-				});
-			}
-
-			function openDrawer() {
-				buildDrawer();
-				drawer.classList.add('open');
-				overlay.classList.add('visible');
-				hamburger.classList.add('open');
-				document.body.style.overflow = 'hidden';
-			}
-
-			function closeDrawer() {
-				drawer.classList.remove('open');
-				overlay.classList.remove('visible');
-				hamburger.classList.remove('open');
-				document.body.style.overflow = '';
-			}
-
-			hamburger.addEventListener('click', () => {
-				drawer.classList.contains('open') ? closeDrawer() : openDrawer();
-			});
-			closeBtn.addEventListener('click', closeDrawer);
-			overlay.addEventListener('click', closeDrawer);
-
-			// Swipe-to-close (drag αριστερά → κλείσιμο)
-			let touchStartX = 0;
-			drawer.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-			drawer.addEventListener('touchend',   e => {
-				if (e.changedTouches[0].clientX - touchStartX > 60) closeDrawer();
-			}, { passive: true });
-		})();
+		// Κλήση αρχικά για να ρυθμίσει το display
+		window.dispatchEvent(new Event('resize'));
 	</script>
 </body>
 
