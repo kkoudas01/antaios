@@ -4,161 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Editor - Studio Pro</title>
-    <!-- Tailwind CSS για γρήγορο, πανέμορφο, responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons για καθαρά, προσβάσιμα εικονίδια -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* CSS για βελτίωση προσβασιμότητας και φιλικότητας (Αστιγματισμός / Αχρωματοψία) */
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background-color: #0b0f19;
             color: #f3f4f6;
             transition: background-color 0.4s ease, color 0.4s ease;
         }
-        /* Υψηλή αντίθεση για επιλεγμένα στοιχεία */
         .accessible-focus:focus-visible {
             outline: 3px solid #f59e0b !important;
             outline-offset: 2px;
         }
-        /* Custom scrollbar για ομοιομορφία */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-
-        /* --- ΟΜΑΛΗ ΜΕΤΑΒΑΣΗ ΘΕΜΑΤΟΣ --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
         body, header, section, footer, button, textarea, select, input, div, h1, h2, h3, h4, label, span, i {
             transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
         }
-
-        /* --- LIGHT THEME OVERRIDES --- */
-        body.light-theme {
-            background-color: #f3f4f6;
-            color: #1f2937;
+        body.light-theme { background-color: #f3f4f6; color: #1f2937; }
+        body.light-theme header, body.light-theme footer { background-color: #ffffff; border-color: #e5e7eb; color: #4b5563; }
+        body.light-theme header h1 { color: #d97706; }
+        body.light-theme section { background-color: #ffffff; border-color: #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        body.light-theme .tab-btn { background-color: #f3f4f6; color: #4b5563; }
+        body.light-theme .tab-btn:hover { background-color: #e5e7eb; }
+        body.light-theme .tab-btn.active { background-color: #fef3c7; color: #b45309; border-color: #f59e0b; }
+        body.light-theme #file-info { background-color: #f9fafb; border-color: #e5e7eb; color: #4b5563; }
+        body.light-theme input[type="range"] { background-color: #e5e7eb; }
+        body.light-theme textarea, body.light-theme select, body.light-theme input[type="text"], body.light-theme input[type="number"] {
+            background-color: #ffffff; border-color: #d1d5db; color: #111827;
         }
-        body.light-theme header,
-        body.light-theme footer {
-            background-color: #ffffff;
-            border-color: #e5e7eb;
-            color: #4b5563;
-        }
-        body.light-theme header h1 {
-            color: #d97706; /* Amber-600 */
-        }
-        body.light-theme section {
-            background-color: #ffffff;
-            border-color: #e5e7eb;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-        }
-        body.light-theme .tab-btn {
-            background-color: #f3f4f6;
-            color: #4b5563;
-        }
-        body.light-theme .tab-btn:hover {
-            background-color: #e5e7eb;
-        }
-        body.light-theme .tab-btn.active {
-            background-color: #fef3c7;
-            color: #b45309;
-            border-color: #f59e0b;
-        }
-        body.light-theme #file-info {
-            background-color: #f9fafb;
-            border-color: #e5e7eb;
-            color: #4b5563;
-        }
-        body.light-theme input[type="range"] {
-            background-color: #e5e7eb;
-        }
-        body.light-theme textarea,
-        body.light-theme select,
-        body.light-theme input[type="text"],
-        body.light-theme input[type="number"] {
-            background-color: #ffffff;
-            border-color: #d1d5db;
-            color: #111827;
-        }
-        body.light-theme textarea:focus,
-        body.light-theme select:focus,
-        body.light-theme input:focus {
-            border-color: #f59e0b;
-        }
-        body.light-theme .bg-\[\#1f2937\/50\] {
-            background-color: #f9fafb;
-            border-color: #e5e7eb;
-        }
-        
-        /* General Tool Buttons (Rotation, Crop, Color picker etc) for Light Theme */
-        body.light-theme .bg-\[\#1f2937\] {
-            background-color: #e5e7eb;
-            border-color: #d1d5db;
-            color: #1f2937;
-        }
-        body.light-theme .hover\:bg-\[\#374151\]:hover {
-            background-color: #d1d5db;
-        }
-        body.light-theme .bg-\[\#111827\] {
-            background-color: #ffffff;
-            border-color: #e5e7eb;
-        }
-
-        /* Specific Text Color Mappings for high contrast in Light mode */
-        body.light-theme .text-gray-200,
-        body.light-theme .text-gray-300,
-        body.light-theme .text-gray-400 {
-            color: #374151;
-        }
-        body.light-theme .text-gray-500 {
-            color: #4b5563;
-        }
-        body.light-theme .text-white {
-            color: #111827;
-        }
-        body.light-theme .text-emerald-400 {
-            color: #059669;
-        }
-        body.light-theme .text-sky-400 {
-            color: #0284c7;
-        }
-        body.light-theme .text-amber-500 {
-            color: #d97706;
-        }
-        body.light-theme .text-amber-400 {
-            color: #b45309;
-        }
-        body.light-theme .text-red-400 {
-            color: #dc2626;
-        }
-
-        body.light-theme #empty-state h2 {
-            color: #4b5563;
-        }
-        body.light-theme #empty-state p {
-            color: #6b7280;
-        }
-
-        /* Canvas Radial Pattern override for Light Theme */
+        body.light-theme textarea:focus, body.light-theme select:focus, body.light-theme input:focus { border-color: #f59e0b; }
+        body.light-theme .bg-\[\#1f2937\/50\] { background-color: #f9fafb; border-color: #e5e7eb; }
+        body.light-theme .bg-\[\#1f2937\] { background-color: #e5e7eb; border-color: #d1d5db; color: #1f2937; }
+        body.light-theme .hover\:bg-\[\#374151\]:hover { background-color: #d1d5db; }
+        body.light-theme .bg-\[\#111827\] { background-color: #ffffff; border-color: #e5e7eb; }
+        body.light-theme .text-gray-200, body.light-theme .text-gray-300, body.light-theme .text-gray-400 { color: #374151; }
+        body.light-theme .text-gray-500 { color: #4b5563; }
+        body.light-theme .text-white { color: #111827; }
+        body.light-theme .text-emerald-400 { color: #059669; }
+        body.light-theme .text-sky-400 { color: #0284c7; }
+        body.light-theme .text-amber-500 { color: #d97706; }
+        body.light-theme .text-amber-400 { color: #b45309; }
+        body.light-theme .text-red-400 { color: #dc2626; }
+        body.light-theme #empty-state h2 { color: #4b5563; }
+        body.light-theme #empty-state p { color: #6b7280; }
         body.light-theme #canvas-container-panel {
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-color: #f8fafc;
-            border-color: #e2e8f0;
+            background-color: #f8fafc; border-color: #e2e8f0;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- Header / Navbar -->
     <header class="bg-[#111827] border-b border-[#1f2937] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
         <div class="flex items-center space-x-3">
             <a href="index.html" class="flex items-center space-x-2 bg-[#1f2937] hover:bg-[#374151] text-white px-3 py-2 rounded-lg transition-colors border border-amber-500/30 accessible-focus" title="Επιστροφή στην αρχική">
@@ -172,14 +72,10 @@
         </div>
     </header>
 
-    <!-- Main Workspace -->
     <main class="flex-1 w-full max-w-7xl mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        <!-- Αριστερό Sidebar: Εργαλεία και Controls (4 στήλες) -->
         <section class="lg:col-span-4 bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex flex-col justify-between space-y-4 shadow-lg overflow-y-auto max-h-[calc(100vh-140px)]">
-            
             <div class="space-y-4">
-                <!-- Εισαγωγή Φωτογραφίας -->
                 <div class="border-2 border-dashed border-[#374151] hover:border-amber-500/50 rounded-lg p-4 text-center cursor-pointer transition-colors relative" id="drop-zone">
                     <input type="file" id="image-loader" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                     <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
@@ -189,7 +85,6 @@
                     </div>
                 </div>
 
-                <!-- Canvas Control Info & Quick Reset -->
                 <div id="file-info" class="hidden text-xs bg-[#1f2937] p-2 rounded border border-gray-700 flex justify-between items-center text-gray-400">
                     <span id="img-resolution">0 x 0 px</span>
                     <div class="flex items-center gap-3">
@@ -202,7 +97,6 @@
                     </div>
                 </div>
 
-                <!-- Κουμπιά Επεξεργασίας / Tooltabs -->
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="switchTab('tab-transform')" class="tab-btn active bg-amber-500/10 text-amber-400 border border-amber-500/30 p-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 hover:bg-amber-500/20 transition-all">
                         <i data-lucide="move" class="w-4 h-4"></i> Μετασχηματισμός
@@ -218,9 +112,6 @@
                     </button>
                 </div>
 
-                <!-- SUBTABS CONTENT -->
-                
-                <!-- 1. TAB: TRANSFORM -->
                 <div id="tab-transform" class="space-y-3 tool-panel">
                     <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Μετασχηματισμός</h3>
                     <div class="grid grid-cols-2 gap-2">
@@ -239,160 +130,102 @@
                     </div>
                 </div>
 
-                <!-- 2. TAB: FILTERS -->
                 <div id="tab-filters" class="space-y-4 tool-panel hidden">
                     <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Βασικά Φίλτρα & Εφέ</h3>
-                    
                     <div class="space-y-3">
-                        <!-- Brightness -->
                         <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <label for="filter-brightness" class="text-gray-300">Φωτεινότητα</label>
-                                <span id="val-brightness" class="text-amber-500 font-semibold">100%</span>
-                            </div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-brightness" class="text-gray-300">Φωτεινότητα</label><span id="val-brightness" class="text-amber-500 font-semibold">100%</span></div>
                             <input type="range" id="filter-brightness" min="0" max="200" value="100" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
                         </div>
-                        
-                        <!-- Contrast -->
                         <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <label for="filter-contrast" class="text-gray-300">Αντίθεση (Contrast)</label>
-                                <span id="val-contrast" class="text-amber-500 font-semibold">100%</span>
-                            </div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-contrast" class="text-gray-300">Αντίθεση</label><span id="val-contrast" class="text-amber-500 font-semibold">100%</span></div>
                             <input type="range" id="filter-contrast" min="0" max="200" value="100" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
                         </div>
-
-                        <!-- Saturation -->
                         <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <label for="filter-saturation" class="text-gray-300">Κορεσμός (Saturation)</label>
-                                <span id="val-saturation" class="text-amber-500 font-semibold">100%</span>
-                            </div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-saturation" class="text-gray-300">Κορεσμός</label><span id="val-saturation" class="text-amber-500 font-semibold">100%</span></div>
                             <input type="range" id="filter-saturation" min="0" max="200" value="100" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
                         </div>
-
-                        <!-- Grayscale -->
                         <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <label for="filter-grayscale" class="text-gray-300">Ασπρόμαυρο (Grayscale)</label>
-                                <span id="val-grayscale" class="text-amber-500 font-semibold">0%</span>
-                            </div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-grayscale" class="text-gray-300">Ασπρόμαυρο</label><span id="val-grayscale" class="text-amber-500 font-semibold">0%</span></div>
                             <input type="range" id="filter-grayscale" min="0" max="100" value="0" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
                         </div>
-
-                        <!-- Sepia -->
                         <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <label for="filter-sepia" class="text-gray-300">Σέπια (Sepia)</label>
-                                <span id="val-sepia" class="text-amber-500 font-semibold">0%</span>
-                            </div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-sepia" class="text-gray-300">Σέπια</label><span id="val-sepia" class="text-amber-500 font-semibold">0%</span></div>
                             <input type="range" id="filter-sepia" min="0" max="100" value="0" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
                         </div>
-
-                        <!-- Blur & Sharpen -->
                         <div class="pt-2 border-t border-[#1f2937]">
                             <h4 class="text-xs font-bold text-gray-400 mb-2">Blur & Sharpen</h4>
                             <div class="grid grid-cols-2 gap-2">
                                 <button id="btn-apply-blur" class="bg-[#1f2937] hover:bg-[#374151] py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all">
-                                    <i data-lucide="eye-off" class="w-4 h-4 text-sky-400"></i> Θόλωμα (Blur)
+                                    <i data-lucide="eye-off" class="w-4 h-4 text-sky-400"></i> Θόλωμα
                                 </button>
                                 <button id="btn-apply-sharpen" class="bg-[#1f2937] hover:bg-[#374151] py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all">
-                                    <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Όξυνση (Sharpen)
+                                    <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Όξυνση
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. TAB: ADVANCED TOOLS -->
                 <div id="tab-tools" class="space-y-4 tool-panel hidden">
                     <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Advanced Εργαλεία</h3>
-                    
-                    <!-- EXIF Cleaner -->
                     <div class="p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold">Αφαίρεση Μεταδεδομένων (EXIF)</h4>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        </div>
-                        <p class="text-[11px] leading-relaxed">Καθαρισμός GPS, ημερομηνιών και πληροφοριών συσκευής λήψης κατά την αποθήκευση.</p>
-                        <button id="btn-clean-exif" class="w-full bg-[#1f2937] border border-gray-700 hover:border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 py-2 rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                        <div class="flex items-center justify-between"><h4 class="text-xs font-bold">Αφαίρεση EXIF</h4><span class="w-2 h-2 rounded-full bg-emerald-500"></span></div>
+                        <p class="text-[11px] leading-relaxed">Καθαρισμός GPS, ημερομηνιών κατά την αποθήκευση.</p>
+                        <button id="btn-clean-exif" class="w-full bg-[#1f2937] border border-gray-700 hover:border-emerald-500/50 text-emerald-400 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-2">
                             <i data-lucide="shield-check" class="w-4 h-4"></i> Αφαίρεση EXIF Τώρα
                         </button>
                     </div>
-
-                    <!-- Background Removal -->
                     <div class="p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 space-y-2">
-                        <h4 class="text-xs font-bold">Αφαίρεση Φόντου (Background Remover)</h4>
-                        <p class="text-[11px] leading-relaxed">Αφαιρέστε αυτόματα το ομοιόμορφο φόντο ή χρησιμοποιήστε flood-fill χρωμάτων.</p>
+                        <h4 class="text-xs font-bold">Αφαίρεση Φόντου</h4>
+                        <p class="text-[11px] leading-relaxed">Αυτόματο smart fill ή επιλογή χρώματος.</p>
                         <div class="flex gap-2">
-                            <button id="btn-auto-bg" class="flex-1 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 py-2 rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-1">
-                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Auto (Smart Fill)
+                            <button id="btn-auto-bg" class="flex-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Auto
                             </button>
-                            <button id="btn-color-bg" class="flex-1 bg-[#1f2937] hover:bg-[#374151] border border-gray-700 py-2 rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+                            <button id="btn-color-bg" class="flex-1 bg-[#1f2937] hover:bg-[#374151] border border-gray-700 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1">
                                 <i data-lucide="pipette" class="w-3.5 h-3.5"></i> Επιλογή Φόντου
                             </button>
                         </div>
                     </div>
-
-                    <!-- Color Picker -->
                     <div class="p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 space-y-2">
                         <div class="flex justify-between items-center">
-                            <h4 class="text-xs font-bold">Color Picker (Δειγματοληψία)</h4>
-                            <button id="btn-color-picker" class="bg-[#1f2937] hover:bg-[#374151] border border-gray-700 p-1.5 rounded-md text-amber-500" title="Ενεργοποίηση">
-                                <i data-lucide="pipette" class="w-4 h-4"></i>
-                            </button>
+                            <h4 class="text-xs font-bold">Color Picker</h4>
+                            <button id="btn-color-picker" class="bg-[#1f2937] hover:bg-[#374151] border border-gray-700 p-1.5 rounded-md text-amber-500"><i data-lucide="pipette" class="w-4 h-4"></i></button>
                         </div>
                         <div class="flex items-center gap-3 bg-[#111827] p-2 rounded border border-gray-800">
-                            <div id="color-preview" class="w-8 h-8 rounded border border-gray-700" style="background-color: #ffffff;"></div>
-                            <div class="text-xs">
-                                <div id="color-hex" class="font-mono select-all font-bold">#FFFFFF</div>
-                                <div id="color-rgb" class="font-mono text-[10px]">rgb(255, 255, 255)</div>
-                            </div>
+                            <div id="color-preview" class="w-8 h-8 rounded border border-gray-700" style="background-color:#ffffff;"></div>
+                            <div class="text-xs"><div id="color-hex" class="font-mono font-bold">#FFFFFF</div><div id="color-rgb" class="font-mono text-[10px]">rgb(255,255,255)</div></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. TAB: TEXT TOOL -->
                 <div id="tab-text" class="space-y-4 tool-panel hidden">
                     <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Προσθήκη Κειμένου</h3>
                     <div class="space-y-3">
-                        <div>
-                            <label for="text-input" class="block text-xs mb-1">Κείμενο / Λογότυπο</label>
-                            <textarea id="text-input" rows="2" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none resize-none" placeholder="Γράψτε εδώ..."></textarea>
-                        </div>
+                        <div><label for="text-input" class="block text-xs mb-1">Κείμενο</label><textarea id="text-input" rows="3" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs focus:border-amber-500 outline-none resize-none" placeholder="Γράψτε εδώ..."></textarea></div>
                         <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label for="text-font-size" class="block text-xs mb-1">Μέγεθος (px)</label>
-                                <input type="number" id="text-font-size" value="30" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs font-mono">
-                            </div>
-                            <div>
-                                <label for="text-color" class="block text-xs mb-1">Χρώμα</label>
-                                <div class="flex gap-1">
-                                    <input type="color" id="text-color" value="#ffffff" class="bg-transparent border-0 w-8 h-8 p-0 cursor-pointer">
-                                    <input type="text" id="text-color-hex" value="#ffffff" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg px-2 py-1 text-[11px] font-mono">
-                                </div>
-                            </div>
+                            <div><label for="text-font-size" class="block text-xs mb-1">Μέγεθος (px)</label><input type="number" id="text-font-size" value="30" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs font-mono"></div>
+                            <div><label for="text-color" class="block text-xs mb-1">Χρώμα</label><div class="flex gap-1"><input type="color" id="text-color" value="#ffffff" class="bg-transparent border-0 w-8 h-8 p-0 cursor-pointer"><input type="text" id="text-color-hex" value="#ffffff" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg px-2 py-1 text-[11px] font-mono"></div></div>
                         </div>
-                        <button id="btn-apply-text" class="w-full bg-amber-500 hover:bg-amber-600 text-[#0b0f19] font-bold py-2 rounded-lg text-xs transition-colors flex items-center justify-center gap-2 shadow-lg">
-                            <i data-lucide="check" class="w-4 h-4"></i> Εφαρμογή Κειμένου
+                        <button id="btn-submit-text" class="w-full bg-amber-500 hover:bg-amber-600 text-[#0b0f19] font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg">
+                            <i data-lucide="move" class="w-4 h-4"></i> Εισαγωγή / Προεπισκόπηση
+                        </button>
+                        <button id="btn-apply-text" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg hidden">
+                            <i data-lucide="check" class="w-4 h-4"></i> Οριστικοποίηση στην εικόνα
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Κάτω Μέρος Sidebar: Φαινομενικό Theme Panel (Steganography) -->
             <div class="pt-4 border-t border-[#1f2937] space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Λειτουργία Θέματος</span>
-                </div>
+                <div class="flex justify-between items-center"><span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Λειτουργία Θέματος</span></div>
                 <div class="grid grid-cols-2 gap-3">
-                    <!-- Κουμπί Φεγγάρι (Dark Theme / Απόκρυψη) -->
-                    <button id="btn-moon" class="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-indigo-950/20 to-slate-900 border border-[#1f2937] hover:border-indigo-500/40 rounded-xl transition-all accessible-focus shadow-md group">
+                    <button id="btn-moon" class="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-indigo-950/20 to-slate-900 border border-[#1f2937] hover:border-indigo-500/40 rounded-xl accessible-focus shadow-md group">
                         <i data-lucide="moon" class="w-5 h-5 text-indigo-400/80 group-hover:text-indigo-300"></i>
                         <span class="text-[10px] font-medium text-gray-400 mt-1">Σκοτεινό</span>
                     </button>
-                    <!-- Κουμπί Ήλιος (Light Theme / Αποκωδικοποίηση) -->
-                    <button id="btn-sun" class="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-amber-950/20 to-slate-900 border border-[#1f2937] hover:border-amber-500/40 rounded-xl transition-all accessible-focus shadow-md group">
+                    <button id="btn-sun" class="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-amber-950/20 to-slate-900 border border-[#1f2937] hover:border-amber-500/40 rounded-xl accessible-focus shadow-md group">
                         <i data-lucide="sun" class="w-5 h-5 text-amber-500/80 group-hover:text-amber-400"></i>
                         <span class="text-[10px] font-medium text-gray-400 mt-1">Φωτεινό</span>
                     </button>
@@ -400,14 +233,9 @@
             </div>
         </section>
 
-        <!-- Κέντρο: Canvas / Editor Area (8 στήλες) -->
         <section class="lg:col-span-8 flex flex-col justify-between space-y-4">
-            
-            <!-- Canvas Container -->
             <div class="flex-1 bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex items-center justify-center relative min-h-[350px] md:min-h-[500px] shadow-inner overflow-hidden" id="canvas-container-panel">
                 <canvas id="main-canvas" class="max-w-full max-h-[70vh] rounded shadow-lg object-contain bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] border border-dashed border-gray-800 transition-shadow"></canvas>
-
-                <!-- Empty State Message -->
                 <div id="empty-state" class="absolute text-center p-6 pointer-events-none">
                     <i data-lucide="image" class="w-16 h-16 text-gray-700 mx-auto mb-3 animate-pulse"></i>
                     <h2 class="text-base font-bold text-gray-400">Δεν έχει φορτωθεί φωτογραφία</h2>
@@ -415,1003 +243,688 @@
                 </div>
             </div>
 
-            <!-- Export / Save Panel -->
             <div class="bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
                 <div class="flex items-center space-x-3 w-full md:w-auto">
-                    <label for="save-format" class="text-xs font-bold uppercase tracking-wider whitespace-nowrap">Format Εξαγωγής:</label>
-                    <select id="save-format" class="bg-[#1f2937] border border-gray-700 text-sm rounded-lg px-3 py-2 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none w-full md:w-36">
-                        <option value="image/png">PNG (.png)</option>
-                        <option value="image/jpeg">JPEG (.jpg)</option>
-                        <option value="image/webp">WEBP (.webp)</option>
-                        <option value="application/pdf">PDF (.pdf)</option>
+                    <label for="save-format" class="text-xs font-bold uppercase tracking-wider whitespace-nowrap">Format:</label>
+                    <select id="save-format" class="bg-[#1f2937] border border-gray-700 text-sm rounded-lg px-3 py-2 text-white focus:border-amber-500 outline-none w-full md:w-36">
+                        <option value="image/png">PNG</option>
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/webp">WEBP</option>
+                        <option value="application/pdf">PDF</option>
                     </select>
                 </div>
-                
-                <!-- Action Buttons -->
                 <div class="flex items-center gap-3 w-full md:w-auto justify-end">
-                    <button id="btn-save" class="flex-1 md:flex-initial bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#0b0f19] font-bold px-6 py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-[1.01] accessible-focus">
+                    <button id="btn-save" class="flex-1 md:flex-initial bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#0b0f19] font-bold px-6 py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-lg">
                         <i data-lucide="download" class="w-4 h-4"></i> Αποθήκευση
                     </button>
                 </div>
             </div>
-
         </section>
-
     </main>
 
-    <!-- UI Notification system (No alert allowed) -->
     <div id="toast-container" class="fixed bottom-4 left-4 z-50 space-y-2 pointer-events-none"></div>
 
-    <!-- Footer -->
     <footer class="bg-[#0b0f19] border-t border-[#1f2937] px-6 py-4 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
         <p>&copy; 2026 Photo Editor - Όλα τα εργαλεία εκτελούνται τοπικά στον φυλλομετρητή σας.</p>
-        <p class="font-bold text-amber-500/70 tracking-wider hover:text-amber-500 transition-colors mt-2 md:mt-0">
-            Κώστας Κούδας - Ανταίος
-        </p>
+        <p class="font-bold text-amber-500/70 tracking-wider hover:text-amber-500 transition-colors mt-2 md:mt-0">Κώστας Κούδας - Ανταίος</p>
     </footer>
 
-    <!-- JavaScript Implementation -->
     <script>
-        // --- 1. ΑΛΦΑΒΗΤΟ 168 ΧΑΡΑΚΤΗΡΩΝ ---
+        // --- 1. ΑΛΦΑΒΗΤΟ (περιλαμβάνει newline και ειδικούς ελληνικούς χαρακτήρες) ---
         const ALPHABET = [
-            ' ', // Το κενό αντιστοιχεί στη θέση 1 (index 0)
-            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            ' ', 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
             'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
             'α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','ο','π','ρ','σ','ς','τ','υ','φ','χ','ψ','ω',
             'Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Ι','Κ','Λ','Μ','Ν','Ξ','Ο','Π','Ρ','Σ','Τ','Υ','Φ','Χ','Ψ','Ω',
             'ά','έ','ή','ί','ό','ύ','ώ','ϊ','ϋ','ΐ','ΰ','Ά','Έ','Ή','Ί','Ό','Ύ','Ώ','Ϊ','Ϋ',
             '0','1','2','3','4','5','6','7','8','9',
             '!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','}','[',']','|','\\',':',';','"','\'','<','>',',','.','?','/',
-            '~','€','£','¤','§','¦'
+            '~','€','£','¤','§','¦','—','«','»','…','\n'
         ];
         const ALPHABET_SIZE = ALPHABET.length;
 
-        function getCharIndex(char) {
-            return ALPHABET.indexOf(char);
-        }
+        function getCharIndex(char) { return ALPHABET.indexOf(char); }
 
-        function vigenereEncrypt(plainText, key) {
-            let cipherText = "";
-            let keyIndex = 0;
-            for (let i = 0; i < plainText.length; i++) {
-                const char = plainText[i];
-                const charPos = getCharIndex(char);
-                if (charPos === -1) {
-                    cipherText += char; 
-                    continue;
-                }
-                const keyChar = key[keyIndex % key.length];
-                const keyPos = getCharIndex(keyChar);
-                const shift = keyPos !== -1 ? keyPos : 0;
-                
-                const newPos = (charPos + shift) % ALPHABET_SIZE;
-                cipherText += ALPHABET[newPos];
-                keyIndex++;
+        function vigenereEncrypt(plain, key) {
+            let out = "", ki = 0;
+            for (let ch of plain) {
+                let p = getCharIndex(ch);
+                if (p === -1) { out += ch; continue; }
+                let k = getCharIndex(key[ki % key.length]);
+                out += ALPHABET[(p + (k !== -1 ? k : 0)) % ALPHABET_SIZE];
+                ki++;
             }
-            return cipherText;
+            return out;
         }
 
-        function vigenereDecrypt(cipherText, key) {
-            let plainText = "";
-            let keyIndex = 0;
-            for (let i = 0; i < cipherText.length; i++) {
-                const char = cipherText[i];
-                const charPos = getCharIndex(char);
-                if (charPos === -1) {
-                    plainText += char;
-                    continue;
-                }
-                const keyChar = key[keyIndex % key.length];
-                const keyPos = getCharIndex(keyChar);
-                const shift = keyPos !== -1 ? keyPos : 0;
-                
-                let newPos = (charPos - shift) % ALPHABET_SIZE;
-                if (newPos < 0) newPos += ALPHABET_SIZE;
-                plainText += ALPHABET[newPos];
-                keyIndex++;
+        function vigenereDecrypt(cipher, key) {
+            let out = "", ki = 0;
+            for (let ch of cipher) {
+                let c = getCharIndex(ch);
+                if (c === -1) { out += ch; continue; }
+                let k = getCharIndex(key[ki % key.length]);
+                let pos = (c - (k !== -1 ? k : 0)) % ALPHABET_SIZE;
+                if (pos < 0) pos += ALPHABET_SIZE;
+                out += ALPHABET[pos];
+                ki++;
             }
-            return plainText;
+            return out;
         }
 
-        // --- 2. STATE MANAGEMENT & GLOBALS ---
         const canvas = document.getElementById('main-canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        
-        let originalImage = null; 
-        let undoStack = [];
-        let cleanExifEnabled = true;
-        let filterBaseCanvas = null; 
+        let originalImage = null, undoStack = [], filterBaseCanvas = null;
+        let moonState = false, sunState = false, moonTimer = null, sunTimer = null;
+        let secretKey = "", pendingStegoAction = null, preservedLsbPayload = "";
+        let isColorPickerActive = false, cropMode = false, cropStart = {x:0,y:0}, cropEnd = {x:0,y:0}, isCropping = false, cropCanvasSnapshot = null;
 
-        // Σύστημα Steganography State (No Modals)
-        let moonState = false;
-        let sunState = false;
-        let moonTimer = null;
-        let sunTimer = null;
-        let secretKey = "";
-        let pendingStegoAction = null; 
-        let preservedLsbPayload = ""; 
-        
-        // Λοιπά εργαλεία
-        let isColorPickerActive = false;
-        let cropMode = false;
-        let cropStart = { x: 0, y: 0 };
-        let cropEnd = { x: 0, y: 0 };
-        let isCropping = false;
-        let cropCanvasSnapshot = null; 
+        // Draggable text state
+        let textMode = false;
+        let textIsDragging = false;
+        let pendingText = { text: '', x: 0, y: 0, size: 30, color: '#ffffff', width: 0, height: 0, offsetX: 0, offsetY: 0 };
 
-        // --- 3. UI INITIALIZATION ---
-        window.addEventListener('load', () => {
-            lucide.createIcons();
-            showToast("Καλώς ορίσατε στο Studio Pro!", "success");
-        });
+        window.addEventListener('load', () => { lucide.createIcons(); showToast("Καλώς ορίσατε στο Studio Pro!", "success"); });
 
-        // Dropzone & File Loader
         const imageLoader = document.getElementById('image-loader');
         const dropZone = document.getElementById('drop-zone');
-
         imageLoader.addEventListener('change', handleImageUpload);
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-amber-500');
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-amber-500');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-amber-500');
-            if (e.dataTransfer.files.length > 0) {
-                imageLoader.files = e.dataTransfer.files;
-                handleImageUpload();
-            }
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-amber-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-amber-500'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault(); dropZone.classList.remove('border-amber-500');
+            if (e.dataTransfer.files.length) { imageLoader.files = e.dataTransfer.files; handleImageUpload(); }
         });
 
         function handleImageUpload() {
             const file = imageLoader.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function(ev) {
                 const img = new Image();
                 img.onload = function() {
-                    originalImage = img;
-                    undoStack = [];
-                    filterBaseCanvas = null;
+                    originalImage = img; undoStack = []; filterBaseCanvas = null;
                     loadImageToCanvas(img);
-                    
-                    preservedLsbPayload = extractRawLsbFromCanvas();
-                    
+                    preservedLsbPayload = null;
                     document.getElementById('empty-state').classList.add('hidden');
                     document.getElementById('file-info').classList.remove('hidden');
                     document.getElementById('img-resolution').innerText = `${img.width} x ${img.height} px`;
-                }
-                img.src = event.target.result;
-            }
+                };
+                img.src = ev.target.result;
+            };
             reader.readAsDataURL(file);
         }
 
         function loadImageToCanvas(img) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
+            canvas.width = img.width; canvas.height = img.height;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.drawImage(img,0,0);
             saveHistoryState();
         }
 
         function saveHistoryState() {
-            const state = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            undoStack.push(state);
-            if (undoStack.length > 15) undoStack.shift(); 
-            filterBaseCanvas = null; 
+            undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+            if (undoStack.length > 15) undoStack.shift();
+            filterBaseCanvas = null;
         }
 
-        // --- 4. TABS & UI ROUTING ---
         function switchTab(tabId) {
             if (tabId === 'tab-text') {
-                if (moonState) {
-                    clearTimeout(moonTimer);
-                    moonState = false;
-                    pendingStegoAction = "encrypt-key";
-                } else if (sunState) {
-                    clearTimeout(sunTimer);
-                    sunState = false;
-                    pendingStegoAction = "decrypt-key";
-                }
-            } else {
-                cancelStegoStates();
-                pendingStegoAction = null;
-                secretKey = "";
+                if (moonState) { clearTimeout(moonTimer); moonState = false; pendingStegoAction = "encrypt-key"; }
+                else if (sunState) { clearTimeout(sunTimer); sunState = false; pendingStegoAction = "decrypt-key"; }
+            } else { cancelStegoStates(); pendingStegoAction = null; secretKey = ""; }
+            if (tabId !== 'tab-text' && textMode) {
+                textMode = false;
+                const lastState = undoStack[undoStack.length - 1];
+                if (lastState) ctx.putImageData(lastState, 0, 0);
+                document.getElementById('btn-apply-text').classList.add('hidden');
+                document.getElementById('btn-submit-text').classList.remove('hidden');
             }
-
+            if (tabId !== 'tab-transform' && cropMode) {
+                cropMode = false; isCropping = false;
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                if (cropCanvasSnapshot) ctx.putImageData(cropCanvasSnapshot,0,0);
+            }
             document.querySelectorAll('.tool-panel').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
-            
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-amber-500/10', 'text-amber-400', 'border-amber-500/30');
-                btn.classList.add('bg-[#1f2937]', 'text-gray-300', 'border-transparent');
+                btn.classList.remove('active','bg-amber-500/10','text-amber-400','border-amber-500/30');
+                btn.classList.add('bg-[#1f2937]','text-gray-300','border-transparent');
             });
-            event.currentTarget.classList.remove('bg-[#1f2937]', 'text-gray-300', 'border-transparent');
-            event.currentTarget.classList.add('active', 'bg-amber-500/10', 'text-amber-400', 'border-amber-500/30');
+            event.currentTarget.classList.remove('bg-[#1f2937]','text-gray-300','border-transparent');
+            event.currentTarget.classList.add('active','bg-amber-500/10','text-amber-400','border-amber-500/30');
         }
 
-        function cancelStegoStates() {
-            moonState = false;
-            sunState = false;
-            clearTimeout(moonTimer);
-            clearTimeout(sunTimer);
-        }
+        function cancelStegoStates() { moonState = sunState = false; clearTimeout(moonTimer); clearTimeout(sunTimer); }
 
-        // --- 5. ΦΕΓΓΑΡΙ & ΗΛΙΟΣ (STEGANOGRAPHY & THEME ENGINE) ---
         const MAGIC_MARKER = "STEGO:";
 
-        function extractRawLsbFromCanvas() {
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            let currentByte = "";
-            let binaryStr = "";
-            for (let i = 0; i < imgData.length; i++) {
-                if (i % 4 === 3) continue; 
-                currentByte += (imgData[i] & 1);
-                if (currentByte.length === 8) {
-                    binaryStr += currentByte;
-                    if (currentByte === "00000000") {
-                        return binaryStr; 
-                    }
-                    currentByte = "";
-                }
+        function extractBinaryPayloadFromCanvas() {
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+            const maxBits = canvas.width * canvas.height * 3;
+            let allBits = "";
+            for (let i = 0; i < imgData.length && allBits.length < maxBits; i++) {
+                if (i % 4 === 3) continue;
+                allBits += (imgData[i] & 1);
             }
-            return ""; 
+            if (allBits.length < 24) return null;
+            const lengthBin = allBits.substr(0, 24);
+            const payloadLen = parseInt(lengthBin, 2);
+            if (allBits.length < 24 + payloadLen) return null;
+            return allBits.substr(24, payloadLen);
         }
 
         function injectLsbToCanvas(binaryString) {
             if (!binaryString) return;
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            
-            if (binaryString.length > data.length) return;
-
-            let bitIndex = 0;
-            for (let i = 0; i < data.length && bitIndex < binaryString.length; i++) {
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const data = imgData.data;
+            const maxBits = canvas.width * canvas.height * 3;
+            if (binaryString.length > maxBits) return;
+            let bitIdx = 0;
+            for (let i = 0; i < data.length && bitIdx < binaryString.length; i++) {
                 if (i % 4 === 3) continue;
-                const bit = parseInt(binaryString[bitIndex]);
-                data[i] = (data[i] & 0xFE) | bit;
-                bitIndex++;
+                data[i] = (data[i] & 0xFE) | parseInt(binaryString[bitIdx]);
+                bitIdx++;
             }
-            ctx.putImageData(imageData, 0, 0);
+            ctx.putImageData(imgData, 0,0);
         }
 
-        // Κουμπί Φεγγάρι -> Θέμα: Σκοτεινό + Έναρξη stego (Απόκρυψη)
         document.getElementById('btn-moon').addEventListener('click', () => {
             document.body.classList.remove('light-theme');
-            if (!originalImage) return; 
-            
-            cancelStegoStates();
-            moonState = true;
-            
-            moonTimer = setTimeout(() => {
-                if (moonState) cancelStegoStates();
-            }, 20000);
+            if (!originalImage) return;
+            cancelStegoStates(); moonState = true;
+            moonTimer = setTimeout(() => { if (moonState) cancelStegoStates(); }, 20000);
         });
 
-        // Κουμπί Ήλιος -> Θέμα: Φωτεινό + Έναρξη stego (Αποκωδικοποίηση)
         document.getElementById('btn-sun').addEventListener('click', () => {
             document.body.classList.add('light-theme');
             if (!originalImage) return;
-
-            cancelStegoStates();
-            sunState = true;
-
-            sunTimer = setTimeout(() => {
-                if (sunState) cancelStegoStates();
-            }, 20000);
+            cancelStegoStates(); sunState = true;
+            sunTimer = setTimeout(() => { if (sunState) cancelStegoStates(); }, 20000);
         });
 
         function performLsbEncryption(payloadText, key) {
-            const encryptedPayload = vigenereEncrypt(MAGIC_MARKER + payloadText, key);
-            
-            let binaryString = "";
-            for (let i = 0; i < encryptedPayload.length; i++) {
-                const char = encryptedPayload[i];
-                const code = getCharIndex(char);
-                const binaryChar = code.toString(2).padStart(8, '0');
-                binaryString += binaryChar;
+            const clean = payloadText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const encrypted = vigenereEncrypt(MAGIC_MARKER + clean, key);
+            let binary = "";
+            for (let ch of encrypted) {
+                let code = getCharIndex(ch);
+                if (code === -1) code = getCharIndex(' ');
+                binary += code.toString(2).padStart(8, '0');
             }
-            binaryString += "00000000"; // Null terminator
+            const payloadLen = binary.length;
+            if (payloadLen > 0xFFFFFF) { showToast("Μήνυμα πολύ μεγάλο!", "warning"); return; }
+            const lengthBits = payloadLen.toString(2).padStart(24, '0');
+            binary = lengthBits + binary;
 
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-
-            if (binaryString.length > data.length) return;
-
-            let bitIndex = 0;
-            for (let i = 0; i < data.length && bitIndex < binaryString.length; i++) {
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const data = imgData.data;
+            const available = canvas.width * canvas.height * 3;
+            if (binary.length > available) { showToast("Η εικόνα δεν χωράει το κείμενο!", "warning"); return; }
+            let bitIdx = 0;
+            for (let i = 0; i < data.length && bitIdx < binary.length; i++) {
                 if (i % 4 === 3) continue;
-                const bit = parseInt(binaryString[bitIndex]);
-                data[i] = (data[i] & 0xFE) | bit;
-                bitIndex++;
+                data[i] = (data[i] & 0xFE) | parseInt(binary[bitIdx]);
+                bitIdx++;
             }
-
-            ctx.putImageData(imageData, 0, 0);
-            preservedLsbPayload = binaryString;
+            ctx.putImageData(imgData, 0,0);
+            preservedLsbPayload = binary;
             saveHistoryState();
         }
 
         function performLsbDecryption(key) {
-            let binaryString = preservedLsbPayload;
-            if (!binaryString) {
-                binaryString = extractRawLsbFromCanvas();
+            let binary = preservedLsbPayload;
+            if (!binary) {
+                binary = extractBinaryPayloadFromCanvas();
+                if (!binary) { cancelStegoStates(); showToast("Δεν βρέθηκε κρυμμένο μήνυμα.", "warning"); return; }
+            } else {
+                if (binary.length < 24) return;
+                const len = parseInt(binary.substr(0,24), 2);
+                binary = binary.substr(24, len);
             }
 
-            let decryptedPayload = "";
-            for(let i=0; i<binaryString.length; i+=8) {
-                let byte = binaryString.substr(i, 8);
-                if(byte === "00000000") break;
-                let charCode = parseInt(byte, 2);
-                if (charCode < ALPHABET_SIZE) {
-                    decryptedPayload += ALPHABET[charCode];
-                }
+            let decoded = "";
+            for (let i = 0; i < binary.length; i += 8) {
+                let byte = binary.substr(i, 8);
+                if (byte.length < 8) break;
+                let code = parseInt(byte, 2);
+                if (code < ALPHABET_SIZE) decoded += ALPHABET[code];
             }
-
-            const decryptedText = vigenereDecrypt(decryptedPayload, key);
-
-            if (decryptedText.startsWith(MAGIC_MARKER)) {
-                const finalMessage = decryptedText.substring(MAGIC_MARKER.length);
-                openMessageModal("Ανάκτηση Μηνύματος", finalMessage);
+            const plain = vigenereDecrypt(decoded, key);
+            if (plain.startsWith(MAGIC_MARKER)) {
+                openMessageModal("Ανάκτηση Μηνύματος", plain.substring(MAGIC_MARKER.length));
             } else {
                 cancelStegoStates();
+                showToast("Λάθος κλειδί ή μη έγκυρο μήνυμα.", "warning");
             }
         }
 
-        // --- 6. MODALS ---
         function openMessageModal(title, msg) {
-            const modalDiv = document.createElement('div');
-            modalDiv.className = "fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in";
-            modalDiv.innerHTML = `
-                <div class="bg-white dark:bg-[#111827] border border-amber-500/40 rounded-xl p-6 w-full max-w-md shadow-2xl transition-all">
+            const modal = document.createElement('div');
+            modal.className = "fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4";
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-[#111827] border border-amber-500/40 rounded-xl p-6 w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
                     <h3 class="text-lg font-bold text-amber-500 flex items-center gap-2 mb-3">
-                        <i data-lucide="unlock" class="w-5 h-5"></i>
+                        <i data-lucide="unlock" class="w-5 h-5 flex-shrink-0"></i>
                         <span>${title}</span>
                     </h3>
-                    <div class="bg-gray-100 dark:bg-[#1f2937] p-4 rounded-lg border border-gray-200 dark:border-gray-800 mb-4 select-all">
+                    <div class="bg-gray-100 dark:bg-[#1f2937] p-4 rounded-lg border border-gray-200 dark:border-gray-800 mb-4 overflow-y-auto max-h-[60vh] select-all" style="white-space:pre-wrap;">
                         <p class="text-sm font-mono text-gray-800 dark:text-white break-words">${msg}</p>
                     </div>
-                    <div class="flex justify-end">
+                    <div class="flex justify-end mt-auto">
                         <button class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg text-xs transition-colors">Κλείσιμο</button>
                     </div>
-                </div>
-            `;
-            document.body.appendChild(modalDiv);
+                </div>`;
+            document.body.appendChild(modal);
             lucide.createIcons();
-            
-            modalDiv.querySelector('button').onclick = () => {
-                modalDiv.remove();
+            modal.querySelector('button').onclick = () => modal.remove();
+        }
+
+        function showToast(msg, type="info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let bg = "bg-[#1f2937] border-gray-700 text-white", icon = "info";
+            if (type==="success") { bg = "bg-[#111827] border-emerald-500/50 text-emerald-300"; icon = "check-circle"; }
+            else if (type==="warning") { bg = "bg-[#111827] border-amber-500/50 text-amber-300"; icon = "alert-triangle"; }
+            else if (type==="danger") { bg = "bg-[#111827] border-red-500/50 text-red-300"; icon = "alert-circle"; }
+            toast.className = `flex items-center space-x-3 border p-4 rounded-lg shadow-lg pointer-events-auto transition-all transform translate-y-2 opacity-0 duration-300 ${bg}`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0"></i><span class="text-xs font-semibold leading-snug">${msg}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.classList.remove('translate-y-2','opacity-0'), 50);
+            setTimeout(() => { toast.classList.add('opacity-0','translate-y-[-10px]'); setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (evt.clientX - rect.left) * (canvas.width / rect.width),
+                y: (evt.clientY - rect.top) * (canvas.height / rect.height)
             };
         }
 
-        function showToast(message, type = "info") {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            let bg = "bg-[#1f2937] border-gray-700 text-white";
-            let icon = "info";
-            if (type === "success") { bg = "bg-[#111827] border-emerald-500/50 text-emerald-300"; icon = "check-circle"; }
-            else if (type === "warning") { bg = "bg-[#111827] border-amber-500/50 text-amber-300"; icon = "alert-triangle"; }
-            else if (type === "danger") { bg = "bg-[#111827] border-red-500/50 text-red-300"; icon = "alert-circle"; }
+        function drawPendingText(withBorder = true) {
+            if (!originalImage || !pendingText.text) return;
+            const lastState = undoStack[undoStack.length - 1];
+            if (lastState) ctx.putImageData(lastState, 0, 0);
 
-            toast.className = `flex items-center space-x-3 border p-4 rounded-lg shadow-lg pointer-events-auto transition-all transform translate-y-2 opacity-0 duration-300 ${bg}`;
-            toast.innerHTML = `
-                <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0"></i>
-                <span class="text-xs font-semibold leading-snug">${message}</span>
-            `;
-            
-            container.appendChild(toast);
-            lucide.createIcons();
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 50);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-[-10px]');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // --- 7. TEXT & WATERMARK TOOL (WITH SILENT STEGANOGRAPHY) ---
-        document.getElementById('btn-apply-text').addEventListener('click', () => {
-            if (!originalImage) {
-                showToast("Φορτώστε πρώτα μια φωτογραφία!", "warning");
-                return;
-            }
-            const text = document.getElementById('text-input').value;
-            if (!text) {
-                showToast("Παρακαλώ πληκτρολογήστε κάποιο κείμενο!", "warning");
-                return;
-            }
-
-            // Silent Steganography Key/Text entry handlers
-            if (pendingStegoAction === "encrypt-key") {
-                secretKey = text;
-                document.getElementById('text-input').value = ""; // Silent Clear
-                pendingStegoAction = "encrypt-text";
-                return;
-            }
-
-            if (pendingStegoAction === "encrypt-text") {
-                performLsbEncryption(text, secretKey);
-                document.getElementById('text-input').value = ""; // Silent Clear
-                pendingStegoAction = null;
-                secretKey = "";
-                return;
-            }
-
-            if (pendingStegoAction === "decrypt-key") {
-                secretKey = text;
-                document.getElementById('text-input').value = ""; // Silent Clear
-                performLsbDecryption(secretKey);
-                pendingStegoAction = null;
-                secretKey = "";
-                return;
-            }
-
-            // Normal Text drawing...
-            const fontSize = parseInt(document.getElementById('text-font-size').value) || 30;
-            const color = document.getElementById('text-color').value;
-
-            ctx.font = `bold ${fontSize}px system-ui`;
-            ctx.fillStyle = color;
+            ctx.font = `bold ${pendingText.size}px system-ui`;
+            ctx.fillStyle = pendingText.color;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-            
-            saveHistoryState();
-        });
-
-        document.getElementById('text-color').addEventListener('input', (e) => {
-            document.getElementById('text-color-hex').value = e.target.value;
-        });
-        document.getElementById('text-color-hex').addEventListener('input', (e) => {
-            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
-                document.getElementById('text-color').value = e.target.value;
+            const lineHeight = pendingText.size * 1.4;
+            const maxWidth = canvas.width * 0.9;
+            const paragraphs = pendingText.text.split('\n');
+            let linesToDraw = [];
+            for (let para of paragraphs) {
+                if (para.trim() === "") { linesToDraw.push(""); continue; }
+                const words = para.split(' ');
+                let line = words[0] || "";
+                for (let n = 1; n < words.length; n++) {
+                    const testLine = line + ' ' + words[n];
+                    if (ctx.measureText(testLine).width > maxWidth) {
+                        linesToDraw.push(line);
+                        line = words[n];
+                    } else line = testLine;
+                }
+                linesToDraw.push(line);
             }
+            pendingText.height = linesToDraw.length * lineHeight;
+            pendingText.width = maxWidth;
+            let startY = pendingText.y;
+            for (let i = 0; i < linesToDraw.length; i++) {
+                ctx.fillText(linesToDraw[i], pendingText.x, startY + i * lineHeight);
+            }
+            if (withBorder) {
+                ctx.strokeStyle = "#f59e0b";
+                ctx.lineWidth = Math.max(2, canvas.width / 500);
+                ctx.setLineDash([10, 10]);
+                ctx.strokeRect(
+                    pendingText.x - (maxWidth / 2) - 10,
+                    startY - (lineHeight / 2) - 10,
+                    maxWidth + 20,
+                    pendingText.height + 10
+                );
+                ctx.setLineDash([]);
+            }
+        }
+
+        const updatePendingTextParams = () => {
+            if (textMode) {
+                pendingText.size = parseInt(document.getElementById('text-font-size').value) || 30;
+                pendingText.color = document.getElementById('text-color').value;
+                pendingText.text = document.getElementById('text-input').value;
+                drawPendingText(true);
+            }
+        };
+        document.getElementById('text-font-size').addEventListener('input', updatePendingTextParams);
+        document.getElementById('text-color').addEventListener('input', updatePendingTextParams);
+        document.getElementById('text-input').addEventListener('input', updatePendingTextParams);
+
+        document.getElementById('btn-submit-text').addEventListener('click', () => {
+            if (!originalImage) { showToast("Φορτώστε πρώτα φωτογραφία!", "warning"); return; }
+            const text = document.getElementById('text-input').value;
+            if (!text) return;
+
+            if (pendingStegoAction === "encrypt-key") { secretKey = text; document.getElementById('text-input').value = ""; pendingStegoAction = "encrypt-text"; return; }
+            if (pendingStegoAction === "encrypt-text") { performLsbEncryption(text, secretKey); document.getElementById('text-input').value = ""; pendingStegoAction = null; secretKey = ""; return; }
+            if (pendingStegoAction === "decrypt-key") { secretKey = text; document.getElementById('text-input').value = ""; performLsbDecryption(secretKey); pendingStegoAction = null; secretKey = ""; return; }
+
+            pendingText.text = text;
+            pendingText.size = parseInt(document.getElementById('text-font-size').value) || 30;
+            // Auto-fit
+            let currentSize = pendingText.size;
+            let fits = false;
+            let attempts = 0;
+            while (!fits && attempts < 15 && currentSize > 12) {
+                ctx.font = `bold ${currentSize}px system-ui`;
+                const maxWidth = canvas.width * 0.9;
+                const paragraphs = pendingText.text.split('\n');
+                let lineCount = 0;
+                for (let para of paragraphs) {
+                    if (para.trim() === "") { lineCount++; continue; }
+                    const words = para.split(' ');
+                    let line = words[0] || "";
+                    for (let n = 1; n < words.length; n++) {
+                        if (ctx.measureText(line + ' ' + words[n]).width > maxWidth) {
+                            lineCount++;
+                            line = words[n];
+                        } else line = line + ' ' + words[n];
+                    }
+                    lineCount++;
+                }
+                const totalHeight = lineCount * (currentSize * 1.4);
+                if (totalHeight <= canvas.height * 0.85) fits = true;
+                else { currentSize -= Math.max(2, Math.floor(currentSize * 0.1)); attempts++; }
+            }
+            if (currentSize < pendingText.size) {
+                pendingText.size = Math.max(10, currentSize);
+                document.getElementById('text-font-size').value = pendingText.size;
+                showToast("Το μέγεθος μειώθηκε αυτόματα για να χωρέσει στην εικόνα.", "info");
+            }
+            pendingText.color = document.getElementById('text-color').value;
+            pendingText.x = canvas.width / 2;
+            pendingText.y = pendingText.size * 1.4;
+            textMode = true;
+            drawPendingText(true);
+            document.getElementById('btn-submit-text').classList.add('hidden');
+            document.getElementById('btn-apply-text').classList.remove('hidden');
+            showToast("Μπορείτε να σύρετε το κείμενο με το ποντίκι. Πατήστε 'Οριστικοποίηση' για αποθήκευση.", "info");
         });
 
-        // --- 8. ΜΕΤΑΣΧΗΜΑΤΙΣΜΟΣ (ROTATE, FLIP, CROP) ---
-        // Rotate 90 CW
-        document.getElementById('btn-rotate-90').addEventListener('click', () => {
-            if (!originalImage) return;
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = canvas.height;
-            tempCanvas.height = canvas.width;
-
-            tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-            tempCtx.rotate(Math.PI / 2);
-            tempCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
-
-            canvas.width = tempCanvas.width;
-            canvas.height = tempCanvas.height;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(tempCanvas, 0, 0);
-
+        document.getElementById('btn-apply-text').addEventListener('click', () => {
+            if (!textMode) return;
+            drawPendingText(false);
             saveHistoryState();
+            textMode = false;
+            document.getElementById('text-input').value = "";
+            document.getElementById('btn-apply-text').classList.add('hidden');
+            document.getElementById('btn-submit-text').classList.remove('hidden');
+            showToast("Το κείμενο αποτυπώθηκε μόνιμα στην εικόνα!", "success");
         });
 
-        // Flip Horizontal
-        document.getElementById('btn-flip-h').addEventListener('click', () => {
-            if (!originalImage) return;
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-
-            tempCtx.translate(canvas.width, 0);
-            tempCtx.scale(-1, 1);
-            tempCtx.drawImage(canvas, 0, 0);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(tempCanvas, 0, 0);
-
-            saveHistoryState();
-        });
-
-        // Flip Vertical
-        document.getElementById('btn-flip-v').addEventListener('click', () => {
-            if (!originalImage) return;
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-
-            tempCtx.translate(0, canvas.height);
-            tempCtx.scale(1, -1);
-            tempCtx.drawImage(canvas, 0, 0);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(tempCanvas, 0, 0);
-
-            saveHistoryState();
-        });
-
-        // Manual Crop Tool (Interactive)
-        const cropBtn = document.getElementById('btn-crop-mode');
-        cropBtn.addEventListener('click', () => {
-            if (!originalImage) return;
-            cropMode = !cropMode;
-            if (cropMode) {
-                cropBtn.classList.add('bg-amber-500/20', 'border-amber-500/50', 'text-amber-400');
-                canvas.style.cursor = 'crosshair';
-            } else {
-                cropBtn.classList.remove('bg-amber-500/20', 'border-amber-500/50', 'text-amber-400');
-                canvas.style.cursor = 'default';
-                if (cropCanvasSnapshot) {
-                    ctx.putImageData(cropCanvasSnapshot, 0, 0); 
+        canvas.addEventListener('mousedown', e => {
+            const pos = getMousePos(canvas, e);
+            if (textMode) {
+                const halfW = (pendingText.width / 2) + 20;
+                const lineHeight = pendingText.size * 1.4;
+                const topY = pendingText.y - (lineHeight / 2) - 10;
+                const bottomY = pendingText.y + pendingText.height + 10;
+                if (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) {
+                    textIsDragging = true;
+                    pendingText.offsetX = pos.x - pendingText.x;
+                    pendingText.offsetY = pos.y - pendingText.y;
+                    return;
                 }
             }
+            if (cropMode) {
+                cropStart.x = pos.x; cropStart.y = pos.y;
+                isCropping = true;
+                cropCanvasSnapshot = ctx.getImageData(0,0,canvas.width,canvas.height);
+            }
         });
 
-        canvas.addEventListener('mousedown', (e) => {
-            if (!cropMode) return;
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            cropStart.x = (e.clientX - rect.left) * scaleX;
-            cropStart.y = (e.clientY - rect.top) * scaleY;
-            isCropping = true;
-            
-            cropCanvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if (!cropMode || !isCropping || !cropCanvasSnapshot) return;
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            cropEnd.x = (e.clientX - rect.left) * scaleX;
-            cropEnd.y = (e.clientY - rect.top) * scaleY;
-
-            ctx.putImageData(cropCanvasSnapshot, 0, 0);
-            
-            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            const startX = Math.min(cropStart.x, cropEnd.x);
-            const startY = Math.min(cropStart.y, cropEnd.y);
-            const width = Math.abs(cropEnd.x - cropStart.x);
-            const height = Math.abs(cropEnd.y - cropStart.y);
-
-            ctx.clearRect(startX, startY, width, height);
-            ctx.putImageData(cropCanvasSnapshot, 0, 0, startX, startY, width, height);
-
-            ctx.strokeStyle = "#f59e0b"; 
-            ctx.lineWidth = 2 * Math.max(scaleX, scaleY); 
-            ctx.setLineDash([8 * scaleX, 8 * scaleY]);
-            ctx.strokeRect(startX, startY, width, height);
-            ctx.setLineDash([]); 
+        canvas.addEventListener('mousemove', e => {
+            const pos = getMousePos(canvas, e);
+            if (textIsDragging) {
+                pendingText.x = pos.x - pendingText.offsetX;
+                pendingText.y = pos.y - pendingText.offsetY;
+                drawPendingText(true);
+                canvas.style.cursor = 'move';
+                return;
+            } else if (textMode) {
+                const halfW = (pendingText.width / 2) + 20;
+                const lineHeight = pendingText.size * 1.4;
+                const topY = pendingText.y - (lineHeight / 2) - 10;
+                const bottomY = pendingText.y + pendingText.height + 10;
+                canvas.style.cursor = (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) ? 'move' : 'default';
+            }
+            if (cropMode && isCropping && cropCanvasSnapshot) {
+                cropEnd.x = pos.x; cropEnd.y = pos.y;
+                ctx.putImageData(cropCanvasSnapshot, 0,0);
+                ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+                const sx = Math.min(cropStart.x, cropEnd.x), sy = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
+                ctx.clearRect(sx, sy, w, h);
+                ctx.putImageData(cropCanvasSnapshot,0,0, sx, sy, w, h);
+                const scaleX = canvas.width / canvas.getBoundingClientRect().width;
+                const scaleY = canvas.height / canvas.getBoundingClientRect().height;
+                ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2 * Math.max(scaleX, scaleY);
+                ctx.setLineDash([8*scaleX, 8*scaleY]); ctx.strokeRect(sx,sy,w,h); ctx.setLineDash([]);
+            }
         });
 
         canvas.addEventListener('mouseup', () => {
-            if (!cropMode || !isCropping) return;
-            isCropping = false;
-            cropMode = false;
-            cropBtn.classList.remove('bg-amber-500/20', 'border-amber-500/50', 'text-amber-400');
-            canvas.style.cursor = 'default';
-
-            const x = Math.min(cropStart.x, cropEnd.x);
-            const y = Math.min(cropStart.y, cropEnd.y);
-            const w = Math.abs(cropEnd.x - cropStart.x);
-            const h = Math.abs(cropEnd.y - cropStart.y);
-
-            if (w < 10 || h < 10) {
-                ctx.putImageData(cropCanvasSnapshot, 0, 0);
-                return;
+            if (textIsDragging) { textIsDragging = false; return; }
+            if (cropMode && isCropping) {
+                isCropping = false; cropMode = false;
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                const x = Math.min(cropStart.x, cropEnd.x), y = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
+                if (w < 10 || h < 10) { ctx.putImageData(cropCanvasSnapshot,0,0); return; }
+                const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+                const src = document.createElement('canvas'); src.width = canvas.width; src.height = canvas.height;
+                src.getContext('2d').putImageData(cropCanvasSnapshot,0,0);
+                tmp.getContext('2d').drawImage(src, x, y, w, h, 0,0,w,h);
+                canvas.width = w; canvas.height = h;
+                ctx.clearRect(0,0,w,h); ctx.drawImage(tmp,0,0);
+                document.getElementById('img-resolution').innerText = `${w} x ${h} px`;
+                saveHistoryState();
             }
+        });
 
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = w;
-            tempCanvas.height = h;
-
-            const croppedData = document.createElement('canvas');
-            croppedData.width = canvas.width;
-            croppedData.height = canvas.height;
-            croppedData.getContext('2d').putImageData(cropCanvasSnapshot, 0, 0);
-
-            tempCtx.drawImage(croppedData, x, y, w, h, 0, 0, w, h);
-
-            canvas.width = w;
-            canvas.height = h;
-            ctx.clearRect(0, 0, w, h);
-            ctx.drawImage(tempCanvas, 0, 0);
-
-            document.getElementById('img-resolution').innerText = `${w} x ${h} px`;
+        document.getElementById('btn-rotate-90').addEventListener('click', () => {
+            if (!originalImage) return;
+            const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
+            tmp.width = canvas.height; tmp.height = canvas.width;
+            tctx.translate(tmp.width/2, tmp.height/2); tctx.rotate(Math.PI/2);
+            tctx.drawImage(canvas, -canvas.width/2, -canvas.height/2);
+            canvas.width = tmp.width; canvas.height = tmp.height;
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(tmp,0,0);
+            saveHistoryState();
+        });
+        document.getElementById('btn-flip-h').addEventListener('click', () => {
+            if (!originalImage) return;
+            const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
+            tmp.width = canvas.width; tmp.height = canvas.height;
+            tctx.translate(canvas.width,0); tctx.scale(-1,1);
+            tctx.drawImage(canvas,0,0);
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(tmp,0,0);
+            saveHistoryState();
+        });
+        document.getElementById('btn-flip-v').addEventListener('click', () => {
+            if (!originalImage) return;
+            const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
+            tmp.width = canvas.width; tmp.height = canvas.height;
+            tctx.translate(0,canvas.height); tctx.scale(1,-1);
+            tctx.drawImage(canvas,0,0);
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(tmp,0,0);
             saveHistoryState();
         });
 
-        // --- 9. CSS FILTERS & REALTIME PROCESSING ---
-        const fBrightness = document.getElementById('filter-brightness');
-        const fContrast = document.getElementById('filter-contrast');
-        const fSaturation = document.getElementById('filter-saturation');
-        const fGrayscale = document.getElementById('filter-grayscale');
-        const fSepia = document.getElementById('filter-sepia');
-
-        const filters = [fBrightness, fContrast, fSaturation, fGrayscale, fSepia];
-        
-        filters.forEach(filter => {
-            filter.addEventListener('input', applyCssFilters);
-            filter.addEventListener('change', () => {
-                if (filterBaseCanvas) saveHistoryState();
-            });
+        const fBrightness = document.getElementById('filter-brightness'), fContrast = document.getElementById('filter-contrast'),
+              fSaturation = document.getElementById('filter-saturation'), fGrayscale = document.getElementById('filter-grayscale'),
+              fSepia = document.getElementById('filter-sepia');
+        [fBrightness,fContrast,fSaturation,fGrayscale,fSepia].forEach(f => {
+            f.addEventListener('input', applyCssFilters);
+            f.addEventListener('change', () => { if (filterBaseCanvas) saveHistoryState(); });
         });
-
         function applyCssFilters() {
             if (!originalImage) return;
-
-            const b = fBrightness.value;
-            const c = fContrast.value;
-            const s = fSaturation.value;
-            const g = fGrayscale.value;
-            const sep = fSepia.value;
-
-            document.getElementById('val-brightness').innerText = `${b}%`;
-            document.getElementById('val-contrast').innerText = `${c}%`;
-            document.getElementById('val-saturation').innerText = `${s}%`;
-            document.getElementById('val-grayscale').innerText = `${g}%`;
+            const b = fBrightness.value, c = fContrast.value, s = fSaturation.value, g = fGrayscale.value, sep = fSepia.value;
+            document.getElementById('val-brightness').innerText = `${b}%`; document.getElementById('val-contrast').innerText = `${c}%`;
+            document.getElementById('val-saturation').innerText = `${s}%`; document.getElementById('val-grayscale').innerText = `${g}%`;
             document.getElementById('val-sepia').innerText = `${sep}%`;
-
             if (!filterBaseCanvas) {
                 filterBaseCanvas = document.createElement('canvas');
-                filterBaseCanvas.width = canvas.width;
-                filterBaseCanvas.height = canvas.height;
-                const tempCtx = filterBaseCanvas.getContext('2d');
-                const lastState = undoStack[undoStack.length - 1];
-                if (lastState) {
-                    tempCtx.putImageData(lastState, 0, 0);
-                } else {
-                    tempCtx.drawImage(canvas, 0, 0);
-                }
+                filterBaseCanvas.width = canvas.width; filterBaseCanvas.height = canvas.height;
+                const tctx = filterBaseCanvas.getContext('2d');
+                const last = undoStack[undoStack.length-1];
+                if (last) tctx.putImageData(last,0,0); else tctx.drawImage(canvas,0,0);
             }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) grayscale(${g}%) sepia(${sep}%)`;
-            ctx.drawImage(filterBaseCanvas, 0, 0);
-            ctx.filter = 'none'; 
+            ctx.drawImage(filterBaseCanvas,0,0);
+            ctx.filter = 'none';
         }
 
-        // --- 10. BLUR & SHARPEN KERNELS (CONVOLUTION) ---
-        function convolution(weights, opaque = true) {
-            const side = Math.round(Math.sqrt(weights.length));
-            const halfSide = Math.floor(side / 2);
-            const src = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const sw = src.width;
-            const sh = src.height;
-            const srcData = src.data;
-
-            const output = ctx.createImageData(sw, sh);
-            const dstData = output.data;
-
-            for (let y = 0; y < sh; y++) {
-                for (let x = 0; x < sw; x++) {
-                    const sy = y;
-                    const sx = x;
-                    const dstOff = (y * sw + x) * 4;
-                    let r = 0, g = 0, b = 0, a = 0;
-                    for (let cy = 0; cy < side; cy++) {
-                        for (let cx = 0; cx < side; cx++) {
-                            const scy = Math.min(sh - 1, Math.max(0, sy + cy - halfSide));
-                            const scx = Math.min(sw - 1, Math.max(0, sx + cx - halfSide));
-                            const srcOff = (scy * sw + scx) * 4;
-                            const wt = weights[cy * side + cx];
-                            r += srcData[srcOff] * wt;
-                            g += srcData[srcOff + 1] * wt;
-                            b += srcData[srcOff + 2] * wt;
-                            a += srcData[srcOff + 3] * wt;
+        function convolution(weights, opaque=true) {
+            const side = Math.round(Math.sqrt(weights.length)), half = Math.floor(side/2);
+            const src = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const sw = src.width, sh = src.height, srcData = src.data;
+            const out = ctx.createImageData(sw, sh), dst = out.data;
+            for (let y=0; y<sh; y++) {
+                for (let x=0; x<sw; x++) {
+                    const off = (y*sw + x)*4;
+                    let r=0,g=0,b=0,a=0;
+                    for (let cy=0; cy<side; cy++) {
+                        for (let cx=0; cx<side; cx++) {
+                            const sy = Math.min(sh-1, Math.max(0, y+cy-half));
+                            const sx = Math.min(sw-1, Math.max(0, x+cx-half));
+                            const so = (sy*sw + sx)*4;
+                            const wt = weights[cy*side + cx];
+                            r += srcData[so]*wt; g += srcData[so+1]*wt; b += srcData[so+2]*wt; a += srcData[so+3]*wt;
                         }
                     }
-                    dstData[dstOff] = r;
-                    dstData[dstOff + 1] = g;
-                    dstData[dstOff + 2] = b;
-                    dstData[dstOff + 3] = opaque ? 255 : a;
+                    dst[off]=r; dst[off+1]=g; dst[off+2]=b; dst[off+3]=opaque?255:a;
                 }
             }
-            return output;
+            return out;
         }
-
         document.getElementById('btn-apply-blur').addEventListener('click', () => {
             if (!originalImage) return;
-            const blurKernel = [
-                1/16, 2/16, 1/16,
-                2/16, 4/16, 2/16,
-                1/16, 2/16, 1/16
-            ];
-            const result = convolution(blurKernel);
-            ctx.putImageData(result, 0, 0);
+            ctx.putImageData(convolution([1/16,2/16,1/16, 2/16,4/16,2/16, 1/16,2/16,1/16]),0,0);
             saveHistoryState();
         });
-
         document.getElementById('btn-apply-sharpen').addEventListener('click', () => {
             if (!originalImage) return;
-            const sharpenKernel = [
-                 0, -1,  0,
-                -1,  5, -1,
-                 0, -1,  0
-            ];
-            const result = convolution(sharpenKernel);
-            ctx.putImageData(result, 0, 0);
+            ctx.putImageData(convolution([0,-1,0, -1,5,-1, 0,-1,0]),0,0);
             saveHistoryState();
         });
 
-        // --- 11. COLOR PICKER TOOL ---
         const cpBtn = document.getElementById('btn-color-picker');
         cpBtn.addEventListener('click', () => {
             if (!originalImage) return;
             isColorPickerActive = !isColorPickerActive;
-            if (isColorPickerActive) {
-                cpBtn.classList.add('bg-amber-500/20', 'border-amber-500/50');
-                canvas.style.cursor = 'cell';
-            } else {
-                cpBtn.classList.remove('bg-amber-500/20', 'border-amber-500/50');
-                canvas.style.cursor = 'default';
-            }
+            if (isColorPickerActive) { cpBtn.classList.add('bg-amber-500/20','border-amber-500/50'); canvas.style.cursor='cell'; }
+            else { cpBtn.classList.remove('bg-amber-500/20','border-amber-500/50'); canvas.style.cursor='default'; }
         });
-
-        canvas.addEventListener('click', (e) => {
+        canvas.addEventListener('click', e => {
             if (!isColorPickerActive) return;
-            
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const x = Math.floor((e.clientX - rect.left) * scaleX);
-            const y = Math.floor((e.clientY - rect.top) * scaleY);
-
-            const pixel = ctx.getImageData(x, y, 1, 1).data;
-            const r = pixel[0];
-            const g = pixel[1];
-            const b = pixel[2];
-
-            const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-            
+            const x = Math.floor((e.clientX-rect.left)*(canvas.width/rect.width));
+            const y = Math.floor((e.clientY-rect.top)*(canvas.height/rect.height));
+            const p = ctx.getImageData(x,y,1,1).data;
+            const hex = "#"+((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
             document.getElementById('color-preview').style.backgroundColor = hex;
             document.getElementById('color-hex').innerText = hex;
-            document.getElementById('color-rgb').innerText = `rgb(${r}, ${g}, ${b})`;
-
-            document.execCommand('copy'); 
-            
-            isColorPickerActive = false;
-            cpBtn.classList.remove('bg-amber-500/20', 'border-amber-500/50');
-            canvas.style.cursor = 'default';
+            document.getElementById('color-rgb').innerText = `rgb(${p[0]},${p[1]},${p[2]})`;
+            isColorPickerActive = false; cpBtn.classList.remove('bg-amber-500/20','border-amber-500/50'); canvas.style.cursor='default';
         });
 
-        // --- 12. BACKGROUND REMOVAL (SMART LOCAL FILL) ---
         document.getElementById('btn-auto-bg').addEventListener('click', () => {
             if (!originalImage) return;
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imgData.data;
-            
-            const corners = [
-                {x: 0, y: 0},
-                {x: canvas.width - 1, y: 0},
-                {x: 0, y: canvas.height - 1},
-                {x: canvas.width - 1, y: canvas.height - 1}
-            ];
-
-            let tolerance = 35;
-            
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height), data = imgData.data;
+            const corners = [{x:0,y:0},{x:canvas.width-1,y:0},{x:0,y:canvas.height-1},{x:canvas.width-1,y:canvas.height-1}];
+            const tolerance = 35;
             corners.forEach(corner => {
-                const index = (corner.y * canvas.width + corner.x) * 4;
-                const targetR = data[index];
-                const targetG = data[index+1];
-                const targetB = data[index+2];
-
-                const queue = [corner];
-                const visited = new Uint8Array(canvas.width * canvas.height);
-                
-                while (queue.length > 0) {
-                    const curr = queue.shift();
-                    const currIndex = (curr.y * canvas.width + curr.x) * 4;
-                    const visIndex = curr.y * canvas.width + curr.x;
-
-                    if (visited[visIndex]) continue;
-                    visited[visIndex] = 1;
-
-                    const r = data[currIndex];
-                    const g = data[currIndex+1];
-                    const b = data[currIndex+2];
-
-                    const diff = Math.sqrt(
-                        Math.pow(r - targetR, 2) +
-                        Math.pow(g - targetG, 2) +
-                        Math.pow(b - targetB, 2)
-                    );
-
-                    if (diff < tolerance) {
-                        data[currIndex + 3] = 0;
-
-                        if (curr.x > 0) queue.push({x: curr.x - 1, y: curr.y});
-                        if (curr.x < canvas.width - 1) queue.push({x: curr.x + 1, y: curr.y});
-                        if (curr.y > 0) queue.push({x: curr.x, y: curr.y - 1});
-                        if (curr.y < canvas.height - 1) queue.push({x: curr.x, y: curr.y + 1});
+                const idx = (corner.y*canvas.width+corner.x)*4;
+                const tr = data[idx], tg = data[idx+1], tb = data[idx+2];
+                const queue = [corner], visited = new Uint8Array(canvas.width*canvas.height);
+                while (queue.length) {
+                    const curr = queue.shift(), cidx = (curr.y*canvas.width+curr.x)*4, vi = curr.y*canvas.width+curr.x;
+                    if (visited[vi]) continue; visited[vi]=1;
+                    if (Math.sqrt((data[cidx]-tr)**2+(data[cidx+1]-tg)**2+(data[cidx+2]-tb)**2) < tolerance) {
+                        data[cidx+3] = 0;
+                        if (curr.x>0) queue.push({x:curr.x-1,y:curr.y});
+                        if (curr.x<canvas.width-1) queue.push({x:curr.x+1,y:curr.y});
+                        if (curr.y>0) queue.push({x:curr.x,y:curr.y-1});
+                        if (curr.y<canvas.height-1) queue.push({x:curr.x,y:curr.y+1});
                     }
                 }
             });
-
-            ctx.putImageData(imgData, 0, 0);
-            saveHistoryState();
+            ctx.putImageData(imgData,0,0); saveHistoryState();
         });
 
         let isColorBgRemovalActive = false;
-        document.getElementById('btn-color-bg').addEventListener('click', () => {
-            if (!originalImage) return;
-            isColorBgRemovalActive = true;
-            canvas.style.cursor = 'cell';
-        });
-
-        canvas.addEventListener('click', (e) => {
+        document.getElementById('btn-color-bg').addEventListener('click', () => { if (!originalImage) return; isColorBgRemovalActive = true; canvas.style.cursor='cell'; });
+        canvas.addEventListener('click', e => {
             if (!isColorBgRemovalActive) return;
-            isColorBgRemovalActive = false;
-            canvas.style.cursor = 'default';
-
+            isColorBgRemovalActive = false; canvas.style.cursor='default';
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const x = Math.floor((e.clientX - rect.left) * scaleX);
-            const y = Math.floor((e.clientY - rect.top) * scaleY);
-
-            const pixel = ctx.getImageData(x, y, 1, 1).data;
-            const targetR = pixel[0];
-            const targetG = pixel[1];
-            const targetB = pixel[2];
-
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imgData.data;
+            const x = Math.floor((e.clientX-rect.left)*(canvas.width/rect.width));
+            const y = Math.floor((e.clientY-rect.top)*(canvas.height/rect.height));
+            const p = ctx.getImageData(x,y,1,1).data;
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height), data = imgData.data;
             const tolerance = 45;
-
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i];
-                const g = data[i+1];
-                const b = data[i+2];
-
-                const diff = Math.sqrt(
-                    Math.pow(r - targetR, 2) +
-                    Math.pow(g - targetG, 2) +
-                    Math.pow(b - targetB, 2)
-                );
-
-                if (diff < tolerance) {
-                    data[i+3] = 0;
-                }
+            for (let i=0; i<data.length; i+=4) {
+                if (Math.sqrt((data[i]-p[0])**2+(data[i+1]-p[1])**2+(data[i+2]-p[2])**2) < tolerance) data[i+3] = 0;
             }
-
-            ctx.putImageData(imgData, 0, 0);
-            saveHistoryState();
+            ctx.putImageData(imgData,0,0); saveHistoryState();
         });
 
-        // --- 13. EXIF CLEANER ---
-        document.getElementById('btn-clean-exif').addEventListener('click', () => {
-            cleanExifEnabled = true;
-        });
+        document.getElementById('btn-clean-exif').addEventListener('click', () => { cleanExifEnabled = true; showToast("EXIF θα αφαιρεθούν κατά την αποθήκευση.", "success"); });
 
-        // --- 14. EXPORT & SAVE (IMAGE / PDF) ---
         document.getElementById('btn-save').addEventListener('click', () => {
             if (!originalImage) return;
-            const format = document.getElementById('save-format').value;
-            
-            if (format === "application/pdf") {
-                exportAsPdf();
-            } else {
-                exportAsImage(format);
-            }
+            const fmt = document.getElementById('save-format').value;
+            if (fmt === "application/pdf") exportAsPdf(); else exportAsImage(fmt);
         });
-
         function exportAsImage(format) {
-            let tempImgData = null;
-            if (preservedLsbPayload) {
-                tempImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                injectLsbToCanvas(preservedLsbPayload);
-            }
-
-            const dataUrl = canvas.toDataURL(format, 0.95);
-            const link = document.createElement('a');
-            const ext = format.split('/')[1];
-            
-            link.download = `studio_pro_edit.${ext}`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            if (tempImgData) {
-                ctx.putImageData(tempImgData, 0, 0);
-            }
+            let tmp = null;
+            if (preservedLsbPayload) { tmp = ctx.getImageData(0,0,canvas.width,canvas.height); injectLsbToCanvas(preservedLsbPayload); }
+            const url = canvas.toDataURL(format, 0.95);
+            const a = document.createElement('a'); a.download = `studio_pro_edit.${format.split('/')[1]}`; a.href = url;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            if (tmp) ctx.putImageData(tmp,0,0);
         }
-
         function exportAsPdf() {
-            let tempImgData = null;
-            if (preservedLsbPayload) {
-                tempImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                injectLsbToCanvas(preservedLsbPayload);
-            }
-
-            const dataUrl = canvas.toDataURL('image/png');
-            
-            if (tempImgData) {
-                ctx.putImageData(tempImgData, 0, 0);
-            }
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Studio Pro PDF Document</title>
-                    <style>
-                        body {
-                            margin: 0;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            height: 100vh;
-                            background-color: #ffffff;
-                        }
-                        img {
-                            max-width: 100%;
-                            max-height: 100%;
-                            object-fit: contain;
-                            page-break-inside: avoid;
-                        }
-                        @page {
-                            size: auto;
-                            margin: 0;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <img src="${dataUrl}" onload="window.print(); window.close();"/>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
+            let tmp = null;
+            if (preservedLsbPayload) { tmp = ctx.getImageData(0,0,canvas.width,canvas.height); injectLsbToCanvas(preservedLsbPayload); }
+            const url = canvas.toDataURL('image/png');
+            if (tmp) ctx.putImageData(tmp,0,0);
+            const w = window.open('','_blank');
+            w.document.write(`<html><head><title>PDF</title><style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#fff}img{max-width:100%;max-height:100%;object-fit:contain}@page{size:auto;margin:0}</style></head><body><img src="${url}" onload="window.print();window.close()"/></body></html>`);
+            w.document.close();
         }
 
-        // --- 15. RESET BUTTON ---
         document.getElementById('btn-reset').addEventListener('click', () => {
             if (!originalImage) return;
-            
-            filterBaseCanvas = null; 
-            loadImageToCanvas(originalImage);
-            
-            fBrightness.value = 100;
-            fContrast.value = 100;
-            fSaturation.value = 100;
-            fGrayscale.value = 0;
-            fSepia.value = 0;
-            document.getElementById('val-brightness').innerText = "100%";
-            document.getElementById('val-contrast').innerText = "100%";
-            document.getElementById('val-saturation').innerText = "100%";
-            document.getElementById('val-grayscale').innerText = "0%";
-            document.getElementById('val-sepia').innerText = "0%";
-
+            filterBaseCanvas = null; loadImageToCanvas(originalImage);
+            fBrightness.value=100; fContrast.value=100; fSaturation.value=100; fGrayscale.value=0; fSepia.value=0;
+            ['val-brightness','val-contrast','val-saturation','val-grayscale','val-sepia'].forEach(id => document.getElementById(id).innerText = id.includes('gray')||id.includes('sepia')?'0%':'100%');
             cancelStegoStates();
             document.getElementById('img-resolution').innerText = `${canvas.width} x ${canvas.height} px`;
         });
-
-        // ΚΟΥΜΠΙ ΑΝΑΙΡΕΣΗΣ (UNDO)
         document.getElementById('btn-undo').addEventListener('click', () => {
-            if (!originalImage) return;
-
-            if (undoStack.length > 1) {
-                undoStack.pop(); 
-                const previousState = undoStack[undoStack.length - 1]; 
-                
-                canvas.width = previousState.width;
-                canvas.height = previousState.height;
-                ctx.putImageData(previousState, 0, 0);
-                
-                filterBaseCanvas = null; 
-                document.getElementById('img-resolution').innerText = `${canvas.width} x ${canvas.height} px`;
-            }
+            if (!originalImage || undoStack.length<2) return;
+            undoStack.pop();
+            const prev = undoStack[undoStack.length-1];
+            canvas.width = prev.width; canvas.height = prev.height;
+            ctx.putImageData(prev,0,0);
+            filterBaseCanvas = null;
+            document.getElementById('img-resolution').innerText = `${canvas.width} x ${canvas.height} px`;
         });
     </script>
 </body>
