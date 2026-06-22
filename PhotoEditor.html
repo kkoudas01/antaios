@@ -13,10 +13,7 @@
             color: #f3f4f6;
             transition: background-color 0.4s ease, color 0.4s ease;
         }
-        .accessible-focus:focus-visible {
-            outline: 3px solid #f59e0b !important;
-            outline-offset: 2px;
-        }
+        .accessible-focus:focus-visible { outline: 3px solid #f59e0b !important; outline-offset: 2px; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -73,7 +70,6 @@
     </header>
 
     <main class="flex-1 w-full max-w-7xl mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        
         <section class="lg:col-span-4 bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex flex-col justify-between space-y-4 shadow-lg overflow-y-auto max-h-[calc(100vh-140px)]">
             <div class="space-y-4">
                 <div class="border-2 border-dashed border-[#374151] hover:border-amber-500/50 rounded-lg p-4 text-center cursor-pointer transition-colors relative" id="drop-zone">
@@ -270,7 +266,7 @@
     </footer>
 
     <script>
-        // --- 1. ΑΛΦΑΒΗΤΟ (περιλαμβάνει newline και ειδικούς ελληνικούς χαρακτήρες) ---
+        // --- ΑΛΦΑΒΗΤΟ (περιλαμβάνει όλους τους απαραίτητους χαρακτήρες) ---
         const ALPHABET = [
             ' ', 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
             'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -279,11 +275,21 @@
             'ά','έ','ή','ί','ό','ύ','ώ','ϊ','ϋ','ΐ','ΰ','Ά','Έ','Ή','Ί','Ό','Ύ','Ώ','Ϊ','Ϋ',
             '0','1','2','3','4','5','6','7','8','9',
             '!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','}','[',']','|','\\',':',';','"','\'','<','>',',','.','?','/',
-            '~','€','£','¤','§','¦','—','«','»','…','\n'
+            '~','€','£','¤','§','¦','—','«','»','…','\n',
+            '\u2019'   // RIGHT SINGLE QUOTATION MARK (’)
         ];
         const ALPHABET_SIZE = ALPHABET.length;
 
         function getCharIndex(char) { return ALPHABET.indexOf(char); }
+
+        function sanitizeText(text) {
+            let result = '';
+            for (let ch of text) {
+                if (getCharIndex(ch) !== -1) result += ch;
+                else result += ' ';
+            }
+            return result;
+        }
 
         function vigenereEncrypt(plain, key) {
             let out = "", ki = 0;
@@ -317,11 +323,9 @@
         let moonState = false, sunState = false, moonTimer = null, sunTimer = null;
         let secretKey = "", pendingStegoAction = null, preservedLsbPayload = "";
         let isColorPickerActive = false, cropMode = false, cropStart = {x:0,y:0}, cropEnd = {x:0,y:0}, isCropping = false, cropCanvasSnapshot = null;
-
-        // Draggable text state
-        let textMode = false;
-        let textIsDragging = false;
+        let textMode = false, textIsDragging = false;
         let pendingText = { text: '', x: 0, y: 0, size: 30, color: '#ffffff', width: 0, height: 0, offsetX: 0, offsetY: 0 };
+        let onCropMove, onCropUp;
 
         window.addEventListener('load', () => { lucide.createIcons(); showToast("Καλώς ορίσατε στο Studio Pro!", "success"); });
 
@@ -384,6 +388,8 @@
                 document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
                 canvas.style.cursor = 'default';
                 if (cropCanvasSnapshot) ctx.putImageData(cropCanvasSnapshot,0,0);
+                if (onCropMove) window.removeEventListener('mousemove', onCropMove);
+                if (onCropUp) window.removeEventListener('mouseup', onCropUp);
             }
             document.querySelectorAll('.tool-panel').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
@@ -398,6 +404,7 @@
         function cancelStegoStates() { moonState = sunState = false; clearTimeout(moonTimer); clearTimeout(sunTimer); }
 
         const MAGIC_MARKER = "STEGO:";
+        const END_MARKER = " ENDSTEGO";
 
         function extractBinaryPayloadFromCanvas() {
             const imgData = ctx.getImageData(0,0,canvas.width,canvas.height).data;
@@ -444,8 +451,10 @@
         });
 
         function performLsbEncryption(payloadText, key) {
-            const clean = payloadText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-            const encrypted = vigenereEncrypt(MAGIC_MARKER + clean, key);
+            let clean = payloadText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            clean = sanitizeText(clean);
+            const fullMessage = MAGIC_MARKER + clean + END_MARKER;
+            const encrypted = vigenereEncrypt(fullMessage, key);
             let binary = "";
             for (let ch of encrypted) {
                 let code = getCharIndex(ch);
@@ -476,9 +485,9 @@
             let binary = preservedLsbPayload;
             if (!binary) {
                 binary = extractBinaryPayloadFromCanvas();
-                if (!binary) { cancelStegoStates(); showToast("Δεν βρέθηκε κρυμμένο μήνυμα.", "warning"); return; }
+                if (!binary) { cancelStegoStates(); showToast("Δεν βρέθηκε κρυμμένο μήνυμα.", "warning"); return false; }
             } else {
-                if (binary.length < 24) return;
+                if (binary.length < 24) return false;
                 const len = parseInt(binary.substr(0,24), 2);
                 binary = binary.substr(24, len);
             }
@@ -491,11 +500,12 @@
                 if (code < ALPHABET_SIZE) decoded += ALPHABET[code];
             }
             const plain = vigenereDecrypt(decoded, key);
-            if (plain.startsWith(MAGIC_MARKER)) {
-                openMessageModal("Ανάκτηση Μηνύματος", plain.substring(MAGIC_MARKER.length));
+            if (plain.startsWith(MAGIC_MARKER) && plain.endsWith(END_MARKER)) {
+                const inner = plain.substring(MAGIC_MARKER.length, plain.length - END_MARKER.length);
+                openMessageModal("Ανάκτηση Μηνύματος", inner);
+                return true;
             } else {
-                cancelStegoStates();
-                showToast("Λάθος κλειδί ή μη έγκυρο μήνυμα.", "warning");
+                return false;
             }
         }
 
@@ -504,16 +514,11 @@
             modal.className = "fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4";
             modal.innerHTML = `
                 <div class="bg-white dark:bg-[#111827] border border-amber-500/40 rounded-xl p-6 w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
-                    <h3 class="text-lg font-bold text-amber-500 flex items-center gap-2 mb-3">
-                        <i data-lucide="unlock" class="w-5 h-5 flex-shrink-0"></i>
-                        <span>${title}</span>
-                    </h3>
+                    <h3 class="text-lg font-bold text-amber-500 flex items-center gap-2 mb-3"><i data-lucide="unlock" class="w-5 h-5 flex-shrink-0"></i>${title}</h3>
                     <div class="bg-gray-100 dark:bg-[#1f2937] p-4 rounded-lg border border-gray-200 dark:border-gray-800 mb-4 overflow-y-auto max-h-[60vh] select-all" style="white-space:pre-wrap;">
                         <p class="text-sm font-mono text-gray-800 dark:text-white break-words">${msg}</p>
                     </div>
-                    <div class="flex justify-end mt-auto">
-                        <button class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg text-xs transition-colors">Κλείσιμο</button>
-                    </div>
+                    <div class="flex justify-end"><button class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg text-xs">Κλείσιμο</button></div>
                 </div>`;
             document.body.appendChild(modal);
             lucide.createIcons();
@@ -542,6 +547,114 @@
                 y: (evt.clientY - rect.top) * (canvas.height / rect.height)
             };
         }
+
+        function startCrop(e) {
+            if (!cropMode || !originalImage) return;
+            const pos = getMousePos(canvas, e);
+            cropStart.x = pos.x; cropStart.y = pos.y;
+            isCropping = true;
+            cropCanvasSnapshot = ctx.getImageData(0,0,canvas.width,canvas.height);
+            onCropMove = function(ev) {
+                if (!isCropping) return;
+                const p = getMousePos(canvas, ev);
+                cropEnd.x = p.x; cropEnd.y = p.y;
+                ctx.putImageData(cropCanvasSnapshot, 0,0);
+                ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+                const sx = Math.min(cropStart.x, cropEnd.x), sy = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
+                ctx.clearRect(sx, sy, w, h);
+                ctx.putImageData(cropCanvasSnapshot,0,0, sx, sy, w, h);
+                const scaleX = canvas.width / canvas.getBoundingClientRect().width;
+                const scaleY = canvas.height / canvas.getBoundingClientRect().height;
+                ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2 * Math.max(scaleX, scaleY);
+                ctx.setLineDash([8*scaleX, 8*scaleY]); ctx.strokeRect(sx,sy,w,h); ctx.setLineDash([]);
+            };
+            onCropUp = function(ev) {
+                if (!isCropping) return;
+                window.removeEventListener('mousemove', onCropMove);
+                window.removeEventListener('mouseup', onCropUp);
+                isCropping = false;
+                cropMode = false;
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                const x = Math.min(cropStart.x, cropEnd.x), y = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
+                if (w < 10 || h < 10) {
+                    ctx.putImageData(cropCanvasSnapshot,0,0);
+                    return;
+                }
+                const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+                const src = document.createElement('canvas'); src.width = canvas.width; src.height = canvas.height;
+                src.getContext('2d').putImageData(cropCanvasSnapshot,0,0);
+                tmp.getContext('2d').drawImage(src, x, y, w, h, 0,0,w,h);
+                canvas.width = w; canvas.height = h;
+                ctx.clearRect(0,0,w,h); ctx.drawImage(tmp,0,0);
+                document.getElementById('img-resolution').innerText = `${w} x ${h} px`;
+                saveHistoryState();
+            };
+            window.addEventListener('mousemove', onCropMove);
+            window.addEventListener('mouseup', onCropUp);
+        }
+
+        document.getElementById('btn-crop-mode').addEventListener('click', () => {
+            if (!originalImage) return;
+            cropMode = !cropMode;
+            if (cropMode) {
+                document.getElementById('btn-crop-mode').classList.add('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'crosshair';
+            } else {
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                if (isCropping) {
+                    window.removeEventListener('mousemove', onCropMove);
+                    window.removeEventListener('mouseup', onCropUp);
+                    isCropping = false;
+                    if (cropCanvasSnapshot) ctx.putImageData(cropCanvasSnapshot,0,0);
+                }
+            }
+        });
+
+        canvas.addEventListener('mousedown', e => {
+            const pos = getMousePos(canvas, e);
+            if (textMode) {
+                const halfW = (pendingText.width / 2) + 20;
+                const lineHeight = pendingText.size * 1.4;
+                const topY = pendingText.y - (lineHeight / 2) - 10;
+                const bottomY = pendingText.y + pendingText.height + 10;
+                if (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) {
+                    textIsDragging = true;
+                    pendingText.offsetX = pos.x - pendingText.x;
+                    pendingText.offsetY = pos.y - pendingText.y;
+                    return;
+                }
+            }
+            if (cropMode) {
+                startCrop(e);
+            }
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            const pos = getMousePos(canvas, e);
+            if (textIsDragging) {
+                pendingText.x = pos.x - pendingText.offsetX;
+                pendingText.y = pos.y - pendingText.offsetY;
+                drawPendingText(true);
+                canvas.style.cursor = 'move';
+                return;
+            } else if (textMode) {
+                const halfW = (pendingText.width / 2) + 20;
+                const lineHeight = pendingText.size * 1.4;
+                const topY = pendingText.y - (lineHeight / 2) - 10;
+                const bottomY = pendingText.y + pendingText.height + 10;
+                canvas.style.cursor = (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) ? 'move' : 'default';
+            }
+        });
+
+        canvas.addEventListener('mouseup', e => {
+            if (textIsDragging) {
+                textIsDragging = false;
+            }
+        });
 
         function drawPendingText(withBorder = true) {
             if (!originalImage || !pendingText.text) return;
@@ -601,18 +714,9 @@
         document.getElementById('text-color').addEventListener('input', updatePendingTextParams);
         document.getElementById('text-input').addEventListener('input', updatePendingTextParams);
 
-        document.getElementById('btn-submit-text').addEventListener('click', () => {
-            if (!originalImage) { showToast("Φορτώστε πρώτα φωτογραφία!", "warning"); return; }
-            const text = document.getElementById('text-input').value;
-            if (!text) return;
-
-            if (pendingStegoAction === "encrypt-key") { secretKey = text; document.getElementById('text-input').value = ""; pendingStegoAction = "encrypt-text"; return; }
-            if (pendingStegoAction === "encrypt-text") { performLsbEncryption(text, secretKey); document.getElementById('text-input').value = ""; pendingStegoAction = null; secretKey = ""; return; }
-            if (pendingStegoAction === "decrypt-key") { secretKey = text; document.getElementById('text-input').value = ""; performLsbDecryption(secretKey); pendingStegoAction = null; secretKey = ""; return; }
-
+        function startDraggableText(text) {
             pendingText.text = text;
             pendingText.size = parseInt(document.getElementById('text-font-size').value) || 30;
-            // Auto-fit
             let currentSize = pendingText.size;
             let fits = false;
             let attempts = 0;
@@ -640,7 +744,6 @@
             if (currentSize < pendingText.size) {
                 pendingText.size = Math.max(10, currentSize);
                 document.getElementById('text-font-size').value = pendingText.size;
-                showToast("Το μέγεθος μειώθηκε αυτόματα για να χωρέσει στην εικόνα.", "info");
             }
             pendingText.color = document.getElementById('text-color').value;
             pendingText.x = canvas.width / 2;
@@ -649,7 +752,32 @@
             drawPendingText(true);
             document.getElementById('btn-submit-text').classList.add('hidden');
             document.getElementById('btn-apply-text').classList.remove('hidden');
-            showToast("Μπορείτε να σύρετε το κείμενο με το ποντίκι. Πατήστε 'Οριστικοποίηση' για αποθήκευση.", "info");
+        }
+
+        document.getElementById('btn-submit-text').addEventListener('click', () => {
+            if (!originalImage) { showToast("Φορτώστε πρώτα φωτογραφία!", "warning"); return; }
+            const text = document.getElementById('text-input').value;
+            if (!text) return;
+
+            if (pendingStegoAction === "encrypt-key") { secretKey = text; document.getElementById('text-input').value = ""; pendingStegoAction = "encrypt-text"; return; }
+            if (pendingStegoAction === "encrypt-text") { performLsbEncryption(text, secretKey); document.getElementById('text-input').value = ""; pendingStegoAction = null; secretKey = ""; return; }
+            if (pendingStegoAction === "decrypt-key") {
+                secretKey = text;
+                const keyAttempt = text;
+                document.getElementById('text-input').value = "";
+                const success = performLsbDecryption(secretKey);
+                if (!success) {
+                    cancelStegoStates();
+                    startDraggableText(keyAttempt);
+                    // Κανένα toast – αθόρυβη επαναφορά σε κανονική λειτουργία
+                }
+                pendingStegoAction = null;
+                secretKey = "";
+                return;
+            }
+
+            // Κανονική λειτουργία draggable text (χωρίς stego)
+            startDraggableText(text);
         });
 
         document.getElementById('btn-apply-text').addEventListener('click', () => {
@@ -663,77 +791,7 @@
             showToast("Το κείμενο αποτυπώθηκε μόνιμα στην εικόνα!", "success");
         });
 
-        canvas.addEventListener('mousedown', e => {
-            const pos = getMousePos(canvas, e);
-            if (textMode) {
-                const halfW = (pendingText.width / 2) + 20;
-                const lineHeight = pendingText.size * 1.4;
-                const topY = pendingText.y - (lineHeight / 2) - 10;
-                const bottomY = pendingText.y + pendingText.height + 10;
-                if (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) {
-                    textIsDragging = true;
-                    pendingText.offsetX = pos.x - pendingText.x;
-                    pendingText.offsetY = pos.y - pendingText.y;
-                    return;
-                }
-            }
-            if (cropMode) {
-                cropStart.x = pos.x; cropStart.y = pos.y;
-                isCropping = true;
-                cropCanvasSnapshot = ctx.getImageData(0,0,canvas.width,canvas.height);
-            }
-        });
-
-        canvas.addEventListener('mousemove', e => {
-            const pos = getMousePos(canvas, e);
-            if (textIsDragging) {
-                pendingText.x = pos.x - pendingText.offsetX;
-                pendingText.y = pos.y - pendingText.offsetY;
-                drawPendingText(true);
-                canvas.style.cursor = 'move';
-                return;
-            } else if (textMode) {
-                const halfW = (pendingText.width / 2) + 20;
-                const lineHeight = pendingText.size * 1.4;
-                const topY = pendingText.y - (lineHeight / 2) - 10;
-                const bottomY = pendingText.y + pendingText.height + 10;
-                canvas.style.cursor = (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) ? 'move' : 'default';
-            }
-            if (cropMode && isCropping && cropCanvasSnapshot) {
-                cropEnd.x = pos.x; cropEnd.y = pos.y;
-                ctx.putImageData(cropCanvasSnapshot, 0,0);
-                ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                const sx = Math.min(cropStart.x, cropEnd.x), sy = Math.min(cropStart.y, cropEnd.y);
-                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
-                ctx.clearRect(sx, sy, w, h);
-                ctx.putImageData(cropCanvasSnapshot,0,0, sx, sy, w, h);
-                const scaleX = canvas.width / canvas.getBoundingClientRect().width;
-                const scaleY = canvas.height / canvas.getBoundingClientRect().height;
-                ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2 * Math.max(scaleX, scaleY);
-                ctx.setLineDash([8*scaleX, 8*scaleY]); ctx.strokeRect(sx,sy,w,h); ctx.setLineDash([]);
-            }
-        });
-
-        canvas.addEventListener('mouseup', () => {
-            if (textIsDragging) { textIsDragging = false; return; }
-            if (cropMode && isCropping) {
-                isCropping = false; cropMode = false;
-                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
-                canvas.style.cursor = 'default';
-                const x = Math.min(cropStart.x, cropEnd.x), y = Math.min(cropStart.y, cropEnd.y);
-                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
-                if (w < 10 || h < 10) { ctx.putImageData(cropCanvasSnapshot,0,0); return; }
-                const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
-                const src = document.createElement('canvas'); src.width = canvas.width; src.height = canvas.height;
-                src.getContext('2d').putImageData(cropCanvasSnapshot,0,0);
-                tmp.getContext('2d').drawImage(src, x, y, w, h, 0,0,w,h);
-                canvas.width = w; canvas.height = h;
-                ctx.clearRect(0,0,w,h); ctx.drawImage(tmp,0,0);
-                document.getElementById('img-resolution').innerText = `${w} x ${h} px`;
-                saveHistoryState();
-            }
-        });
-
+        // Rotate & Flip
         document.getElementById('btn-rotate-90').addEventListener('click', () => {
             if (!originalImage) return;
             const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
@@ -763,6 +821,7 @@
             saveHistoryState();
         });
 
+        // Filters
         const fBrightness = document.getElementById('filter-brightness'), fContrast = document.getElementById('filter-contrast'),
               fSaturation = document.getElementById('filter-saturation'), fGrayscale = document.getElementById('filter-grayscale'),
               fSepia = document.getElementById('filter-sepia');
@@ -823,6 +882,7 @@
             saveHistoryState();
         });
 
+        // Color picker & bg removal
         const cpBtn = document.getElementById('btn-color-picker');
         cpBtn.addEventListener('click', () => {
             if (!originalImage) return;
@@ -886,6 +946,7 @@
 
         document.getElementById('btn-clean-exif').addEventListener('click', () => { cleanExifEnabled = true; showToast("EXIF θα αφαιρεθούν κατά την αποθήκευση.", "success"); });
 
+        // Export
         document.getElementById('btn-save').addEventListener('click', () => {
             if (!originalImage) return;
             const fmt = document.getElementById('save-format').value;
@@ -909,6 +970,7 @@
             w.document.close();
         }
 
+        // Reset & Undo
         document.getElementById('btn-reset').addEventListener('click', () => {
             if (!originalImage) return;
             filterBaseCanvas = null; loadImageToCanvas(originalImage);
