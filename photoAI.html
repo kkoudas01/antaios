@@ -3,566 +3,1022 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Εξαγωγή Μεταδεδομένων Εικόνας</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Photo Editor - Studio Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            color: #333;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
-        
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            width: 95%;
-            max-width: 900px;
-            overflow: hidden;
+        .accessible-focus:focus-visible { outline: 3px solid #f59e0b !important; outline-offset: 2px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        body, header, section, footer, button, textarea, select, input, div, h1, h2, h3, h4, label, span, i {
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
         }
-        
-        header {
-            background: #2c3e50;
-            color: white;
-            padding: 25px 30px;
-            text-align: center;
-            position: relative;
+        body.light-theme { background-color: #f3f4f6; color: #1f2937; }
+        body.light-theme header, body.light-theme footer { background-color: #ffffff; border-color: #e5e7eb; color: #4b5563; }
+        body.light-theme header h1 { color: #d97706; }
+        body.light-theme section { background-color: #ffffff; border-color: #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        body.light-theme .tab-btn { background-color: #f3f4f6; color: #4b5563; }
+        body.light-theme .tab-btn:hover { background-color: #e5e7eb; }
+        body.light-theme .tab-btn.active { background-color: #fef3c7; color: #b45309; border-color: #f59e0b; }
+        body.light-theme #file-info { background-color: #f9fafb; border-color: #e5e7eb; color: #4b5563; }
+        body.light-theme input[type="range"] { background-color: #e5e7eb; }
+        body.light-theme textarea, body.light-theme select, body.light-theme input[type="text"], body.light-theme input[type="number"] {
+            background-color: #ffffff; border-color: #d1d5db; color: #111827;
         }
-        
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+        body.light-theme textarea:focus, body.light-theme select:focus, body.light-theme input:focus { border-color: #f59e0b; }
+        body.light-theme .bg-\[\#1f2937\/50\] { background-color: #f9fafb; border-color: #e5e7eb; }
+        body.light-theme .bg-\[\#1f2937\] { background-color: #e5e7eb; border-color: #d1d5db; color: #1f2937; }
+        body.light-theme .hover\:bg-\[\#374151\]:hover { background-color: #d1d5db; }
+        body.light-theme .bg-\[\#111827\] { background-color: #ffffff; border-color: #e5e7eb; }
+        body.light-theme .text-gray-200, body.light-theme .text-gray-300, body.light-theme .text-gray-400 { color: #374151; }
+        body.light-theme .text-gray-500 { color: #4b5563; }
+        body.light-theme .text-white { color: #111827; }
+        body.light-theme .text-emerald-400 { color: #059669; }
+        body.light-theme .text-sky-400 { color: #0284c7; }
+        body.light-theme .text-amber-500 { color: #d97706; }
+        body.light-theme .text-amber-400 { color: #b45309; }
+        body.light-theme .text-red-400 { color: #dc2626; }
+        body.light-theme #empty-state h2 { color: #4b5563; }
+        body.light-theme #empty-state p { color: #6b7280; }
+        body.light-theme #canvas-container-panel {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-color: #f8fafc; border-color: #e2e8f0;
         }
-        
-        h1 i {
-            color: #3498db;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.8;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .content {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 30px;
-            gap: 30px;
-        }
-        
-        .upload-section {
-            flex: 1;
-            min-width: 300px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .section-title {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .upload-area {
-            border: 3px dashed #3498db;
-            border-radius: 12px;
-            padding: 30px 20px;
-            text-align: center;
-            background: rgba(52, 152, 219, 0.05);
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 25px;
-        }
-        
-        .upload-area:hover {
-            background: rgba(52, 152, 219, 0.1);
-            border-color: #2980b9;
-        }
-        
-        .upload-area i {
-            font-size: 4rem;
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-        
-        .upload-area h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        
-        .upload-area p {
-            color: #7f8c8d;
-            font-size: 0.95rem;
-        }
-        
-        #fileInput {
-            display: none;
-        }
-        
-        .url-input {
-            display: flex;
-            margin-top: 25px;
-            gap: 10px;
-        }
-        
-        .url-input input {
-            flex: 1;
-            padding: 14px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .url-input input:focus {
-            border-color: #3498db;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 14px 25px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        button:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .results-section {
-            flex: 1;
-            min-width: 300px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        
-        .results-placeholder {
-            text-align: center;
-            padding: 50px 20px;
-            color: #7f8c8d;
-        }
-        
-        .results-placeholder i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #bdc3c7;
-        }
-        
-        .metadata-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .metadata-table th {
-            background: #2c3e50;
-            color: white;
-            text-align: left;
-            padding: 12px 15px;
-        }
-        
-        .metadata-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .metadata-table tr:nth-child(even) {
-            background: #f1f8ff;
-        }
-        
-        .metadata-table tr:hover {
-            background: #e3f2fd;
-        }
-        
-        .ai-prompt {
-            background: #fffde7 !important;
-            font-weight: 600;
-            color: #e65100;
-        }
-        
-        .image-preview {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .image-preview img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            border-radius: 0 8px 8px 0;
-            margin: 20px 0;
-            font-size: 0.95rem;
-        }
-        
-        .warning {
-            background: #ffecb3;
-            border-left: 4px solid #ffc107;
-            color: #7d6608;
-        }
-        
-        .error {
-            color: #c0392b;
-            background: #ffebee;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            display: none;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: #ecf0f1;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 768px) {
-            .content {
-                flex-direction: column;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-        }
+        #stego-message-group { display: block; }
+        #stego-output { transition: all 0.3s ease; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-image"></i> Εξαγωγή Μεταδεδομένων Εικόνας</h1>
-            <p class="subtitle">Ανέβασε μια εικόνα ή δώσε το URL της για να εξαγάγεις τα μεταδεδομένα της. Ιδανικό για αναζήτηση prompts σε AI-generated εικόνες.</p>
-        </header>
-        
-        <div class="content">
-            <div class="upload-section">
-                <h2 class="section-title"><i class="fas fa-upload"></i> Επιλογή Εικόνας</h2>
-                
-                <div class="upload-area" id="dropArea">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <h3>Κάνε κλικ ή σύρε εικόνα εδώ</h3>
-                    <p>Μέγιστο μέγεθος αρχείου: 5MB</p>
-                    <p>Υποστηριζόμενες μορφές: JPG, JPEG, PNG, WEBP</p>
-                </div>
-                
-                <input type="file" id="fileInput" accept="image/jpeg, image/png, image/jpg, image/webp">
-                
-                <div class="info-box">
-                    <i class="fas fa-info-circle"></i> Για AI-generated εικόνες, το prompt μπορεί να βρίσκεται στα πεδία: 
-                    <strong>UserComment, ImageDescription, Parameters, ή Software</strong>
-                </div>
-                
-                <div class="error" id="errorBox">
-                    <i class="fas fa-exclamation-triangle"></i> <span id="errorText"></span>
-                </div>
-                
-                <h3 class="section-title"><i class="fas fa-link"></i> ή Εισαγωγή URL</h3>
-                
-                <div class="url-input">
-                    <input type="text" id="urlInput" placeholder="https://example.com/image.jpg">
-                    <button id="fetchBtn"><i class="fas fa-download"></i> Φόρτωση</button>
-                </div>
-                
-                <div class="info-box warning">
-                    <i class="fas fa-exclamation-triangle"></i> Σημείωση: Ορισμένοι εξωτερικοί διακομιστές μπορεί να μην επιτρέπουν την πρόσβαση λόγω CORS policy.
-                </div>
-            </div>
-            
-            <div class="results-section">
-                <h2 class="section-title"><i class="fas fa-list"></i> Μεταδεδομένα</h2>
-                
-                <div class="image-preview" id="imagePreview"></div>
-                
-                <div id="resultsContainer">
-                    <div class="results-placeholder">
-                        <i class="fas fa-search"></i>
-                        <h3>Δεν έχει φορτωθεί εικόνα ακόμα</h3>
-                        <p>Ανέβασε μια εικόνα ή δώσε το URL της για να δεις τα μεταδεδομένα της</p>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <header class="bg-[#111827] border-b border-[#1f2937] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
+        <div class="flex items-center space-x-3">
+            <a href="index.html" class="flex items-center space-x-2 bg-[#1f2937] hover:bg-[#374151] text-white px-3 py-2 rounded-lg transition-colors border border-amber-500/30 accessible-focus" title="Επιστροφή στην αρχική">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span class="hidden sm:inline text-sm font-semibold">Αρχική</span>
+            </a>
+            <h1 class="text-lg md:text-xl font-bold text-amber-500 tracking-wide flex items-center gap-2">
+                <i data-lucide="aperture" class="w-6 h-6 animate-spin-slow"></i>
+                <span>Photo Editor <span class="text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">PRO</span></span>
+            </h1>
+        </div>
+        <button id="btn-theme-toggle" class="p-2 rounded-lg bg-[#1f2937] hover:bg-[#374151] border border-gray-700 text-gray-300 transition-colors" aria-label="Εναλλαγή θέματος">
+            <i data-lucide="moon" class="w-5 h-5"></i>
+        </button>
+    </header>
+
+    <main class="flex-1 w-full max-w-7xl mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <section class="lg:col-span-4 bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex flex-col justify-between space-y-4 shadow-lg overflow-y-auto max-h-[calc(100vh-140px)]">
+            <div class="space-y-4">
+                <div class="border-2 border-dashed border-[#374151] hover:border-amber-500/50 rounded-lg p-4 text-center cursor-pointer transition-colors relative" id="drop-zone">
+                    <input type="file" id="image-loader" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+                        <i data-lucide="upload-cloud" class="w-10 h-10 text-amber-500"></i>
+                        <span class="text-sm font-medium text-gray-300" id="upload-main-text">Σύρετε ή επιλέξτε εικόνα</span>
+                        <span class="text-xs text-gray-500">Υποστηρίζει όλα τα formats</span>
                     </div>
                 </div>
-                
-                <table class="metadata-table" id="metadataTable">
-                    <thead>
-                        <tr>
-                            <th>Ιδιότητα</th>
-                            <th>Τιμή</th>
-                        </tr>
-                    </thead>
-                    <tbody id="metadataBody"></tbody>
-                </table>
+
+                <div id="file-info" class="hidden text-xs bg-[#1f2937] p-2 rounded border border-gray-700 flex justify-between items-center text-gray-400">
+                    <span id="img-resolution">0 x 0 px</span>
+                    <div class="flex items-center gap-3">
+                        <button id="btn-undo" class="text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 transition-colors" title="Αναίρεση τελευταίας ενέργειας">
+                            <i data-lucide="undo" class="w-3.5 h-3.5"></i> Αναίρεση
+                        </button>
+                        <button id="btn-reset" class="text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 transition-colors" title="Επαναφορά στην αρχική εικόνα">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Επαναφορά
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="switchTab('tab-transform')" class="tab-btn active bg-amber-500/10 text-amber-400 border border-amber-500/30 p-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 hover:bg-amber-500/20 transition-all">
+                        <i data-lucide="move" class="w-4 h-4"></i> Μετασχ.
+                    </button>
+                    <button onclick="switchTab('tab-filters')" class="tab-btn bg-[#1f2937] text-gray-300 border border-transparent p-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 hover:bg-[#374151] transition-all">
+                        <i data-lucide="sliders" class="w-4 h-4"></i> Φίλτρα
+                    </button>
+                    <button onclick="switchTab('tab-tools')" class="tab-btn bg-[#1f2937] text-gray-300 border border-transparent p-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 hover:bg-[#374151] transition-all">
+                        <i data-lucide="wrench" class="w-4 h-4"></i> Εργαλεία
+                    </button>
+                    <button onclick="switchTab('tab-text')" id="btn-tab-text" class="tab-btn bg-[#1f2937] text-gray-300 border border-transparent p-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 hover:bg-[#374151] transition-all">
+                        <i data-lucide="type" class="w-4 h-4"></i> Κείμενο
+                    </button>
+                    <button onclick="switchTab('tab-stego')" class="tab-btn bg-[#1f2937] text-gray-300 border border-transparent p-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 hover:bg-[#374151] transition-all">
+                        <i data-lucide="lock" class="w-4 h-4"></i> Crypto
+                    </button>
+                </div>
+
+                <div id="tab-transform" class="space-y-3 tool-panel">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Μετασχηματισμός</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-rotate-90" class="bg-[#1f2937] hover:bg-[#374151] p-2.5 rounded-lg text-xs font-medium flex flex-col items-center gap-1 transition-all">
+                            <i data-lucide="rotate-cw" class="w-5 h-5 text-amber-500"></i> Περιστροφή 90°
+                        </button>
+                        <button id="btn-crop-mode" class="bg-[#1f2937] hover:bg-[#374151] p-2.5 rounded-lg text-xs font-medium flex flex-col items-center gap-1 transition-all">
+                            <i data-lucide="crop" class="w-5 h-5 text-amber-500"></i> Περικοπή
+                        </button>
+                        <button id="btn-flip-h" class="bg-[#1f2937] hover:bg-[#374151] p-2.5 rounded-lg text-xs font-medium flex flex-col items-center gap-1 transition-all">
+                            <i data-lucide="flip-horizontal" class="w-5 h-5 text-amber-500"></i> Οριζ. Ανακλ.
+                        </button>
+                        <button id="btn-flip-v" class="bg-[#1f2937] hover:bg-[#374151] p-2.5 rounded-lg text-xs font-medium flex flex-col items-center gap-1 transition-all">
+                            <i data-lucide="flip-vertical" class="w-5 h-5 text-amber-500"></i> Κατακ. Ανακλ.
+                        </button>
+                    </div>
+                </div>
+
+                <div id="tab-filters" class="space-y-4 tool-panel hidden">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Βασικά Φίλτρα & Εφέ</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-brightness" class="text-gray-300">Φωτεινότητα</label><span id="val-brightness" class="text-amber-500 font-semibold">100%</span></div>
+                            <input type="range" id="filter-brightness" min="0" max="200" value="100" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-contrast" class="text-gray-300">Αντίθεση</label><span id="val-contrast" class="text-amber-500 font-semibold">100%</span></div>
+                            <input type="range" id="filter-contrast" min="0" max="200" value="100" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-saturation" class="text-gray-300">Κορεσμός</label><span id="val-saturation" class="text-amber-500 font-semibold">100%</span></div>
+                            <input type="range" id="filter-saturation" min="0" max="200" value="100" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-grayscale" class="text-gray-300">Ασπρόμαυρο</label><span id="val-grayscale" class="text-amber-500 font-semibold">0%</span></div>
+                            <input type="range" id="filter-grayscale" min="0" max="100" value="0" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><label for="filter-sepia" class="text-gray-300">Σέπια</label><span id="val-sepia" class="text-amber-500 font-semibold">0%</span></div>
+                            <input type="range" id="filter-sepia" min="0" max="100" value="0" class="w-full h-1.5 bg-[#1f2937] rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        </div>
+                        <div class="pt-2 border-t border-[#1f2937]">
+                            <h4 class="text-xs font-bold text-gray-400 mb-2">Blur & Sharpen</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="btn-apply-blur" class="bg-[#1f2937] hover:bg-[#374151] py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all">
+                                    <i data-lucide="eye-off" class="w-4 h-4 text-sky-400"></i> Θόλωμα
+                                </button>
+                                <button id="btn-apply-sharpen" class="bg-[#1f2937] hover:bg-[#374151] py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all">
+                                    <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Όξυνση
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-tools" class="space-y-4 tool-panel hidden">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Advanced Εργαλεία</h3>
+                    <div class="p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 space-y-2">
+                        <div class="flex items-center justify-between"><h4 class="text-xs font-bold">Αφαίρεση EXIF</h4><span class="w-2 h-2 rounded-full bg-emerald-500"></span></div>
+                        <p class="text-[11px] leading-relaxed">Καθαρισμός GPS, ημερομηνιών κατά την αποθήκευση.</p>
+                        <button id="btn-clean-exif" class="w-full bg-[#1f2937] border border-gray-700 hover:border-emerald-500/50 text-emerald-400 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-2">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i> Αφαίρεση EXIF Τώρα
+                        </button>
+                    </div>
+                    <div class="p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 space-y-2">
+                        <h4 class="text-xs font-bold">Αφαίρεση Φόντου</h4>
+                        <p class="text-[11px] leading-relaxed">Αυτόματο smart fill ή επιλογή χρώματος.</p>
+                        <div class="flex gap-2">
+                            <button id="btn-auto-bg" class="flex-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Auto
+                            </button>
+                            <button id="btn-color-bg" class="flex-1 bg-[#1f2937] hover:bg-[#374151] border border-gray-700 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1">
+                                <i data-lucide="pipette" class="w-3.5 h-3.5"></i> Επιλογή Φόντου
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold">Color Picker</h4>
+                            <button id="btn-color-picker" class="bg-[#1f2937] hover:bg-[#374151] border border-gray-700 p-1.5 rounded-md text-amber-500"><i data-lucide="pipette" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="flex items-center gap-3 bg-[#111827] p-2 rounded border border-gray-800">
+                            <div id="color-preview" class="w-8 h-8 rounded border border-gray-700" style="background-color:#ffffff;"></div>
+                            <div class="text-xs"><div id="color-hex" class="font-mono font-bold">#FFFFFF</div><div id="color-rgb" class="font-mono text-[10px]">rgb(255,255,255)</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-text" class="space-y-4 tool-panel hidden">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Προσθήκη Κειμένου</h3>
+                    <div class="space-y-3">
+                        <div><label for="text-input" class="block text-xs mb-1">Κείμενο</label><textarea id="text-input" rows="3" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs focus:border-amber-500 outline-none resize-none" placeholder="Γράψτε εδώ..."></textarea></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label for="text-font-size" class="block text-xs mb-1">Μέγεθος (px)</label><input type="number" id="text-font-size" value="30" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs font-mono"></div>
+                            <div><label for="text-color" class="block text-xs mb-1">Χρώμα</label><div class="flex gap-1"><input type="color" id="text-color" value="#ffffff" class="bg-transparent border-0 w-8 h-8 p-0 cursor-pointer"><input type="text" id="text-color-hex" value="#ffffff" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg px-2 py-1 text-[11px] font-mono"></div></div>
+                        </div>
+                        <button id="btn-submit-text" class="w-full bg-amber-500 hover:bg-amber-600 text-[#0b0f19] font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg">
+                            <i data-lucide="move" class="w-4 h-4"></i> Εισαγωγή / Προεπισκόπηση
+                        </button>
+                        <button id="btn-apply-text" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg hidden">
+                            <i data-lucide="check" class="w-4 h-4"></i> Οριστικοποίηση στην εικόνα
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Νέα καρτέλα Steganography -->
+                <div id="tab-stego" class="space-y-4 tool-panel hidden">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Απόκρυψη / Ανάκτηση Μηνύματος</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="stego-mode" class="block text-xs mb-1">Λειτουργία</label>
+                            <select id="stego-mode" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs focus:border-amber-500 outline-none">
+                                <option value="encrypt">Απόκρυψη (Κρυπτογράφηση)</option>
+                                <option value="decrypt">Ανάκτηση (Αποκρυπτογράφηση)</option>
+                            </select>
+                        </div>
+                        <div id="stego-message-group">
+                            <label for="stego-message" class="block text-xs mb-1">Μήνυμα προς απόκρυψη</label>
+                            <textarea id="stego-message" rows="3" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs focus:border-amber-500 outline-none resize-none" placeholder="Γράψτε το μήνυμά σας..."></textarea>
+                        </div>
+                        <div>
+                            <label for="stego-key" class="block text-xs mb-1">Κλειδί (password)</label>
+                            <input type="text" id="stego-key" class="w-full bg-[#1f2937] border border-gray-700 rounded-lg p-2 text-xs focus:border-amber-500 outline-none" placeholder="Εισάγετε κλειδί...">
+                        </div>
+                        <button id="btn-stego-execute" class="w-full bg-amber-500 hover:bg-amber-600 text-[#0b0f19] font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg">
+                            <i data-lucide="play" class="w-4 h-4"></i> Εκτέλεση
+                        </button>
+                        <div id="stego-output" class="hidden p-3 bg-[#1f2937]/50 rounded-lg border border-gray-800 text-xs">
+                            <h4 class="font-bold text-amber-400 mb-1">Αποτέλεσμα:</h4>
+                            <p id="stego-result" class="font-mono break-words"></p>
+                        </div>
+                        <div class="text-[11px] text-gray-400 leading-relaxed border-t border-gray-700 pt-2">
+                            <p><span class="font-semibold">Οδηγίες:</span> Για απόκρυψη, επιλέξτε "Απόκρυψη", γράψτε το μήνυμα και ένα κλειδί, πατήστε Εκτέλεση. Το μήνυμα θα ενσωματωθεί στην εικόνα.</p>
+                            <p>Για ανάκτηση, επιλέξτε "Ανάκτηση", δώστε το ίδιο κλειδί και πατήστε Εκτέλεση. Το μήνυμα θα εμφανιστεί.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <footer>
-            <p>Η εφαρμογή επεξεργάζεται τις εικόνες τοπικά - τα δεδομένα σας παραμένουν στο πρόγραμμα περιήγησης</p>
-            <p>© 2023 - Εξαγωγή Μεταδεδομένων Εικόνας | Ανάπτυξη: Βασίλης Παπαδόπουλος</p>
-        </footer>
-    </div>
+        </section>
+
+        <section class="lg:col-span-8 flex flex-col justify-between space-y-4">
+            <div class="flex-1 bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex items-center justify-center relative min-h-[350px] md:min-h-[500px] shadow-inner overflow-hidden" id="canvas-container-panel">
+                <canvas id="main-canvas" class="max-w-full max-h-[70vh] rounded shadow-lg object-contain bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] border border-dashed border-gray-800 transition-shadow"></canvas>
+                <div id="empty-state" class="absolute text-center p-6 pointer-events-none">
+                    <i data-lucide="image" class="w-16 h-16 text-gray-700 mx-auto mb-3 animate-pulse"></i>
+                    <h2 class="text-base font-bold text-gray-400">Δεν έχει φορτωθεί φωτογραφία</h2>
+                    <p class="text-xs text-gray-500 max-w-xs mt-1 mx-auto">Επιλέξτε ένα αρχείο από το αριστερό μενού για να ξεκινήσετε την επεξεργασία.</p>
+                </div>
+            </div>
+
+            <div class="bg-[#111827] border border-[#1f2937] rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <label for="save-format" class="text-xs font-bold uppercase tracking-wider whitespace-nowrap">Format:</label>
+                    <select id="save-format" class="bg-[#1f2937] border border-gray-700 text-sm rounded-lg px-3 py-2 text-white focus:border-amber-500 outline-none w-full md:w-36">
+                        <option value="image/png">PNG</option>
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/webp">WEBP</option>
+                        <option value="application/pdf">PDF</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <button id="btn-save" class="flex-1 md:flex-initial bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#0b0f19] font-bold px-6 py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-lg">
+                        <i data-lucide="download" class="w-4 h-4"></i> Αποθήκευση
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast-container" class="fixed bottom-4 left-4 z-50 space-y-2 pointer-events-none"></div>
+
+    <footer class="bg-[#0b0f19] border-t border-[#1f2937] px-6 py-4 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
+        <p>&copy; 2026 Photo Editor - Όλα τα εργαλεία εκτελούνται τοπικά στον φυλλομετρητή σας.</p>
+        <p class="font-bold text-amber-500/70 tracking-wider hover:text-amber-500 transition-colors mt-2 md:mt-0">Κώστας Κούδας - Ανταίος</p>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('fileInput');
-            const dropArea = document.getElementById('dropArea');
-            const urlInput = document.getElementById('urlInput');
-            const fetchBtn = document.getElementById('fetchBtn');
-            const imagePreview = document.getElementById('imagePreview');
-            const metadataBody = document.getElementById('metadataBody');
-            const metadataTable = document.getElementById('metadataTable');
-            const resultsContainer = document.getElementById('resultsContainer');
-            const errorBox = document.getElementById('errorBox');
-            const errorText = document.getElementById('errorText');
-            
-            // Χειρισμός ανεβάσματος αρχείου
-            dropArea.addEventListener('click', () => fileInput.click());
-            
-            fileInput.addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    handleImageFile(this.files[0]);
-                }
-            });
-            
-            // Χειρισμός drag and drop
-            dropArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#27ae60';
-                this.style.backgroundColor = 'rgba(39, 174, 96, 0.1)';
-            });
-            
-            dropArea.addEventListener('dragleave', function() {
-                this.style.borderColor = '#3498db';
-                this.style.backgroundColor = 'rgba(52, 152, 219, 0.05)';
-            });
-            
-            dropArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#3498db';
-                this.style.backgroundColor = 'rgba(52, 152, 219, 0.05)';
-                
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    handleImageFile(e.dataTransfer.files[0]);
-                }
-            });
-            
-            // Χειρισμός URL
-            fetchBtn.addEventListener('click', function() {
-                const url = urlInput.value.trim();
-                if (!url) {
-                    showError('Παρακαλώ εισάγετε ένα URL εικόνας');
-                    return;
-                }
-                
-                fetchImageFromUrl(url);
-            });
-            
-            // Συνάρτηση για επεξεργασία αρχείου εικόνας
-            function handleImageFile(file) {
-                // Έλεγχος τύπου αρχείου
-                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-                if (!validTypes.includes(file.type)) {
-                    showError('Μη υποστηριζόμενη μορφή αρχείου. Παρακαλώ επιλέξτε JPG, PNG ή WEBP.');
-                    return;
-                }
-                
-                // Έλεγχος μεγέθους αρχείου
-                if (file.size > 5 * 1024 * 1024) {
-                    showError('Το αρχείο είναι πολύ μεγάλο. Μέγιστο επιτρεπτό μέγεθος: 5MB');
-                    return;
-                }
-                
-                // Εμφάνιση προεπισκόπησης
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    displayImagePreview(e.target.result);
-                    extractMetadata(e.target.result);
+        // --- ΑΛΦΑΒΗΤΟ (περιλαμβάνει όλους τους απαραίτητους χαρακτήρες) ---
+        const ALPHABET = [
+            ' ', 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+            'α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','ο','π','ρ','σ','ς','τ','υ','φ','χ','ψ','ω',
+            'Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Ι','Κ','Λ','Μ','Ν','Ξ','Ο','Π','Ρ','Σ','Τ','Υ','Φ','Χ','Ψ','Ω',
+            'ά','έ','ή','ί','ό','ύ','ώ','ϊ','ϋ','ΐ','ΰ','Ά','Έ','Ή','Ί','Ό','Ύ','Ώ','Ϊ','Ϋ',
+            '0','1','2','3','4','5','6','7','8','9',
+            '!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','}','[',']','|','\\',':',';','"','\'','<','>',',','.','?','/',
+            '~','€','£','¤','§','¦','—','«','»','…','\n',
+            '\u2019'   // RIGHT SINGLE QUOTATION MARK (’)
+        ];
+        const ALPHABET_SIZE = ALPHABET.length;
+
+        function getCharIndex(char) { return ALPHABET.indexOf(char); }
+
+        function sanitizeText(text) {
+            let result = '';
+            for (let ch of text) {
+                if (getCharIndex(ch) !== -1) result += ch;
+                else result += ' ';
+            }
+            return result;
+        }
+
+        function vigenereEncrypt(plain, key) {
+            let out = "", ki = 0;
+            for (let ch of plain) {
+                let p = getCharIndex(ch);
+                if (p === -1) { out += ch; continue; }
+                let k = getCharIndex(key[ki % key.length]);
+                out += ALPHABET[(p + (k !== -1 ? k : 0)) % ALPHABET_SIZE];
+                ki++;
+            }
+            return out;
+        }
+
+        function vigenereDecrypt(cipher, key) {
+            let out = "", ki = 0;
+            for (let ch of cipher) {
+                let c = getCharIndex(ch);
+                if (c === -1) { out += ch; continue; }
+                let k = getCharIndex(key[ki % key.length]);
+                let pos = (c - (k !== -1 ? k : 0)) % ALPHABET_SIZE;
+                if (pos < 0) pos += ALPHABET_SIZE;
+                out += ALPHABET[pos];
+                ki++;
+            }
+            return out;
+        }
+
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let originalImage = null, undoStack = [], filterBaseCanvas = null;
+        let preservedLsbPayload = "";
+        let isColorPickerActive = false, cropMode = false, cropStart = {x:0,y:0}, cropEnd = {x:0,y:0}, isCropping = false, cropCanvasSnapshot = null;
+        let textMode = false, textIsDragging = false;
+        let pendingText = { text: '', x: 0, y: 0, size: 30, color: '#ffffff', width: 0, height: 0, offsetX: 0, offsetY: 0 };
+        let onCropMove, onCropUp;
+        let cleanExifEnabled = false;
+
+        window.addEventListener('load', () => { lucide.createIcons(); showToast("Καλώς ορίσατε στο Studio Pro!", "success"); });
+
+        const imageLoader = document.getElementById('image-loader');
+        const dropZone = document.getElementById('drop-zone');
+        imageLoader.addEventListener('change', handleImageUpload);
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-amber-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-amber-500'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault(); dropZone.classList.remove('border-amber-500');
+            if (e.dataTransfer.files.length) { imageLoader.files = e.dataTransfer.files; handleImageUpload(); }
+        });
+
+        function handleImageUpload() {
+            const file = imageLoader.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img; undoStack = []; filterBaseCanvas = null;
+                    loadImageToCanvas(img);
+                    preservedLsbPayload = "";
+                    document.getElementById('empty-state').classList.add('hidden');
+                    document.getElementById('file-info').classList.remove('hidden');
+                    document.getElementById('img-resolution').innerText = `${img.width} x ${img.height} px`;
                 };
-                reader.readAsDataURL(file);
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadImageToCanvas(img) {
+            canvas.width = img.width; canvas.height = img.height;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.drawImage(img,0,0);
+            saveHistoryState();
+        }
+
+        function saveHistoryState() {
+            undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+            if (undoStack.length > 15) undoStack.shift();
+            filterBaseCanvas = null;
+        }
+
+        function switchTab(tabId) {
+            // Αν φεύγουμε από την καρτέλα κειμένου, ακυρώνουμε τη λειτουργία text
+            if (tabId !== 'tab-text' && textMode) {
+                textMode = false;
+                const lastState = undoStack[undoStack.length - 1];
+                if (lastState) ctx.putImageData(lastState, 0, 0);
+                document.getElementById('btn-apply-text').classList.add('hidden');
+                document.getElementById('btn-submit-text').classList.remove('hidden');
             }
-            
-            // Συνάρτηση για λήψη εικόνας από URL
-            function fetchImageFromUrl(url) {
-                // Έλεγχος για έγκυρο URL εικόνας
-                if (!/\.(jpeg|jpg|png|webp)$/i.test(url)) {
-                    showError('Το URL δεν δείχνει σε έγκυρη εικόνα (JPG, PNG, WEBP)');
+            // Αν φεύγουμε από transform, ακυρώνουμε το crop
+            if (tabId !== 'tab-transform' && cropMode) {
+                cropMode = false; isCropping = false;
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                if (cropCanvasSnapshot) ctx.putImageData(cropCanvasSnapshot,0,0);
+                if (onCropMove) window.removeEventListener('mousemove', onCropMove);
+                if (onCropUp) window.removeEventListener('mouseup', onCropUp);
+            }
+            document.querySelectorAll('.tool-panel').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active','bg-amber-500/10','text-amber-400','border-amber-500/30');
+                btn.classList.add('bg-[#1f2937]','text-gray-300','border-transparent');
+            });
+            event.currentTarget.classList.remove('bg-[#1f2937]','text-gray-300','border-transparent');
+            event.currentTarget.classList.add('active','bg-amber-500/10','text-amber-400','border-amber-500/30');
+        }
+
+        // --- Steganography helpers ---
+        const MAGIC_MARKER = "STEGO:";
+        const END_MARKER = " ENDSTEGO";
+
+        function extractBinaryPayloadFromCanvas() {
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+            const maxBits = canvas.width * canvas.height * 3;
+            let allBits = "";
+            for (let i = 0; i < imgData.length && allBits.length < maxBits; i++) {
+                if (i % 4 === 3) continue;
+                allBits += (imgData[i] & 1);
+            }
+            if (allBits.length < 24) return null;
+            const lengthBin = allBits.substr(0, 24);
+            const payloadLen = parseInt(lengthBin, 2);
+            if (allBits.length < 24 + payloadLen) return null;
+            return allBits.substr(24, payloadLen);
+        }
+
+        function injectLsbToCanvas(binaryString) {
+            if (!binaryString) return;
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const data = imgData.data;
+            const maxBits = canvas.width * canvas.height * 3;
+            if (binaryString.length > maxBits) return;
+            let bitIdx = 0;
+            for (let i = 0; i < data.length && bitIdx < binaryString.length; i++) {
+                if (i % 4 === 3) continue;
+                data[i] = (data[i] & 0xFE) | parseInt(binaryString[bitIdx]);
+                bitIdx++;
+            }
+            ctx.putImageData(imgData, 0,0);
+        }
+
+        function performLsbEncryption(payloadText, key) {
+            let clean = payloadText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            clean = sanitizeText(clean);
+            const fullMessage = MAGIC_MARKER + clean + END_MARKER;
+            const encrypted = vigenereEncrypt(fullMessage, key);
+            let binary = "";
+            for (let ch of encrypted) {
+                let code = getCharIndex(ch);
+                if (code === -1) code = getCharIndex(' ');
+                binary += code.toString(2).padStart(8, '0');
+            }
+            const payloadLen = binary.length;
+            if (payloadLen > 0xFFFFFF) { showToast("Μήνυμα πολύ μεγάλο!", "warning"); return; }
+            const lengthBits = payloadLen.toString(2).padStart(24, '0');
+            binary = lengthBits + binary;
+
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const data = imgData.data;
+            const available = canvas.width * canvas.height * 3;
+            if (binary.length > available) { showToast("Η εικόνα δεν χωράει το κείμενο!", "warning"); return; }
+            let bitIdx = 0;
+            for (let i = 0; i < data.length && bitIdx < binary.length; i++) {
+                if (i % 4 === 3) continue;
+                data[i] = (data[i] & 0xFE) | parseInt(binary[bitIdx]);
+                bitIdx++;
+            }
+            ctx.putImageData(imgData, 0,0);
+            preservedLsbPayload = binary;
+            saveHistoryState();
+        }
+
+        function performLsbDecryption(key) {
+            let binary = preservedLsbPayload;
+            if (!binary) {
+                binary = extractBinaryPayloadFromCanvas();
+                if (!binary) return null;
+            } else {
+                if (binary.length < 24) return null;
+                const len = parseInt(binary.substr(0,24), 2);
+                binary = binary.substr(24, len);
+            }
+
+            let decoded = "";
+            for (let i = 0; i < binary.length; i += 8) {
+                let byte = binary.substr(i, 8);
+                if (byte.length < 8) break;
+                let code = parseInt(byte, 2);
+                if (code < ALPHABET_SIZE) decoded += ALPHABET[code];
+            }
+            const plain = vigenereDecrypt(decoded, key);
+            if (plain.startsWith(MAGIC_MARKER) && plain.endsWith(END_MARKER)) {
+                const inner = plain.substring(MAGIC_MARKER.length, plain.length - END_MARKER.length);
+                return inner;
+            } else {
+                return null;
+            }
+        }
+
+        // --- Steganography UI ---
+        document.getElementById('stego-mode').addEventListener('change', function() {
+            const group = document.getElementById('stego-message-group');
+            if (this.value === 'encrypt') {
+                group.style.display = 'block';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+
+        document.getElementById('btn-stego-execute').addEventListener('click', function() {
+            if (!originalImage) { showToast("Φορτώστε πρώτα φωτογραφία!", "warning"); return; }
+            const mode = document.getElementById('stego-mode').value;
+            const key = document.getElementById('stego-key').value.trim();
+            if (!key) { showToast("Εισάγετε κλειδί!", "warning"); return; }
+            const outputDiv = document.getElementById('stego-output');
+            const resultP = document.getElementById('stego-result');
+
+            if (mode === 'encrypt') {
+                const message = document.getElementById('stego-message').value;
+                if (!message) { showToast("Γράψτε ένα μήνυμα!", "warning"); return; }
+                performLsbEncryption(message, key);
+                outputDiv.classList.remove('hidden');
+                resultP.innerText = "Το μήνυμα ενσωματώθηκε με επιτυχία στην εικόνα.";
+                showToast("Το μήνυμα αποκρύφθηκε!", "success");
+            } else {
+                // decrypt
+                const result = performLsbDecryption(key);
+                if (result !== null) {
+                    outputDiv.classList.remove('hidden');
+                    resultP.innerText = result;
+                    showToast("Το μήνυμα ανακτήθηκε!", "success");
+                } else {
+                    outputDiv.classList.remove('hidden');
+                    resultP.innerText = "Δεν βρέθηκε κρυμμένο μήνυμα ή το κλειδί είναι λάθος.";
+                    showToast("Αποτυχία ανάκτησης.", "warning");
+                }
+            }
+        });
+
+        // --- Theme toggle (απλό, χωρίς steganography) ---
+        let themeDark = true;
+        document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            themeDark = !themeDark;
+            const icon = document.querySelector('#btn-theme-toggle i');
+            if (themeDark) {
+                icon.setAttribute('data-lucide', 'moon');
+            } else {
+                icon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        });
+
+        // --- Toast ---
+        function showToast(msg, type="info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let bg = "bg-[#1f2937] border-gray-700 text-white", icon = "info";
+            if (type==="success") { bg = "bg-[#111827] border-emerald-500/50 text-emerald-300"; icon = "check-circle"; }
+            else if (type==="warning") { bg = "bg-[#111827] border-amber-500/50 text-amber-300"; icon = "alert-triangle"; }
+            else if (type==="danger") { bg = "bg-[#111827] border-red-500/50 text-red-300"; icon = "alert-circle"; }
+            toast.className = `flex items-center space-x-3 border p-4 rounded-lg shadow-lg pointer-events-auto transition-all transform translate-y-2 opacity-0 duration-300 ${bg}`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0"></i><span class="text-xs font-semibold leading-snug">${msg}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.classList.remove('translate-y-2','opacity-0'), 50);
+            setTimeout(() => { toast.classList.add('opacity-0','translate-y-[-10px]'); setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        // --- Mouse helpers ---
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (evt.clientX - rect.left) * (canvas.width / rect.width),
+                y: (evt.clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        // --- Crop ---
+        function startCrop(e) {
+            if (!cropMode || !originalImage) return;
+            const pos = getMousePos(canvas, e);
+            cropStart.x = pos.x; cropStart.y = pos.y;
+            isCropping = true;
+            cropCanvasSnapshot = ctx.getImageData(0,0,canvas.width,canvas.height);
+            onCropMove = function(ev) {
+                if (!isCropping) return;
+                const p = getMousePos(canvas, ev);
+                cropEnd.x = p.x; cropEnd.y = p.y;
+                ctx.putImageData(cropCanvasSnapshot, 0,0);
+                ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+                const sx = Math.min(cropStart.x, cropEnd.x), sy = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
+                ctx.clearRect(sx, sy, w, h);
+                ctx.putImageData(cropCanvasSnapshot,0,0, sx, sy, w, h);
+                const scaleX = canvas.width / canvas.getBoundingClientRect().width;
+                const scaleY = canvas.height / canvas.getBoundingClientRect().height;
+                ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2 * Math.max(scaleX, scaleY);
+                ctx.setLineDash([8*scaleX, 8*scaleY]); ctx.strokeRect(sx,sy,w,h); ctx.setLineDash([]);
+            };
+            onCropUp = function(ev) {
+                if (!isCropping) return;
+                window.removeEventListener('mousemove', onCropMove);
+                window.removeEventListener('mouseup', onCropUp);
+                isCropping = false;
+                cropMode = false;
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                const x = Math.min(cropStart.x, cropEnd.x), y = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x), h = Math.abs(cropEnd.y - cropStart.y);
+                if (w < 10 || h < 10) {
+                    ctx.putImageData(cropCanvasSnapshot,0,0);
                     return;
                 }
-                
-                // Προσθήκη CORS proxy για να αποφύγουμε τα CORS issues
-                const proxyUrl = 'https://corsproxy.io/?';
-                const fetchUrl = proxyUrl + encodeURIComponent(url);
-                
-                // Εμφάνιση ενδείξεως φόρτωσης
-                resultsContainer.innerHTML = `
-                    <div class="results-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <h3>Φόρτωση εικόνας...</h3>
-                        <p>Παρακαλώ περιμένετε</p>
-                    </div>
-                `;
-                
-                fetch(fetchUrl)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Η εικόνα δεν μπόρεσε να φορτωθεί');
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        const reader = new FileReader();
-                        reader.onload = function() {
-                            displayImagePreview(reader.result);
-                            extractMetadata(reader.result);
-                        };
-                        reader.readAsDataURL(blob);
-                    })
-                    .catch(error => {
-                        showError(`Σφάλμα κατά τη φόρτωση: ${error.message}`);
-                    });
-            }
-            
-            // Συνάρτηση για εμφάνιση προεπισκόπησης εικόνας
-            function displayImagePreview(dataUrl) {
-                imagePreview.innerHTML = `<img src="${dataUrl}" alt="Προεπισκόπηση εικόνας">`;
-                hideError();
-            }
-            
-            // Συνάρτηση για εξαγωγή μεταδεδομένων
-            function extractMetadata(dataUrl) {
-                // Εμφάνιση ενδείξεως φόρτωσης
-                resultsContainer.innerHTML = `
-                    <div class="results-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <h3>Εξαγωγή μεταδεδομένων...</h3>
-                        <p>Παρακαλώ περιμένετε</p>
-                    </div>
-                `;
-                
-                // Προσομοίωση καθυστέρησης για UX
-                setTimeout(() => {
-                    const img = new Image();
-                    img.src = dataUrl;
-                    
-                    img.onload = function() {
-                        // Προσομοίωση εξαγωγής μεταδεδομένων
-                        const metadata = simulateMetadataExtraction();
-                        
-                        // Εμφάνιση αποτελεσμάτων
-                        displayMetadata(metadata);
-                    };
-                }, 1500);
-            }
-            
-            // Συνάρτηση προσομοίωσης εξαγωγής μεταδεδομένων
-            function simulateMetadataExtraction() {
-                // Τυχαίες πληροφορίες μεταδεδομένων
-                const metadata = {
-                    "Make": "AI Generator Pro",
-                    "Model": "SynthImager v4.2",
-                    "Software": "Stable Diffusion 2.1",
-                    "DateTime": "2023:08:08 14:35:22",
-                    "ImageWidth": "1024",
-                    "ImageHeight": "1024",
-                    "Copyright": "Δημιουργία AI - Δεν προστατεύεται από πνευματικά δικαιώματα",
-                    "UserComment": "masterpiece, best quality, intricate details, fantasy landscape, majestic castle, waterfall, vibrant colors, sunset, dramatic clouds, digital painting, artstation, concept art, 8k",
-                    "Parameters": "Steps: 50, Sampler: Euler a, CFG scale: 7, Seed: 123456789, Size: 1024x1024, Model hash: 7d0b4e2f",
-                    "Artist": "AI Art Generator",
-                    "ImageDescription": "A fantasy landscape with a majestic castle and waterfall at sunset",
-                    "Rating": "5",
-                    "AIEngine": "Stable Diffusion",
-                    "AIVersion": "2.1",
-                    "AISettings": "Prompt: masterpiece, best quality, intricate details... | Negative prompt: low quality, blurry | Steps: 50"
-                };
-                
-                return metadata;
-            }
-            
-            // Συνάρτηση για εμφάνιση μεταδεδομένων
-            function displayMetadata(metadata) {
-                // Απόκρυψη placeholder
-                resultsContainer.style.display = 'none';
-                
-                // Καθαρισμός πίνακα
-                metadataBody.innerHTML = '';
-                
-                // Προσθήκη δεδομένων στον πίνακα
-                for (const [key, value] of Object.entries(metadata)) {
-                    const row = document.createElement('tr');
-                    
-                    // Επισήμανση πεδίων που ενδεχομένως περιέχουν prompts
-                    const isPromptField = ['UserComment', 'Parameters', 'ImageDescription', 'AISettings', 'Software'].includes(key);
-                    
-                    row.innerHTML = `
-                        <td>${key}</td>
-                        <td class="${isPromptField ? 'ai-prompt' : ''}">${value}</td>
-                    `;
-                    
-                    metadataBody.appendChild(row);
+                const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+                const src = document.createElement('canvas'); src.width = canvas.width; src.height = canvas.height;
+                src.getContext('2d').putImageData(cropCanvasSnapshot,0,0);
+                tmp.getContext('2d').drawImage(src, x, y, w, h, 0,0,w,h);
+                canvas.width = w; canvas.height = h;
+                ctx.clearRect(0,0,w,h); ctx.drawImage(tmp,0,0);
+                document.getElementById('img-resolution').innerText = `${w} x ${h} px`;
+                saveHistoryState();
+            };
+            window.addEventListener('mousemove', onCropMove);
+            window.addEventListener('mouseup', onCropUp);
+        }
+
+        document.getElementById('btn-crop-mode').addEventListener('click', () => {
+            if (!originalImage) return;
+            cropMode = !cropMode;
+            if (cropMode) {
+                document.getElementById('btn-crop-mode').classList.add('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'crosshair';
+            } else {
+                document.getElementById('btn-crop-mode').classList.remove('bg-amber-500/20','border-amber-500/50','text-amber-400');
+                canvas.style.cursor = 'default';
+                if (isCropping) {
+                    window.removeEventListener('mousemove', onCropMove);
+                    window.removeEventListener('mouseup', onCropUp);
+                    isCropping = false;
+                    if (cropCanvasSnapshot) ctx.putImageData(cropCanvasSnapshot,0,0);
                 }
-                
-                // Εμφάνιση πίνακα
-                metadataTable.style.display = 'table';
             }
-            
-            // Συνάρτηση για εμφάνιση σφάλματος
-            function showError(message) {
-                errorText.textContent = message;
-                errorBox.style.display = 'block';
+        });
+
+        canvas.addEventListener('mousedown', e => {
+            const pos = getMousePos(canvas, e);
+            if (textMode) {
+                const halfW = (pendingText.width / 2) + 20;
+                const lineHeight = pendingText.size * 1.4;
+                const topY = pendingText.y - (lineHeight / 2) - 10;
+                const bottomY = pendingText.y + pendingText.height + 10;
+                if (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) {
+                    textIsDragging = true;
+                    pendingText.offsetX = pos.x - pendingText.x;
+                    pendingText.offsetY = pos.y - pendingText.y;
+                    return;
+                }
             }
-            
-            // Συνάρτηση για απόκρυψη σφάλματος
-            function hideError() {
-                errorBox.style.display = 'none';
+            if (cropMode) {
+                startCrop(e);
             }
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            const pos = getMousePos(canvas, e);
+            if (textIsDragging) {
+                pendingText.x = pos.x - pendingText.offsetX;
+                pendingText.y = pos.y - pendingText.offsetY;
+                drawPendingText(true);
+                canvas.style.cursor = 'move';
+                return;
+            } else if (textMode) {
+                const halfW = (pendingText.width / 2) + 20;
+                const lineHeight = pendingText.size * 1.4;
+                const topY = pendingText.y - (lineHeight / 2) - 10;
+                const bottomY = pendingText.y + pendingText.height + 10;
+                canvas.style.cursor = (pos.x >= pendingText.x - halfW && pos.x <= pendingText.x + halfW && pos.y >= topY && pos.y <= bottomY) ? 'move' : 'default';
+            }
+        });
+
+        canvas.addEventListener('mouseup', e => {
+            if (textIsDragging) {
+                textIsDragging = false;
+            }
+        });
+
+        // --- Text drawing ---
+        function drawPendingText(withBorder = true) {
+            if (!originalImage || !pendingText.text) return;
+            const lastState = undoStack[undoStack.length - 1];
+            if (lastState) ctx.putImageData(lastState, 0, 0);
+
+            ctx.font = `bold ${pendingText.size}px system-ui`;
+            ctx.fillStyle = pendingText.color;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            const lineHeight = pendingText.size * 1.4;
+            const maxWidth = canvas.width * 0.9;
+            const paragraphs = pendingText.text.split('\n');
+            let linesToDraw = [];
+            for (let para of paragraphs) {
+                if (para.trim() === "") { linesToDraw.push(""); continue; }
+                const words = para.split(' ');
+                let line = words[0] || "";
+                for (let n = 1; n < words.length; n++) {
+                    const testLine = line + ' ' + words[n];
+                    if (ctx.measureText(testLine).width > maxWidth) {
+                        linesToDraw.push(line);
+                        line = words[n];
+                    } else line = testLine;
+                }
+                linesToDraw.push(line);
+            }
+            pendingText.height = linesToDraw.length * lineHeight;
+            pendingText.width = maxWidth;
+            let startY = pendingText.y;
+            for (let i = 0; i < linesToDraw.length; i++) {
+                ctx.fillText(linesToDraw[i], pendingText.x, startY + i * lineHeight);
+            }
+            if (withBorder) {
+                ctx.strokeStyle = "#f59e0b";
+                ctx.lineWidth = Math.max(2, canvas.width / 500);
+                ctx.setLineDash([10, 10]);
+                ctx.strokeRect(
+                    pendingText.x - (maxWidth / 2) - 10,
+                    startY - (lineHeight / 2) - 10,
+                    maxWidth + 20,
+                    pendingText.height + 10
+                );
+                ctx.setLineDash([]);
+            }
+        }
+
+        const updatePendingTextParams = () => {
+            if (textMode) {
+                pendingText.size = parseInt(document.getElementById('text-font-size').value) || 30;
+                pendingText.color = document.getElementById('text-color').value;
+                pendingText.text = document.getElementById('text-input').value;
+                drawPendingText(true);
+            }
+        };
+        document.getElementById('text-font-size').addEventListener('input', updatePendingTextParams);
+        document.getElementById('text-color').addEventListener('input', updatePendingTextParams);
+        document.getElementById('text-input').addEventListener('input', updatePendingTextParams);
+
+        function startDraggableText(text) {
+            pendingText.text = text;
+            pendingText.size = parseInt(document.getElementById('text-font-size').value) || 30;
+            let currentSize = pendingText.size;
+            let fits = false;
+            let attempts = 0;
+            while (!fits && attempts < 15 && currentSize > 12) {
+                ctx.font = `bold ${currentSize}px system-ui`;
+                const maxWidth = canvas.width * 0.9;
+                const paragraphs = pendingText.text.split('\n');
+                let lineCount = 0;
+                for (let para of paragraphs) {
+                    if (para.trim() === "") { lineCount++; continue; }
+                    const words = para.split(' ');
+                    let line = words[0] || "";
+                    for (let n = 1; n < words.length; n++) {
+                        if (ctx.measureText(line + ' ' + words[n]).width > maxWidth) {
+                            lineCount++;
+                            line = words[n];
+                        } else line = line + ' ' + words[n];
+                    }
+                    lineCount++;
+                }
+                const totalHeight = lineCount * (currentSize * 1.4);
+                if (totalHeight <= canvas.height * 0.85) fits = true;
+                else { currentSize -= Math.max(2, Math.floor(currentSize * 0.1)); attempts++; }
+            }
+            if (currentSize < pendingText.size) {
+                pendingText.size = Math.max(10, currentSize);
+                document.getElementById('text-font-size').value = pendingText.size;
+            }
+            pendingText.color = document.getElementById('text-color').value;
+            pendingText.x = canvas.width / 2;
+            pendingText.y = pendingText.size * 1.4;
+            textMode = true;
+            drawPendingText(true);
+            document.getElementById('btn-submit-text').classList.add('hidden');
+            document.getElementById('btn-apply-text').classList.remove('hidden');
+        }
+
+        document.getElementById('btn-submit-text').addEventListener('click', () => {
+            if (!originalImage) { showToast("Φορτώστε πρώτα φωτογραφία!", "warning"); return; }
+            const text = document.getElementById('text-input').value;
+            if (!text) return;
+            startDraggableText(text);
+        });
+
+        document.getElementById('btn-apply-text').addEventListener('click', () => {
+            if (!textMode) return;
+            drawPendingText(false);
+            saveHistoryState();
+            textMode = false;
+            document.getElementById('text-input').value = "";
+            document.getElementById('btn-apply-text').classList.add('hidden');
+            document.getElementById('btn-submit-text').classList.remove('hidden');
+            showToast("Το κείμενο αποτυπώθηκε μόνιμα στην εικόνα!", "success");
+        });
+
+        // --- Rotate & Flip ---
+        document.getElementById('btn-rotate-90').addEventListener('click', () => {
+            if (!originalImage) return;
+            const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
+            tmp.width = canvas.height; tmp.height = canvas.width;
+            tctx.translate(tmp.width/2, tmp.height/2); tctx.rotate(Math.PI/2);
+            tctx.drawImage(canvas, -canvas.width/2, -canvas.height/2);
+            canvas.width = tmp.width; canvas.height = tmp.height;
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(tmp,0,0);
+            saveHistoryState();
+        });
+        document.getElementById('btn-flip-h').addEventListener('click', () => {
+            if (!originalImage) return;
+            const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
+            tmp.width = canvas.width; tmp.height = canvas.height;
+            tctx.translate(canvas.width,0); tctx.scale(-1,1);
+            tctx.drawImage(canvas,0,0);
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(tmp,0,0);
+            saveHistoryState();
+        });
+        document.getElementById('btn-flip-v').addEventListener('click', () => {
+            if (!originalImage) return;
+            const tmp = document.createElement('canvas'); const tctx = tmp.getContext('2d');
+            tmp.width = canvas.width; tmp.height = canvas.height;
+            tctx.translate(0,canvas.height); tctx.scale(1,-1);
+            tctx.drawImage(canvas,0,0);
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(tmp,0,0);
+            saveHistoryState();
+        });
+
+        // --- Filters ---
+        const fBrightness = document.getElementById('filter-brightness'), fContrast = document.getElementById('filter-contrast'),
+              fSaturation = document.getElementById('filter-saturation'), fGrayscale = document.getElementById('filter-grayscale'),
+              fSepia = document.getElementById('filter-sepia');
+        [fBrightness,fContrast,fSaturation,fGrayscale,fSepia].forEach(f => {
+            f.addEventListener('input', applyCssFilters);
+            f.addEventListener('change', () => { if (filterBaseCanvas) saveHistoryState(); });
+        });
+        function applyCssFilters() {
+            if (!originalImage) return;
+            const b = fBrightness.value, c = fContrast.value, s = fSaturation.value, g = fGrayscale.value, sep = fSepia.value;
+            document.getElementById('val-brightness').innerText = `${b}%`; document.getElementById('val-contrast').innerText = `${c}%`;
+            document.getElementById('val-saturation').innerText = `${s}%`; document.getElementById('val-grayscale').innerText = `${g}%`;
+            document.getElementById('val-sepia').innerText = `${sep}%`;
+            if (!filterBaseCanvas) {
+                filterBaseCanvas = document.createElement('canvas');
+                filterBaseCanvas.width = canvas.width; filterBaseCanvas.height = canvas.height;
+                const tctx = filterBaseCanvas.getContext('2d');
+                const last = undoStack[undoStack.length-1];
+                if (last) tctx.putImageData(last,0,0); else tctx.drawImage(canvas,0,0);
+            }
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) grayscale(${g}%) sepia(${sep}%)`;
+            ctx.drawImage(filterBaseCanvas,0,0);
+            ctx.filter = 'none';
+        }
+
+        function convolution(weights, opaque=true) {
+            const side = Math.round(Math.sqrt(weights.length)), half = Math.floor(side/2);
+            const src = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const sw = src.width, sh = src.height, srcData = src.data;
+            const out = ctx.createImageData(sw, sh), dst = out.data;
+            for (let y=0; y<sh; y++) {
+                for (let x=0; x<sw; x++) {
+                    const off = (y*sw + x)*4;
+                    let r=0,g=0,b=0,a=0;
+                    for (let cy=0; cy<side; cy++) {
+                        for (let cx=0; cx<side; cx++) {
+                            const sy = Math.min(sh-1, Math.max(0, y+cy-half));
+                            const sx = Math.min(sw-1, Math.max(0, x+cx-half));
+                            const so = (sy*sw + sx)*4;
+                            const wt = weights[cy*side + cx];
+                            r += srcData[so]*wt; g += srcData[so+1]*wt; b += srcData[so+2]*wt; a += srcData[so+3]*wt;
+                        }
+                    }
+                    dst[off]=r; dst[off+1]=g; dst[off+2]=b; dst[off+3]=opaque?255:a;
+                }
+            }
+            return out;
+        }
+        document.getElementById('btn-apply-blur').addEventListener('click', () => {
+            if (!originalImage) return;
+            ctx.putImageData(convolution([1/16,2/16,1/16, 2/16,4/16,2/16, 1/16,2/16,1/16]),0,0);
+            saveHistoryState();
+        });
+        document.getElementById('btn-apply-sharpen').addEventListener('click', () => {
+            if (!originalImage) return;
+            ctx.putImageData(convolution([0,-1,0, -1,5,-1, 0,-1,0]),0,0);
+            saveHistoryState();
+        });
+
+        // --- Color picker & bg removal ---
+        const cpBtn = document.getElementById('btn-color-picker');
+        cpBtn.addEventListener('click', () => {
+            if (!originalImage) return;
+            isColorPickerActive = !isColorPickerActive;
+            if (isColorPickerActive) { cpBtn.classList.add('bg-amber-500/20','border-amber-500/50'); canvas.style.cursor='cell'; }
+            else { cpBtn.classList.remove('bg-amber-500/20','border-amber-500/50'); canvas.style.cursor='default'; }
+        });
+        canvas.addEventListener('click', e => {
+            if (!isColorPickerActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX-rect.left)*(canvas.width/rect.width));
+            const y = Math.floor((e.clientY-rect.top)*(canvas.height/rect.height));
+            const p = ctx.getImageData(x,y,1,1).data;
+            const hex = "#"+((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
+            document.getElementById('color-preview').style.backgroundColor = hex;
+            document.getElementById('color-hex').innerText = hex;
+            document.getElementById('color-rgb').innerText = `rgb(${p[0]},${p[1]},${p[2]})`;
+            isColorPickerActive = false; cpBtn.classList.remove('bg-amber-500/20','border-amber-500/50'); canvas.style.cursor='default';
+        });
+
+        document.getElementById('btn-auto-bg').addEventListener('click', () => {
+            if (!originalImage) return;
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height), data = imgData.data;
+            const corners = [{x:0,y:0},{x:canvas.width-1,y:0},{x:0,y:canvas.height-1},{x:canvas.width-1,y:canvas.height-1}];
+            const tolerance = 35;
+            corners.forEach(corner => {
+                const idx = (corner.y*canvas.width+corner.x)*4;
+                const tr = data[idx], tg = data[idx+1], tb = data[idx+2];
+                const queue = [corner], visited = new Uint8Array(canvas.width*canvas.height);
+                while (queue.length) {
+                    const curr = queue.shift(), cidx = (curr.y*canvas.width+curr.x)*4, vi = curr.y*canvas.width+curr.x;
+                    if (visited[vi]) continue; visited[vi]=1;
+                    if (Math.sqrt((data[cidx]-tr)**2+(data[cidx+1]-tg)**2+(data[cidx+2]-tb)**2) < tolerance) {
+                        data[cidx+3] = 0;
+                        if (curr.x>0) queue.push({x:curr.x-1,y:curr.y});
+                        if (curr.x<canvas.width-1) queue.push({x:curr.x+1,y:curr.y});
+                        if (curr.y>0) queue.push({x:curr.x,y:curr.y-1});
+                        if (curr.y<canvas.height-1) queue.push({x:curr.x,y:curr.y+1});
+                    }
+                }
+            });
+            ctx.putImageData(imgData,0,0); saveHistoryState();
+        });
+
+        let isColorBgRemovalActive = false;
+        document.getElementById('btn-color-bg').addEventListener('click', () => { if (!originalImage) return; isColorBgRemovalActive = true; canvas.style.cursor='cell'; });
+        canvas.addEventListener('click', e => {
+            if (!isColorBgRemovalActive) return;
+            isColorBgRemovalActive = false; canvas.style.cursor='default';
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX-rect.left)*(canvas.width/rect.width));
+            const y = Math.floor((e.clientY-rect.top)*(canvas.height/rect.height));
+            const p = ctx.getImageData(x,y,1,1).data;
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height), data = imgData.data;
+            const tolerance = 45;
+            for (let i=0; i<data.length; i+=4) {
+                if (Math.sqrt((data[i]-p[0])**2+(data[i+1]-p[1])**2+(data[i+2]-p[2])**2) < tolerance) data[i+3] = 0;
+            }
+            ctx.putImageData(imgData,0,0); saveHistoryState();
+        });
+
+        document.getElementById('btn-clean-exif').addEventListener('click', () => { cleanExifEnabled = true; showToast("EXIF θα αφαιρεθούν κατά την αποθήκευση.", "success"); });
+
+        // --- Export ---
+        document.getElementById('btn-save').addEventListener('click', () => {
+            if (!originalImage) return;
+            const fmt = document.getElementById('save-format').value;
+            if (fmt === "application/pdf") exportAsPdf(); else exportAsImage(fmt);
+        });
+        function exportAsImage(format) {
+            let tmp = null;
+            if (preservedLsbPayload) { tmp = ctx.getImageData(0,0,canvas.width,canvas.height); injectLsbToCanvas(preservedLsbPayload); }
+            const url = canvas.toDataURL(format, 0.95);
+            const a = document.createElement('a'); a.download = `studio_pro_edit.${format.split('/')[1]}`; a.href = url;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            if (tmp) ctx.putImageData(tmp,0,0);
+        }
+        function exportAsPdf() {
+            let tmp = null;
+            if (preservedLsbPayload) { tmp = ctx.getImageData(0,0,canvas.width,canvas.height); injectLsbToCanvas(preservedLsbPayload); }
+            const url = canvas.toDataURL('image/png');
+            if (tmp) ctx.putImageData(tmp,0,0);
+            const w = window.open('','_blank');
+            w.document.write(`<html><head><title>PDF</title><style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#fff}img{max-width:100%;max-height:100%;object-fit:contain}@page{size:auto;margin:0}</style></head><body><img src="${url}" onload="window.print();window.close()"/></body></html>`);
+            w.document.close();
+        }
+
+        // --- Reset & Undo ---
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            if (!originalImage) return;
+            filterBaseCanvas = null; loadImageToCanvas(originalImage);
+            fBrightness.value=100; fContrast.value=100; fSaturation.value=100; fGrayscale.value=0; fSepia.value=0;
+            ['val-brightness','val-contrast','val-saturation','val-grayscale','val-sepia'].forEach(id => document.getElementById(id).innerText = id.includes('gray')||id.includes('sepia')?'0%':'100%');
+            document.getElementById('img-resolution').innerText = `${canvas.width} x ${canvas.height} px`;
+            preservedLsbPayload = "";
+        });
+        document.getElementById('btn-undo').addEventListener('click', () => {
+            if (!originalImage || undoStack.length<2) return;
+            undoStack.pop();
+            const prev = undoStack[undoStack.length-1];
+            canvas.width = prev.width; canvas.height = prev.height;
+            ctx.putImageData(prev,0,0);
+            filterBaseCanvas = null;
+            document.getElementById('img-resolution').innerText = `${canvas.width} x ${canvas.height} px`;
         });
     </script>
 </body>

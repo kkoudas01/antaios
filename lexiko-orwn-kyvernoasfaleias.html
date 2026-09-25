@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Λεξικό Όρων Κυβερνοασφάλειας</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e13;
+    --bg-panel:#10161d;
+    --bg-panel-2:#151d26;
+    --border:#232e3b;
+    --text:#dbe4ec;
+    --text-dim:#7c8ba0;
+    --accent:#39ff88;
+    --accent-soft:#9dffc4;
+    --warn:#ff5f56;
+    --font-mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --font-sans:'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 50% -10%, rgba(57,255,136,.05), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    min-height:100vh;
+  }
+  .app{max-width:820px;margin:0 auto;padding:32px 16px 60px;}
+
+  .term-window{
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--bg-panel);
+    box-shadow:0 25px 70px -25px rgba(0,0,0,.65);
+    animation:rise .5s ease both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .term-titlebar{
+    display:flex;align-items:center;gap:7px;
+    padding:11px 14px;background:var(--bg-panel-2);
+    border-bottom:1px solid var(--border);
+  }
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .dot.red{background:#ff5f56}
+  .dot.yellow{background:#ffbd2e}
+  .dot.green{background:#27c93f}
+  .term-title{margin-left:8px;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .term-body{padding:24px 22px 14px;}
+
+  h1{margin:0 0 4px;font-family:var(--font-mono);font-size:1.45rem;font-weight:700;
+     color:var(--text);letter-spacing:-.01em;}
+  .subtitle{margin:0 0 20px;color:var(--text-dim);font-size:.88rem;line-height:1.5;max-width:60ch;}
+
+  .prompt-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--bg);border:1px solid var(--border);border-radius:4px;
+    padding:11px 13px;
+  }
+  .prompt-row:focus-within{border-color:var(--accent);}
+  .prompt-sym{font-family:var(--font-mono);color:var(--accent);font-weight:700;flex-shrink:0;}
+  #search{
+    flex:1;min-width:0;background:transparent;border:none;outline:none;
+    color:var(--text);font-family:var(--font-mono);font-size:.9rem;caret-color:var(--accent);
+  }
+  #search::placeholder{color:var(--text-dim);}
+
+  .controls-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin:12px 2px 4px;flex-wrap:wrap;
+  }
+  .mode-btn{
+    font-family:var(--font-mono);font-size:.78rem;background:transparent;
+    border:1px solid var(--border);color:var(--accent-soft);
+    padding:7px 12px;border-radius:4px;cursor:pointer;transition:border-color .15s, background .15s;
+  }
+  .mode-btn:hover{border-color:var(--accent);background:rgba(57,255,136,.07);}
+  .count{font-family:var(--font-mono);font-size:.74rem;color:var(--text-dim);white-space:nowrap;}
+
+  #content{margin-top:18px;padding-bottom:8px;}
+
+  .group{margin-top:20px;}
+  .group:first-child{margin-top:4px;}
+  .group-title{
+    font-family:var(--font-mono);font-size:.74rem;color:var(--text-dim);
+    margin:0 0 8px 2px;letter-spacing:.01em;
+  }
+  .group-title .hl{color:var(--accent);}
+
+  .term-item{
+    border:1px solid var(--border);
+    border-left:2px solid transparent;
+    background:var(--bg-panel);
+    margin-bottom:6px;
+    border-radius:4px;
+    transition:border-color .15s, background .15s;
+  }
+  .term-item:hover{border-left-color:var(--accent);}
+  .term-item.open{border-left-color:var(--accent);background:var(--bg-panel-2);}
+
+  .term-btn{
+    all:unset;box-sizing:border-box;width:100%;display:flex;
+    align-items:center;justify-content:space-between;gap:14px;
+    padding:12px 14px;cursor:pointer;
+  }
+  .term-left{display:flex;align-items:center;gap:10px;min-width:0;}
+  .marker{
+    font-family:var(--font-mono);color:var(--accent);width:12px;flex-shrink:0;
+    display:inline-block;transition:transform .2s ease;
+  }
+  .term-item.open .marker{transform:rotate(90deg);}
+  .term-name{
+    font-family:var(--font-mono);font-weight:600;font-size:.96rem;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .term-tag{
+    font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);
+    flex-shrink:0;white-space:nowrap;max-width:40%;overflow:hidden;text-overflow:ellipsis;
+  }
+  @media (max-width:560px){ .term-tag{display:none;} }
+
+  .term-desc{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease;}
+  .term-item.open .term-desc{grid-template-rows:1fr;}
+  .term-desc-clip{overflow:hidden;min-height:0;}
+  .term-desc-inner{position:relative;padding:14px 46px 16px 34px;border-top:1px dashed var(--border);}
+  .desc-label{
+    display:block;font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin:0 0 6px;
+  }
+  .term-desc-inner p{margin:0;color:var(--text-dim);line-height:1.6;font-size:.92rem;}
+  .close-btn{
+    position:absolute;top:10px;right:8px;background:transparent;
+    border:1px solid var(--border);color:var(--text-dim);
+    font-family:var(--font-mono);font-size:.7rem;padding:3px 8px;
+    border-radius:4px;cursor:pointer;transition:border-color .15s, color .15s;
+  }
+  .close-btn:hover{color:var(--warn);border-color:var(--warn);}
+
+  .empty{padding:30px 6px;color:var(--text-dim);font-family:var(--font-mono);font-size:.85rem;}
+
+  .page-footer{
+    text-align:center;color:var(--text-dim);font-size:.72rem;
+    margin-top:18px;line-height:1.5;
+  }
+
+  button:focus-visible, input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="term-window">
+    <div class="term-titlebar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="term-title">glossary — ασφάλεια Η/Υ &amp; δεδομένων</span>
+    </div>
+    <div class="term-body">
+      <h1>Λεξικό Όρων</h1>
+      <p class="subtitle">Ορολογία, ακρωνύμια και συντομογραφίες από τις σημειώσεις του μαθήματος — SAST/DAST, δίκτυα &amp; firewalls, Windows logs, malware analysis, μοντέλα ασφάλειας και εργαλεία pentest/CTF.</p>
+
+      <div class="prompt-row">
+        <span class="prompt-sym">$</span>
+        <input id="search" type="text" placeholder="αναζήτηση όρου ή περιγραφής..." autocomplete="off" spellcheck="false" />
+      </div>
+
+      <div class="controls-row">
+        <button id="modeBtn" class="mode-btn">--κατηγοριοποίηση</button>
+        <span class="count" id="count"></span>
+      </div>
+
+      <div id="content"></div>
+    </div>
+  </div>
+  <div class="page-footer">βασισμένο στις σημειώσεις του μαθήματος «Ασφάλεια Η/Υ και Δεδομένων» · NMSLab, Τμήμα Πληροφορικής, Ιόνιο Πανεπιστήμιο</div>
+</div>
+
+<script>
+(function(){
+  const CAT = {
+    SAST: "SAST / DAST & Ασφάλεια Λογισμικού",
+    NET:  "Δίκτυα & Firewalls",
+    LOG:  "Καταγραφές (Logs) & SIEM",
+    ACC:  "Μοντέλα Ασφάλειας & Έλεγχος Πρόσβασης",
+    THR:  "Απειλές & Τεχνικές Επίθεσης",
+    MAL:  "Κακόβουλο Λογισμικό (Malware)",
+    TOOL: "Εργαλεία Pentest / CTF"
+  };
+  const CATEGORY_ORDER = [CAT.SAST, CAT.NET, CAT.LOG, CAT.ACC, CAT.THR, CAT.MAL, CAT.TOOL];
+
+  const TERMS = [
+    // --- SAST / DAST & Ασφάλεια Λογισμικού ---
+    {term:`SAST`, category:CAT.SAST, def:`Static Application Security Testing. Στατική ανάλυση του πηγαίου κώδικα μιας εφαρμογής για τον εντοπισμό ευπαθειών πριν αυτή αναπτυχθεί ή μπει σε παραγωγή. Παραδείγματα εργαλείων: CodeQL, SonarQube, Checkmarx, Fortify.`},
+    {term:`DAST`, category:CAT.SAST, def:`Dynamic Application Security Testing. Έλεγχος μιας εφαρμογής ενώ αυτή εκτελείται (runtime), μέσω προσομοίωσης επιθέσεων, χωρίς πρόσβαση στον πηγαίο κώδικα. Παραδείγματα: OWASP ZAP, Burp Suite, Acunetix.`},
+    {term:`CWE`, category:CAT.SAST, def:`Common Weakness Enumeration. Κατάλογος τυποποιημένων κατηγοριών αδυναμιών λογισμικού/υλικού (π.χ. CWE-89 για SQL Injection, CWE-79 για XSS) που χρησιμοποιείται ως κοινή γλώσσα αναφοράς ευπαθειών.`},
+    {term:`CI/CD`, category:CAT.SAST, def:`Continuous Integration / Continuous Deployment. Αυτοματοποιημένη ροή εργασίας ανάπτυξης λογισμικού, στην οποία μπορούν να ενσωματωθούν αυτόματοι έλεγχοι ασφάλειας (π.χ. SAST) σε κάθε push ή pull request.`},
+    {term:`GitHub Code Scanning`, category:CAT.SAST, def:`Ενσωματωμένο εργαλείο SAST του GitHub που σαρώνει αυτόματα τον κώδικα ενός repository για ευπάθειες, μέσω ροών εργασίας (workflows) σε YAML, κατά το push, το pull request ή σε προγραμματισμένα διαστήματα.`},
+    {term:`CodeQL`, category:CAT.SAST, def:`Μηχανή στατικής ανάλυσης κώδικα ανοιχτού κώδικα της GitHub, η οποία τρέχει «ερωτήματα» πάνω στον κώδικα σαν να ήταν βάση δεδομένων, για τον εντοπισμό ευπαθειών.`},
+    {term:`SonarQube`, category:CAT.SAST, def:`Εργαλείο SAST για συνεχή επιθεώρηση της ποιότητας και της ασφάλειας του πηγαίου κώδικα.`},
+    {term:`Checkmarx`, category:CAT.SAST, def:`Εμπορικό εργαλείο SAST για τον εντοπισμό ευπαθειών στον πηγαίο κώδικα εφαρμογών.`},
+    {term:`Fortify Static Code Analyzer`, category:CAT.SAST, def:`Εργαλείο SAST της Micro Focus για στατική ανάλυση ασφάλειας κώδικα σε πολλές γλώσσες προγραμματισμού.`},
+    {term:`OWASP ZAP`, category:CAT.SAST, def:`Δωρεάν εργαλείο DAST (Zed Attack Proxy) για τον εντοπισμό ευπαθειών σε web εφαρμογές μέσω προσομοίωσης επιθέσεων.`},
+    {term:`Acunetix`, category:CAT.SAST, def:`Εμπορικό εργαλείο DAST για αυτοματοποιημένη σάρωση ευπαθειών σε web εφαρμογές.`},
+    {term:`Dependabot`, category:CAT.SAST, def:`Εργαλείο του GitHub που παρακολουθεί τις εξαρτήσεις (dependencies) ενός project και ειδοποιεί ή ανοίγει αυτόματα pull requests όταν εντοπίζονται γνωστές ευπάθειες.`},
+    {term:`SQL Injection`, category:CAT.SAST, def:`Ευπάθεια (CWE-89) κατά την οποία μη επικυρωμένη είσοδος χρήστη περνά σε ένα SQL query, επιτρέποντας την εκτέλεση κακόβουλων εντολών στη βάση δεδομένων.`},
+    {term:`XSS (Cross-Site Scripting)`, category:CAT.SAST, def:`Ευπάθεια (CWE-79) όπου κακόβουλος κώδικας JavaScript εισάγεται σε μια ιστοσελίδα λόγω ανεπαρκούς επικύρωσης ή κωδικοποίησης εισόδου, και εκτελείται στο πρόγραμμα περιήγησης άλλων χρηστών.`},
+    {term:`SSRF (Server-Side Request Forgery)`, category:CAT.SAST, def:`Ευπάθεια (CWE-918) κατά την οποία είσοδος χρήστη ενσωματώνεται χωρίς επικύρωση σε αίτημα HTTP που εκτελεί ο server, επιτρέποντας στον επιτιθέμενο να «παρασύρει» τον server σε μη εξουσιοδοτημένους προορισμούς.`},
+    {term:`HIPAA`, category:CAT.SAST, def:`Νομοθετικό πλαίσιο των ΗΠΑ για την προστασία ευαίσθητων ιατρικών/υγειονομικών δεδομένων· συχνά αποτελεί απαίτηση συμμόρφωσης σε συστήματα υγειονομικής περίθαλψης.`},
+    {term:`PII (Personally Identifiable Information)`, category:CAT.SAST, def:`Προσωπικά δεδομένα που μπορούν να χρησιμοποιηθούν για την ταυτοποίηση ενός ατόμου· η προστασία τους αποτελεί βασικό στόχο πολιτικών ασφάλειας και κανόνων σάρωσης κώδικα.`},
+
+    // --- Δίκτυα & Firewalls ---
+    {term:`Firewall`, category:CAT.NET, def:`Σύστημα ή ομάδα συστημάτων που επιβάλλει πολιτική ελέγχου πρόσβασης μεταξύ δικτύων, αποτελώντας συνήθως το μοναδικό σημείο διέλευσης της κίνησης.`},
+    {term:`Packet Filtering Firewall`, category:CAT.NET, def:`Stateless firewall που φιλτράρει την κίνηση βάσει πληροφοριών Layer 3/4 (IP, θύρες, πρωτόκολλο, SYN flag), χωρίς να κρατά κατάσταση σύνδεσης.`},
+    {term:`Application Gateway Firewall (Proxy Firewall)`, category:CAT.NET, def:`Προηγμένο firewall που φιλτράρει κίνηση στα Layers 3, 4, 5 και 7 του μοντέλου OSI, επιτρέποντας ανάλυση δεδομένων σε επίπεδο εφαρμογής.`},
+    {term:`NGFW (Next-Generation Firewall)`, category:CAT.NET, def:`Εξελιγμένη κατηγορία firewall με ενσωματωμένη πρόληψη εισβολών (IPS), έλεγχο εφαρμογών, web filtering και threat intelligence.`},
+    {term:`IDS (Intrusion Detection System)`, category:CAT.NET, def:`Σύστημα που ανιχνεύει κακόβουλη κίνηση μέσω υπογραφών και ειδοποιεί, χωρίς να την αποκλείει αυτόματα.`},
+    {term:`IPS (Intrusion Prevention System)`, category:CAT.NET, def:`Σύστημα που ανιχνεύει και αποκλείει αυτόματα την κακόβουλη κίνηση, στέλνοντας παράλληλα logging information σε κονσόλα διαχείρισης.`},
+    {term:`IDPS`, category:CAT.NET, def:`Συλλογικός όρος για τα Intrusion Detection / Prevention Systems (IDS/IPS).`},
+    {term:`HIPS (Host-based IPS)`, category:CAT.NET, def:`Λογισμικό IPS εγκατεστημένο σε μεμονωμένο υπολογιστή που παρακολουθεί και αναλύει ύποπτη δραστηριότητα σε επίπεδο λειτουργικού συστήματος/εφαρμογών.`},
+    {term:`ACL (Access Control List)`, category:CAT.NET, def:`Σειρά κανόνων που ελέγχουν την προώθηση ή απόρριψη πακέτων σε routers, με βάση κριτήρια όπως IP προέλευσης/προορισμού, πρωτόκολλο και θύρες.`},
+    {term:`VPN (Virtual Private Network)`, category:CAT.NET, def:`Ιδιωτικό δίκτυο που δημιουργείται πάνω από ένα δημόσιο δίκτυο (π.χ. Internet), με κρυπτογραφημένες εικονικές συνδέσεις μεταξύ δύο τελικών σημείων.`},
+    {term:`NetFlow`, category:CAT.NET, def:`Τεχνολογία της Cisco που συλλέγει στατιστικά κίνησης δικτύου από routers/switches, χρήσιμη για παρακολούθηση, ασφάλεια και ανάλυση κίνησης.`},
+    {term:`AAA (Authentication, Authorization, Accounting)`, category:CAT.NET, def:`Πλαίσιο ασφάλειας που παρέχει πιστοποίηση ταυτότητας, εξουσιοδότηση πρόσβασης και καταγραφή (λογιστική) της χρήσης πόρων δικτύου.`},
+    {term:`SPAN (Switched Port Analyzer)`, category:CAT.NET, def:`Λειτουργία switch που αντιγράφει την κίνηση από θύρες-πηγή (source ports) σε μια θύρα-προορισμό, για παρακολούθηση από IDS ή analyzer.`},
+    {term:`RSPAN (Remote SPAN)`, category:CAT.NET, def:`Παραλλαγή του SPAN που επιτρέπει παρακολούθηση κίνησης σε απομακρυσμένους switches μέσω VLAN.`},
+    {term:`SNMP`, category:CAT.NET, def:`Simple Network Management Protocol. Πρωτόκολλο που χρησιμοποιείται, μεταξύ άλλων, για την ανακάλυψη συμπεριφοράς δικτυακών συσκευών.`},
+    {term:`DNS`, category:CAT.NET, def:`Domain Name System. Θεμελιώδες πρωτόκολλο δικτύου που μετατρέπει ονόματα τομέα σε διευθύνσεις IP· στόχος επιθέσεων όπως το DNS poisoning.`},
+    {term:`DHCP`, category:CAT.NET, def:`Dynamic Host Configuration Protocol. Θεμελιώδες πρωτόκολλο δικτύου που αναθέτει αυτόματα διευθύνσεις IP σε συσκευές ενός δικτύου.`},
+    {term:`TCP/IP`, category:CAT.NET, def:`Βασική σουίτα πρωτοκόλλων πάνω στην οποία λειτουργεί το σύγχρονο δίκτυο, συμπεριλαμβανομένου του Internet.`},
+
+    // --- Καταγραφές (Logs) & SIEM ---
+    {term:`Event Viewer`, category:CAT.LOG, def:`Πρόγραμμα προβολής συμβάντων των Windows, όπου καταγράφονται τα logs Application, Security, System κ.λπ., με πληροφορίες όπως Event ID, επίπεδο και μήνυμα.`},
+    {term:`Windows Event Log`, category:CAT.LOG, def:`Ενσωματωμένος μηχανισμός καταγραφής γεγονότων στα Windows (Event Logging) που παρακολουθεί δραστηριότητες συστήματος, ασφάλειας και εφαρμογών.`},
+    {term:`Sysmon (System Monitor)`, category:CAT.LOG, def:`Δωρεάν εργαλείο της Microsoft (Sysinternals) που καταγράφει λεπτομερώς γεγονότα όπως δημιουργία διεργασιών, δικτυακές συνδέσεις, φόρτωση DLL και αλλαγές Registry, χωρίς να κάνει το ίδιο ανάλυση.`},
+    {term:`SIEM`, category:CAT.LOG, def:`Security Information and Event Management. Σύστημα συλλογής, συσχέτισης και ανάλυσης logs/γεγονότων ασφαλείας από πολλές πηγές για ανίχνευση απειλών (π.χ. Splunk, IBM QRadar, Wazuh).`},
+    {term:`ELK Stack`, category:CAT.LOG, def:`Συνδυασμός Elasticsearch (μηχανή αναζήτησης), Logstash (επεξεργασία pipeline) και Kibana (οπτικοποίηση), που χρησιμοποιείται συχνά ως βάση SIEM.`},
+    {term:`Wazuh`, category:CAT.LOG, def:`SIEM ανοιχτού κώδικα που βασίζεται στη σουίτα ELK για τη διαχείριση πληροφοριών και γεγονότων ασφαλείας.`},
+    {term:`Security Onion`, category:CAT.LOG, def:`Διανομή ανοιχτού κώδικα προσανατολισμένη στην παρακολούθηση ασφάλειας δικτύου (NSM) και τη διαχείριση logs.`},
+    {term:`SIGMA Rules`, category:CAT.LOG, def:`Γενικευμένη μορφή (YAML) κανόνων ανίχνευσης για logs, ανεξάρτητη πλατφόρμας SIEM, που περιγράφει μοτίβα ύποπτης συμπεριφοράς.`},
+    {term:`UFW (Uncomplicated Firewall)`, category:CAT.LOG, def:`Απλοποιημένο εργαλείο διαχείρισης firewall σε συστήματα Linux, που καταγράφει επιτρεπόμενη/απορριπτόμενη κίνηση.`},
+    {term:`Event ID 4688`, category:CAT.LOG, def:`Windows Security event που καταγράφει τη δημιουργία νέας διεργασίας· χρήσιμο για εντοπισμό εκτέλεσης κακόβουλου λογισμικού ή ύποπτων εντολών.`},
+    {term:`Event ID 4624 / 4625`, category:CAT.LOG, def:`Windows Security events για επιτυχημένη (4624) ή αποτυχημένη (4625) προσπάθεια σύνδεσης λογαριασμού· χρήσιμα για εντοπισμό brute-force επιθέσεων.`},
+    {term:`Event ID 5140`, category:CAT.LOG, def:`Windows Security event που καταγράφει πρόσβαση σε διαμοιραζόμενο πόρο δικτύου, χρήσιμο για ανίχνευση lateral movement.`},
+    {term:`Event ID 5156`, category:CAT.LOG, def:`Windows Security event που καταγράφει επιτρεπόμενη σύνδεση δικτύου από μια διεργασία μέσω του Windows Firewall· πιθανή ένδειξη Command & Control.`},
+    {term:`Event ID 7045`, category:CAT.LOG, def:`Windows System event που καταγράφει την εγκατάσταση νέας υπηρεσίας στο σύστημα· εκτός συνηθισμένου παραθύρου ενημέρωσης μπορεί να υποδηλώνει κακόβουλη υπηρεσία (persistence).`},
+    {term:`Event ID 4663`, category:CAT.LOG, def:`Windows Security event που καταγράφει πρόσβαση σε αρχεία ή Registry, όταν έχει ενεργοποιηθεί σχετική παρακολούθηση (auditing).`},
+    {term:`Event ID 4720 / 4732 / 4728`, category:CAT.LOG, def:`Windows Security events για δημιουργία νέου λογαριασμού χρήστη (4720) και προσθήκη χρήστη σε τοπική (4732) ή domain (4728) ομάδα· κρίσιμα για εντοπισμό δημιουργίας backdoor λογαριασμών.`},
+
+    // --- Μοντέλα Ασφάλειας & Έλεγχος Πρόσβασης ---
+    {term:`CIA Triad`, category:CAT.ACC, def:`Θεμελιώδης αρχή ασφάλειας που περιλαμβάνει Εμπιστευτικότητα (Confidentiality), Ακεραιότητα (Integrity) και Διαθεσιμότητα (Availability).`},
+    {term:`DAC (Discretionary Access Control)`, category:CAT.ACC, def:`Μοντέλο ελέγχου πρόσβασης όπου ο ιδιοκτήτης ενός πόρου αποφασίζει ποιοι άλλοι έχουν πρόσβαση σε αυτόν.`},
+    {term:`MAC (Mandatory Access Control)`, category:CAT.ACC, def:`Μοντέλο ελέγχου πρόσβασης όπου οι κανόνες πρόσβασης καθορίζονται κεντρικά από πολιτική και όχι από τον χρήστη-ιδιοκτήτη· πιο αυστηρό από το DAC.`},
+    {term:`RBAC (Role-Based Access Control)`, category:CAT.ACC, def:`Μοντέλο ελέγχου πρόσβασης όπου τα δικαιώματα εκχωρούνται σε ρόλους αντί σε μεμονωμένους χρήστες, εφαρμόζοντας την αρχή της ελάχιστης προνομίας.`},
+    {term:`Bell-LaPadula Model (BLP)`, category:CAT.ACC, def:`Μοντέλο ασφάλειας που εστιάζει στην εμπιστευτικότητα με τους κανόνες «no read up» και «no write down», χρησιμοποιούμενο κυρίως σε στρατιωτικά/κυβερνητικά συστήματα.`},
+    {term:`Biba Model`, category:CAT.ACC, def:`Μοντέλο ασφάλειας που εστιάζει στην ακεραιότητα δεδομένων με τους κανόνες «no write up» και «no read down», αντίστροφο του Bell-LaPadula.`},
+    {term:`MFA (Multi-Factor Authentication)`, category:CAT.ACC, def:`Πολυπαραγοντική αυθεντικοποίηση που προσθέτει επιπλέον επίπεδα επαλήθευσης ταυτότητας πέρα από τον κωδικό πρόσβασης.`},
+    {term:`UAC (User Account Control)`, category:CAT.ACC, def:`Μηχανισμός των Windows που περιορίζει τις ενέργειες με αυξημένα δικαιώματα, ζητώντας επιβεβαίωση από τον χρήστη.`},
+    {term:`BitLocker`, category:CAT.ACC, def:`Λειτουργία κρυπτογράφησης δίσκου των Windows για την προστασία δεδομένων σε περίπτωση απώλειας ή κλοπής συσκευής.`},
+    {term:`Least Privilege`, category:CAT.ACC, def:`Αρχή ασφάλειας σύμφωνα με την οποία κάθε χρήστης ή διεργασία πρέπει να έχει μόνο τα ελάχιστα απαραίτητα δικαιώματα για την εκτέλεση του έργου του.`},
+
+    // --- Απειλές & Τεχνικές Επίθεσης ---
+    {term:`APT (Advanced Persistent Threat)`, category:CAT.THR, def:`Εξελιγμένη, παρατεταμένη επίθεση από οργανωμένους (συχνά κρατικά υποστηριζόμενους) φορείς, με στόχο τη μακροχρόνια, αδιάκριτη παραμονή σε ένα δίκτυο.`},
+    {term:`Phishing`, category:CAT.THR, def:`Μαζική επίθεση κοινωνικής μηχανικής μέσω email ή μηνυμάτων, που στοχεύει στην υποκλοπή ευαίσθητων στοιχείων μέσω πλαστών ιστοσελίδων.`},
+    {term:`Spear Phishing`, category:CAT.THR, def:`Στοχευμένη, εξατομικευμένη μορφή phishing εναντίον συγκεκριμένου ατόμου ή οργανισμού, δυσκολότερη στην ανίχνευση.`},
+    {term:`Social Engineering`, category:CAT.THR, def:`Τεχνική χειραγώγησης ανθρώπων ώστε να αποκαλύψουν εμπιστευτικές πληροφορίες ή να εκτελέσουν ενέργειες που θέτουν σε κίνδυνο την ασφάλεια.`},
+    {term:`Brute-force Attack`, category:CAT.THR, def:`Επίθεση που δοκιμάζει συστηματικά όλους τους πιθανούς συνδυασμούς για την ανακάλυψη κωδικού πρόσβασης ή κλειδιού.`},
+    {term:`Dictionary Attack`, category:CAT.THR, def:`Επίθεση δοκιμής κωδικών πρόσβασης χρησιμοποιώντας μια προκαθορισμένη λίστα λέξεων/πιθανών κωδικών (π.χ. με το εργαλείο Hydra).`},
+    {term:`Credential Stuffing`, category:CAT.THR, def:`Επίθεση όπου δοκιμάζονται διαπιστευτήρια που έχουν διαρρεύσει από άλλες παραβιάσεις, εκμεταλλευόμενη την επαναχρησιμοποίηση κωδικών.`},
+    {term:`Keylogging`, category:CAT.THR, def:`Καταγραφή των πλήκτρων που πατά ο χρήστης, με σκοπό την υποκλοπή κωδικών πρόσβασης και ευαίσθητων δεδομένων.`},
+    {term:`MITM (Man-in-the-Middle)`, category:CAT.THR, def:`Επίθεση κατά την οποία ο επιτιθέμενος παρεμβάλλεται μεταξύ δύο επικοινωνούντων μερών, υποκλέπτοντας ή τροποποιώντας την επικοινωνία τους.`},
+    {term:`ARP Spoofing`, category:CAT.THR, def:`Τεχνική επίθεσης δικτύου κατά την οποία πλαστά μηνύματα ARP συσχετίζουν τη MAC διεύθυνση του επιτιθέμενου με την IP ενός νόμιμου host.`},
+    {term:`DNS Poisoning`, category:CAT.THR, def:`Επίθεση που αλλοιώνει τα δεδομένα cache ενός DNS server, ανακατευθύνοντας τους χρήστες σε κακόβουλες διευθύνσεις IP.`},
+    {term:`DoS / DDoS`, category:CAT.THR, def:`Denial of Service / Distributed Denial of Service. Επίθεση που υπερφορτώνει ένα σύστημα ή υπηρεσία, στοχεύοντας στη διακοπή της διαθεσιμότητάς της.`},
+    {term:`Reconnaissance`, category:CAT.THR, def:`Προπαρασκευαστικό στάδιο μιας επίθεσης όπου συλλέγονται πληροφορίες για τον στόχο (π.χ. μέσω scanning με Nmap ή passive reconnaissance).`},
+    {term:`MITRE ATT&CK`, category:CAT.THR, def:`Πλαίσιο που καταγράφει τακτικές και τεχνικές επιτιθέμενων, χρησιμοποιούμενο για ανάλυση συμβάντων και σχεδιασμό αμυντικών μέτρων.`},
+    {term:`C2 / C&C (Command & Control)`, category:CAT.THR, def:`Υποδομή που χρησιμοποιεί ένας επιτιθέμενος για να επικοινωνεί εξ αποστάσεως και να ελέγχει μολυσμένα συστήματα.`},
+    {term:`Lateral Movement`, category:CAT.THR, def:`Τεχνική κατά την οποία ο επιτιθέμενος μετακινείται μέσα σε ένα δίκτυο μετά την αρχική παραβίαση, αναζητώντας επιπλέον πρόσβαση ή πόρους.`},
+    {term:`Privilege Escalation`, category:CAT.THR, def:`Τεχνική με την οποία ένας επιτιθέμενος αποκτά υψηλότερα δικαιώματα (π.χ. root/administrator) από αυτά που είχε αρχικά, συχνά εκμεταλλευόμενος λανθασμένες ρυθμίσεις (π.χ. αρχεία SUID).`},
+    {term:`Persistence`, category:CAT.THR, def:`Τεχνικές που χρησιμοποιεί ένας επιτιθέμενος για να διατηρήσει την πρόσβασή του σε ένα σύστημα μετά την αρχική παραβίαση (π.χ. νέες υπηρεσίες, νέοι λογαριασμοί).`},
+
+    // --- Κακόβουλο Λογισμικό (Malware) ---
+    {term:`Malware`, category:CAT.MAL, def:`Γενικός όρος για κακόβουλο λογισμικό σχεδιασμένο να βλάψει ή να αποκτήσει μη εξουσιοδοτημένη πρόσβαση σε ένα σύστημα (ιοί, worms, trojans, ransomware, spyware, rootkits).`},
+    {term:`Virus`, category:CAT.MAL, def:`Κακόβουλο λογισμικό που προσαρτάται σε νόμιμα αρχεία/προγράμματα και εξαπλώνεται όταν αυτά εκτελούνται.`},
+    {term:`Worm`, category:CAT.MAL, def:`Κακόβουλο λογισμικό που αναπαράγεται και εξαπλώνεται αυτόνομα σε δίκτυα, χωρίς να απαιτεί ενέργεια χρήστη.`},
+    {term:`Trojan`, category:CAT.MAL, def:`Κακόβουλο λογισμικό που παρουσιάζεται ως νόμιμο πρόγραμμα προκειμένου να παραπλανήσει τον χρήστη να το εγκαταστήσει.`},
+    {term:`Spyware`, category:CAT.MAL, def:`Κακόβουλο λογισμικό που παρακολουθεί κρυφά τη δραστηριότητα ενός χρήστη και συλλέγει πληροφορίες χωρίς τη συγκατάθεσή του.`},
+    {term:`Ransomware`, category:CAT.MAL, def:`Κακόβουλο λογισμικό που κρυπτογραφεί τα δεδομένα του θύματος και απαιτεί λύτρα για την αποκρυπτογράφησή τους.`},
+    {term:`Rootkit`, category:CAT.MAL, def:`Κακόβουλο λογισμικό σχεδιασμένο να αποκρύπτει την παρουσία του και να διατηρεί προνομιακή (root/admin) πρόσβαση σε ένα σύστημα.`},
+    {term:`Malware Analysis`, category:CAT.MAL, def:`Διαδικασία κατανόησης της λειτουργίας, προέλευσης και επίπτωσης ενός κακόβουλου προγράμματος, μέσω στατικής (χωρίς εκτέλεση) ή δυναμικής (σε sandbox) ανάλυσης.`},
+    {term:`YARA Rules`, category:CAT.MAL, def:`Κανόνες που χρησιμοποιούνται για την αναγνώριση οικογενειών κακόβουλου λογισμικού μέσω συνδυασμών strings, byte patterns και συνθηκών.`},
+    {term:`Sandbox`, category:CAT.MAL, def:`Ελεγχόμενο, απομονωμένο περιβάλλον εκτέλεσης όπου μπορεί να τρέξει με ασφάλεια ύποπτο λογισμικό για παρακολούθηση της συμπεριφοράς του (π.χ. Cuckoo Sandbox).`},
+    {term:`IoC (Indicators of Compromise)`, category:CAT.MAL, def:`Τεχνικά στοιχεία (IP, domains, hashes, patterns) που υποδεικνύουν την παρουσία κακόβουλης δραστηριότητας σε ένα σύστημα ή δίκτυο.`},
+
+    // --- Εργαλεία Pentest / CTF ---
+    {term:`Nmap`, category:CAT.TOOL, def:`Εργαλείο σάρωσης δικτύου για ανακάλυψη ανοιχτών θυρών, υπηρεσιών και λειτουργικών συστημάτων στόχων.`},
+    {term:`Gobuster`, category:CAT.TOOL, def:`Εργαλείο brute-force ανακάλυψης καταλόγων/αρχείων ή subdomains σε web εφαρμογές, χρησιμοποιώντας λίστες λέξεων (wordlists).`},
+    {term:`Hydra`, category:CAT.TOOL, def:`Εργαλείο επίθεσης λεξικού/brute-force για δοκιμή διαπιστευτηρίων σε πολλαπλές υπηρεσίες (π.χ. HTTP forms, SSH, FTP).`},
+    {term:`Burp Suite`, category:CAT.TOOL, def:`Πλατφόρμα δοκιμών ασφάλειας web εφαρμογών με proxy για υποκλοπή/τροποποίηση αιτημάτων HTTP και εργαλεία όπως ο Intruder για αυτοματοποιημένες επιθέσεις.`},
+    {term:`WPScan`, category:CAT.TOOL, def:`Σαρωτής ασφάλειας ειδικά σχεδιασμένος για ιστότοπους WordPress, ικανός να εντοπίζει ευπάθειες και να εκτελεί επιθέσεις λεξικού σε διαπιστευτήρια.`},
+    {term:`Hashcat`, category:CAT.TOOL, def:`Εργαλείο πυρόλυσης (cracking) κατακερματισμών (hashes) κωδικών πρόσβασης με χρήση GPU/CPU.`},
+    {term:`John the Ripper`, category:CAT.TOOL, def:`Δημοφιλές εργαλείο πυρόλυσης κωδικών πρόσβασης/hashes μέσω επιθέσεων λεξικού ή brute-force.`},
+    {term:`Wireshark`, category:CAT.TOOL, def:`Δημοφιλής network protocol analyzer (packet sniffer) με γραφικό περιβάλλον για σύλληψη και ανάλυση κίνησης δικτύου.`},
+    {term:`tcpdump`, category:CAT.TOOL, def:`Εργαλείο γραμμής εντολών για σύλληψη και ανάλυση πακέτων δικτύου, αντίστοιχο του Wireshark χωρίς γραφικό περιβάλλον.`},
+    {term:`Netcat`, category:CAT.TOOL, def:`Εργαλείο δικτύου («ελβετικός σουγιάς») που χρησιμοποιείται, μεταξύ άλλων, για τη δημιουργία listener για λήψη reverse shells.`},
+    {term:`GTFOBins`, category:CAT.TOOL, def:`Βάση δεδομένων Unix binaries που μπορούν να εκμεταλλευτούν για παράκαμψη τοπικών περιορισμών ασφαλείας ή κλιμάκωση προνομίων.`},
+    {term:`SUID`, category:CAT.TOOL, def:`Set User ID. Ειδικό δικαίωμα αρχείου σε Unix/Linux που κάνει ένα εκτελέσιμο να τρέχει πάντα με τα δικαιώματα του ιδιοκτήτη του, ανεξαρτήτως ποιος το εκτελεί — συχνή πηγή κλιμάκωσης προνομίων.`},
+    {term:`CrackStation`, category:CAT.TOOL, def:`Online υπηρεσία πυρόλυσης κωδικοποιημένων (hashed) κωδικών πρόσβασης μέσω μεγάλων προϋπολογισμένων πινάκων αναζήτησης.`},
+    {term:`Reverse Shell`, category:CAT.TOOL, def:`Τεχνική κατά την οποία το μηχάνημα-στόχος συνδέεται πίσω στο μηχάνημα του επιτιθέμενου, παρέχοντάς του διαδραστικό έλεγχο κελύφους (shell).`},
+    {term:`PTY (Pseudo Terminal)`, category:CAT.TOOL, def:`Εικονικό τερματικό που επιτρέπει διαδραστική εκτέλεση εντολών (π.χ. python -c 'import pty;pty.spawn("/bin/bash")'), απαραίτητο για ενέργειες όπως το su σε μη πλήρως διαδραστικά shells.`},
+  ];
+
+  let mode = 'alpha';   // 'alpha' | 'category'
+  let query = '';
+
+  const contentEl = document.getElementById('content');
+  const countEl   = document.getElementById('count');
+  const modeBtn   = document.getElementById('modeBtn');
+  const searchEl  = document.getElementById('search');
+
+  function norm(s){ return s.toLowerCase(); }
+
+  function filterTerms(){
+    if(!query.trim()) return TERMS;
+    const q = norm(query);
+    return TERMS.filter(t => norm(t.term).includes(q) || norm(t.def).includes(q));
+  }
+
+  function groupAlpha(list){
+    const sorted = [...list].sort((a,b) => a.term.localeCompare(b.term, undefined, {sensitivity:'base'}));
+    const groups = {};
+    sorted.forEach(t => {
+      let letter = t.term.trim().charAt(0).toUpperCase();
+      if(!/[A-ZΑ-Ω]/.test(letter)) letter = '#';
+      if(!groups[letter]) groups[letter] = [];
+      groups[letter].push(t);
+    });
+    return groups;
+  }
+
+  function groupCategory(list){
+    const groups = {};
+    CATEGORY_ORDER.forEach(c => groups[c] = []);
+    list.forEach(t => {
+      if(!groups[t.category]) groups[t.category] = [];
+      groups[t.category].push(t);
+    });
+    Object.keys(groups).forEach(k =>
+      groups[k].sort((a,b) => a.term.localeCompare(b.term, undefined, {sensitivity:'base'}))
+    );
+    return groups;
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function buildTermItem(t){
+    const item = document.createElement('div');
+    item.className = 'term-item';
+
+    const btn = document.createElement('button');
+    btn.className = 'term-btn';
+    btn.setAttribute('type','button');
+    btn.innerHTML =
+      `<span class="term-left"><span class="marker">▸</span><span class="term-name">${escapeHtml(t.term)}</span></span>` +
+      (mode === 'alpha' ? `<span class="term-tag"># ${escapeHtml(t.category)}</span>` : ``);
+
+    const desc = document.createElement('div');
+    desc.className = 'term-desc';
+    desc.innerHTML =
+      `<div class="term-desc-clip"><div class="term-desc-inner">` +
+      `<span class="desc-label"># περιγραφή</span>` +
+      `<p>${escapeHtml(t.def)}</p>` +
+      `<button type="button" class="close-btn">[x] κλείσιμο</button>` +
+      `</div></div>`;
+
+    btn.addEventListener('click', () => item.classList.toggle('open'));
+    desc.querySelector('.close-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      item.classList.remove('open');
+    });
+
+    item.appendChild(btn);
+    item.appendChild(desc);
+    return item;
+  }
+
+  function render(){
+    const list = filterTerms();
+    contentEl.innerHTML = '';
+    countEl.textContent = `${list.length} / ${TERMS.length} όροι`;
+
+    if(list.length === 0){
+      contentEl.innerHTML = `<div class="empty"># δεν βρέθηκαν όροι για «${escapeHtml(query)}»</div>`;
+      return;
+    }
+
+    const groups = mode === 'alpha' ? groupAlpha(list) : groupCategory(list);
+    const keys = mode === 'alpha' ? Object.keys(groups) : CATEGORY_ORDER;
+
+    keys.forEach(key => {
+      const items = groups[key];
+      if(!items || items.length === 0) return;
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'group';
+      const title = document.createElement('div');
+      title.className = 'group-title';
+      title.innerHTML = `<span class="hl">#</span> ${escapeHtml(key)}`;
+      groupDiv.appendChild(title);
+      items.forEach(t => groupDiv.appendChild(buildTermItem(t)));
+      contentEl.appendChild(groupDiv);
+    });
+  }
+
+  searchEl.addEventListener('input', (e) => {
+    query = e.target.value;
+    render();
+  });
+
+  modeBtn.addEventListener('click', () => {
+    mode = mode === 'alpha' ? 'category' : 'alpha';
+    modeBtn.textContent = mode === 'alpha' ? '--κατηγοριοποίηση' : '--αλφαβητική σειρά';
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
